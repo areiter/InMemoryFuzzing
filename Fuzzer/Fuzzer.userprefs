@@ -1,12 +1,12 @@
 ﻿<Properties>
   <AuthorInfo Name="Andreas Reiter" Email="andreas.reiter@student.tugraz.at" Copyright="Andreas Reiter" ctype="AuthorInformation" />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Main.cs" ctype="Workbench">
+  <MonoDevelop.Ide.Workbench ActiveDocument="TargetConnectors/ApamaHelpers.cs" ctype="Workbench">
     <Files>
       <File FileName="../Utils/CommonAttributes/ClassIdentifierAttribute.cs" Line="25" Column="38" />
-      <File FileName="TargetConnectors/ApamaHelpers.cs" Line="31" Column="21" />
+      <File FileName="TargetConnectors/ApamaHelpers.cs" Line="90" Column="59" />
       <File FileName="TargetConnectors/ApamaLinuxConnector.cs" Line="60" Column="1" />
-      <File FileName="Main.cs" Line="18" Column="1" />
+      <File FileName="Main.cs" Line="23" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
