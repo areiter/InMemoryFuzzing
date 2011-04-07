@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{892CAB5C-D501-47B1-82E2-BE8492E7E378}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Iaik.Utils</RootNamespace>
+    <AssemblyName>utils</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Debug\utils.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Security" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="CommandLineHandler.cs" />
+    <Compile Include="Serialization\IStreamSerializable.cs" />
+    <Compile Include="StreamHelper.cs" />
+    <Compile Include="ByteStream.cs" />
+    <Compile Include="CommonAttributes\ClassIdentifierAttribute.cs" />
+    <Compile Include="CommonFactories\GenericClassIdentifierFactory.cs" />
+    <Compile Include="Serialization\ITypedStreamSerializable.cs" />
+    <Compile Include="Serialization\TypedPrimitive.cs" />
+    <Compile Include="Serialization\AutoStreamSerializable.cs" />
+    <Compile Include="Serialization\SerializeMeAttribute.cs" />
+    <Compile Include="ByteHelper.cs" />
+    <Compile Include="DictionaryHelper.cs" />
+    <Compile Include="Nonce\NonceGenerator.cs" />
+    <Compile Include="StringHelper.cs" />
+    <Compile Include="Hash\HashProvider.cs" />
+    <Compile Include="Hash\HashDataProvider.cs" />
+    <Compile Include="Hash\HashStreamDataProvider.cs" />
+    <Compile Include="Hash\HashByteDataProvider.cs" />
+    <Compile Include="Hash\HashPrimitiveDataProvider.cs" />
+    <Compile Include="Hash\HashEnumDataProvider.cs" />
+    <Compile Include="Hash\ProtectedPasswordStorage.cs" />
+    <Compile Include="Hash\HashSecureStringDataProvider.cs" />
+    <Compile Include="SwapUtils\IReplacementAlgorithm.cs" />
+    <Compile Include="SwapUtils\Aging.cs" />
+    <Compile Include="SwapUtils\SwapManager.cs" />
+    <Compile Include="Locking\LockContext.cs" />
+    <Compile Include="Locking\LockProvider.cs" />
+    <Compile Include="Hash\HMACProvider.cs" />
+    <Compile Include="BitMap.cs" />
+    <Compile Include="IO\TextReaderStream.cs" />
+    <Compile Include="IO\TextWriterStream.cs" />
+    <Compile Include="IO\HexFilterStream.cs" />
+    <Compile Include="ConsoleUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio />
+  </ProjectExtensions>
+</Project>
