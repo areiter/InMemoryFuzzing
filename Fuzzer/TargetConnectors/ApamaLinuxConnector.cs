@@ -41,7 +41,7 @@ namespace Fuzzer.TargetConnectors
 	{
 		#region Native Imports
 		[DllImport("libapama.so")]
-		private static extern apama_session_t apama_session_create(StringBuilder protocol);
+		private static extern IntPtr apama_session_create(StringBuilder protocol);
 		#endregion
 		public ApamaLinuxConnector ()
 		{
@@ -54,9 +54,10 @@ namespace Fuzzer.TargetConnectors
 			if(protocol == null)
 				throw new KeyNotFoundException("Value for \"protocol\" not found");
 			
-			apama_session_create(
+			IntPtr returnVal = apama_session_create(
 			  new StringBuilder(protocol)
 			);
+			apama_session session = (apama_session)Marshal.PtrToStructure(returnVal, typeof(apama_session));
 		}
 
 		public void Connect ()

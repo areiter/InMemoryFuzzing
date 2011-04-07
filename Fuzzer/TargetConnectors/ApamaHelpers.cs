@@ -17,14 +17,27 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using System.Runtime.InteropServices;
+
 namespace Fuzzer.TargetConnectors
 {
 	
 	/// <summary>
 	/// Apama session that is used to connect and interact with a specific device
 	/// </summary>
-	public struct apama_session_t
+	[StructLayout(LayoutKind.Sequential)]
+	public class apama_session
 	{
+		public IntPtr ptr;
+	}
+	
+	
+	
+	[StructLayout(LayoutKind.Sequential)]
+	public class apama_snapshot_internal
+	{
+		public int id;
+		
 	}
 }
 
