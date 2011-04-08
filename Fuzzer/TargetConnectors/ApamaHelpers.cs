@@ -23,11 +23,43 @@ using System.Collections.Generic;
 namespace Fuzzer.TargetConnectors
 {
 	
+	public class ApamaException:Exception
+	{
+		public ApamaException(string message):
+			base(message)
+		{
+		}
+		
+	}
+	
+	public enum ApamaBreakpointType : int
+	{
+  		APAMA_MEMORY_BREAKPOINT   = 0, /**< A memory breakpoint */
+		APAMA_HARDWARE_BREAKPOINT = 1  /**< A hardware breakpoint */
+	}
+	
+	public enum ApamaReturnValue
+	{
+  		APAMA_ERROR_OK, /**< No error occured */
+  		APAMA_ERROR_UNKNOWN, /**< An unknown error occured */
+  		APAMA_ERROR_UNKNOWN_PROTOCOL, /**< The given protocol is not known */
+  		APAMA_ERROR_CONNECTION, /**< Problem with the connection */
+  		APAMA_ERROR_PROTOCOL, /**< Protocol error */
+  		APAMA_ERROR_OUT_OF_MEMORY, /**< Out of memory */
+  		APAMA_ERROR_NOT_IMPLEMENTED, /**< This function is not implemented by the given protocol */
+  		APAMA_ERROR_BAD_SESSION /**< Caller provided an invalid session */
+	};
+	
 	/// <summary>
 	/// Apama session that is used to connect and interact with a specific device
 	/// </summary>
 	public class apama_session
 	{
+		/// <summary>
+		/// Pointer to the original session struct
+		/// </summary>
+		public IntPtr apama_session_ptr;
+		
 		public apama_snapshot[] snapshots;
 		
 		/// <summary>
@@ -37,25 +69,33 @@ namespace Fuzzer.TargetConnectors
 		/// Cannot be done with a simple unmarshall, because
 		/// structure contains a linked list
 		/// </remarks>
-		/// <param name="ptr">Pointer to a apama_session_t structure</param>
-		public void ReadFromIntPtr(IntPtr ptr)
+		public void ReadFromIntPtr(IntPtr apama_session_ptr, apama_session_internal internalSession)
 		{
-			if(ptr.Equals(IntPtr.Zero))
-				throw new ArgumentException("Cannot read from pointer to zero");
-			
+			this.apama_session_ptr = apama_session_ptr;
 			
 			List<apama_snapshot> snapshots = new List<apama_snapshot>();
+			IntPtr nextSnapshot = internalSession.ptr_apama_snapshot_internal;	
+			apama_snapshot_internal currentSnapshot = null;			
 			
-			apama_snapshot_internal currentSnapshot = null;
-			currentSnapshot = apama_snapshot_internal.ReadFromPointer(ptr);
+			while(!nextSnapshot.Equals(IntPtr.Zero))
+			{			
+				currentSnapshot = apama_snapshot_internal.ReadFromPointer(nextSnapshot);
+				snapshots.Add(currentSnapshot.CreateSnapshot());
+				nextSnapshot = currentSnapshot.nextSnapshot;
+			}
 			
-			do
-			{
-				snapshots.Add(currentSnapshot.CreateSnapshot());	
-			}while((currentSnapshot = currentSnapshot.GetNextSnapshot()) != null);
+			this.snapshots = snapshots.ToArray();
 		}
+		
+		
 	}
 	
+	
+	[StructLayout(LayoutKind.Sequential)]
+	public class apama_session_internal
+	{
+		public IntPtr ptr_apama_snapshot_internal;
+	}
 	
 	
 	[StructLayout(LayoutKind.Sequential)]
@@ -88,7 +128,7 @@ namespace Fuzzer.TargetConnectors
 		public static apama_snapshot_internal ReadFromPointer(IntPtr ptr)
 		{
 			return (apama_snapshot_internal)Marshal.PtrToStructure(
-			          nextSnapshot, 
+			          ptr, 
 			          typeof(apama_snapshot_internal)
 			        );
 		}
@@ -108,6 +148,15 @@ namespace Fuzzer.TargetConnectors
 		internal apama_snapshot(int id)
 		{
 			this.id = id;
+		}
+	}
+	
+	public static class ApamaExtensions
+	{
+		public static void Assert(this ApamaReturnValue returnValue)
+		{
+			if(returnValue != ApamaReturnValue.APAMA_ERROR_OK)
+				throw new ApamaException(returnValue.ToString());
 		}
 	}
 }

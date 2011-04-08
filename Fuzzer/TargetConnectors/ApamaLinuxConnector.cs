@@ -39,39 +39,132 @@ namespace Fuzzer.TargetConnectors
 	[ClassIdentifier("linux/apama")]
 	public class ApamaLinuxConnector : ITargetConnector
 	{
+		
+		/// <summary>
+		/// Current apama session
+		/// </summary>
+		private apama_session _currentSession = null;
+		
+		/// <summary>
+		/// Protocol definition of libapama
+		/// </summary>
+		private string _protocol = null;
+		
 		#region Native Imports
+		
 		[DllImport("libapama.so")]
 		private static extern IntPtr apama_session_create(StringBuilder protocol);
+		
+		[DllImport("libapama.so")]
+		private static extern ApamaReturnValue apama_session_destroy(IntPtr session);
+		
+		[DllImport("libapama.so")]
+		private static extern ApamaReturnValue apama_memory_read(IntPtr session, UInt64 address, ref byte[] buffer, ref UInt64 read_bytes, UInt64 n);
+		
+		[DllImport("libapama.so")]
+		private static extern ApamaReturnValue apama_memory_write(IntPtr session, UInt64 address, ref byte[] buffer, ref UInt64 written_bytes, UInt64 n);
+		
+		[DllImport("libapama.so")]
+		private static extern ApamaReturnValue apama_breakpoint_set(IntPtr session, ApamaBreakpointType type, UInt64 address, UInt64 kind);
+		
 		#endregion
 		public ApamaLinuxConnector ()
 		{
 		}
 		
 		#region ITargetConnector implementation
+		public bool Connected {
+			get {
+				return _currentSession != null;
+			}
+		}
+		
 		public void Setup (IDictionary<string, string> config)
 		{
-			string protocol = DictionaryHelper.GetString("protocol", config, null);
-			if(protocol == null)
+			_protocol = DictionaryHelper.GetString("protocol", config, null);
+			if(_protocol == null)
 				throw new KeyNotFoundException("Value for \"protocol\" not found");
 			
-			IntPtr returnVal = apama_session_create(
-			  new StringBuilder(protocol)
-			);
-			apama_session session = (apama_session)Marshal.PtrToStructure(returnVal, typeof(apama_session));
+			
 		}
 
 		public void Connect ()
 		{
-			throw new NotImplementedException ();
+			IntPtr returnValue = apama_session_create(
+			  new StringBuilder(_protocol)
+			);
+			
+			apama_session_internal internalSession = (apama_session_internal)Marshal.PtrToStructure(returnValue, typeof(apama_session_internal));
+			
+			if(internalSession == null)
+				throw new ApamaException("Could not connect");
+			
+			apama_session session = new apama_session();
+			session.ReadFromIntPtr(returnValue, internalSession);
+			_currentSession = session;
 		}
 
-		public bool Connected {
-			get {
-				throw new NotImplementedException ();
+		public void Close()
+		{
+			if(_currentSession != null)
+			{
+				ApamaReturnValue returnVal = (ApamaReturnValue)apama_session_destroy(_currentSession.apama_session_ptr);
+				if(returnVal != ApamaReturnValue.APAMA_ERROR_OK)
+					throw new ApamaException("Not a valid session");
+				
+				_currentSession = null;
 			}
+		}		
+
+		public ulong ReadMemory (byte[] buffer, ulong address, ulong size)
+		{
+			AssertSession();
+			
+			ulong readBytes = 0;
+			apama_memory_read(_currentSession.apama_session_ptr, address, ref buffer, ref readBytes, size).Assert();
+			return readBytes;
+		}
+
+		public ulong WriteMemory (byte[] buffer, ulong address, ulong size)
+		{
+			AssertSession();
+			
+			ulong writtenBytes = 0;
+			apama_memory_write(_currentSession.apama_session_ptr, address, ref buffer, ref writtenBytes, size);
+			return writtenBytes;
+		}
+		
+		public void SetSoftwareBreakpoint(UInt64 address, UInt64 size)
+		{
+			AssertSession();
+			apama_breakpoint_set(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size).Assert();
+		}
+		
+		#endregion
+
+		#region IDisposable implementation
+
+		#endregion		
+
+
+		#region IDisposable implementation
+		public void Dispose ()
+		{
+			if(_currentSession != null)
+				Close();
 		}
 		#endregion
 
+		
+		/// <summary>
+		/// Throws an exception if the connector is not connected
+		/// </summary>
+		private void AssertSession()
+		{
+			if(!Connected)
+				throw new ApamaException("Not connected to target");
+		}
+		
 		
 	}
 }

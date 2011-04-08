@@ -32,7 +32,7 @@ namespace Fuzzer.TargetConnectors
 	/// As a guideline use prefix "general/..." for cross platform target connectors
 	/// and "win/...", "linux/...",.... for platform specific target connectors
 	/// </remarks>
-	public interface ITargetConnector
+	public interface ITargetConnector : IDisposable
 	{
 		/// <summary>
 		/// Gets the connection state
@@ -51,6 +51,36 @@ namespace Fuzzer.TargetConnectors
 		/// Connects to the target
 		/// </summary>
 		void Connect();
+		
+		/// <summary>
+		/// Closes the connection to the target
+		/// </summary>
+		void Close();
+		
+		/// <summary>
+		/// Reads the memory at the specified address
+		/// </summary>
+		/// <param name="buffer">Buffer of at least size in length</param>
+		/// <param name="address">Address to start reading from </param>
+		/// <param name="size">Number of bytes to read</param>
+		/// <returns>Returns the number of actual read bytes</returns>
+		UInt64 ReadMemory(byte[] buffer, UInt64 address, UInt64 size);
+		
+		/// <summary>
+		/// Writes the memory at the specified address
+		/// </summary>
+		/// <param name="buffer">Buffer of at least size in length</param>
+		/// <param name="address">Address to start writing to </param>
+		/// <param name="size">Number of bytes to write</param>
+		/// <returns>Returns the number of actual written bytes</returns>
+		UInt64 WriteMemory(byte[] buffer, UInt64 address, UInt64 size);
+		
+		/// <summary>
+		/// Sets a software breakpoint at the specified address
+		/// </summary>
+		/// <param name="address">Address of the breakpoint</param>
+		/// <param name="size">Specify the size of the instruction at address to patch</param>
+		void SetSoftwareBreakpoint(UInt64 address, UInt64 size);
 	}
 }
 

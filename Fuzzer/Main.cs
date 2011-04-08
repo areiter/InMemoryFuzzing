@@ -21,7 +21,18 @@ namespace Fuzzer
 			ITargetConnector connector = 
 				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("linux/apama");
 			
-			connector.Setup(config);
+			try
+			{
+				connector.Setup(config);
+				connector.Connect();
+				Console.WriteLine("Connected={0}", connector.Connected);
+				connector.SetSoftwareBreakpoint(0x4004f7, 8);
+				
+			}
+			finally
+			{
+				connector.Close();
+			}
 		}
 	}
 }
