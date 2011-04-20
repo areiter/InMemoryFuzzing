@@ -140,20 +140,24 @@ namespace Fuzzer.TargetConnectors
 			return writtenBytes;
 		}
 		
-		public void SetSoftwareBreakpoint(UInt64 address, UInt64 size)
+		public IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size)
 		{
 			AssertSession();
 			apama_breakpoint_set(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size).Assert();
+			
+			return new ApamaBreakpoint(this, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size);
 		}
 		
-		public void RemoveSoftwareBreakpoinr(UInt64 address, UInt64 size)
+		public void RemoveSoftwareBreakpoint(UInt64 address, UInt64 size)
 		{
 			AssertSession();
-			apama_breakpoint_remove(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_HARDWARE_BREAKPOINT, address, size).Assert();
+			apama_breakpoint_remove(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size).Assert();
 		}
 		
 		public void DebugContinue(UInt64? address)
 		{
+			AssertSession();
+			apama_continue(_currentSession.apama_session_ptr, address == null? 0: address.Value).Assert();
 		}
 		
 		#endregion

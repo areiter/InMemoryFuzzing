@@ -80,7 +80,14 @@ namespace Fuzzer.TargetConnectors
 		/// </summary>
 		/// <param name="address">Address of the breakpoint</param>
 		/// <param name="size">Specify the size of the instruction at address to patch</param>
-		void SetSoftwareBreakpoint(UInt64 address, UInt64 size);
+		IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size);
+		
+		/// <summary>
+		/// Removes the specified software breakpoint
+		/// </summary>
+		/// <param name="address">Address of the breakpoint</param>
+		/// <param name="size">Size of the instruction to restore</param>
+		void RemoveSoftwareBreakpoint(UInt64 address, UInt64 size);
 	}
 }
 
