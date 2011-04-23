@@ -5,5 +5,7 @@
 *.a
 *.swp
 *~
+*.userprefs
+*.pidb
 bin
 obj

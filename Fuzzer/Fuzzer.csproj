@@ -41,6 +41,8 @@
     <Compile Include="TargetConnectors\ITargetConnector.cs" />
     <Compile Include="TargetConnectors\ApamaLinuxConnector.cs" />
     <Compile Include="TargetConnectors\ApamaHelpers.cs" />
+    <Compile Include="TargetConnectors\IBreakpoint.cs" />
+    <Compile Include="TargetConnectors\ApamaBreakpoint.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

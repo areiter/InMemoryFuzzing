@@ -67,6 +67,12 @@ namespace Fuzzer.TargetConnectors
 		[DllImport("libapama.so")]
 		private static extern ApamaReturnValue apama_breakpoint_set(IntPtr session, ApamaBreakpointType type, UInt64 address, UInt64 kind);
 		
+		[DllImport("libapama.so")]
+		private static extern ApamaReturnValue apama_breakpoint_remove(IntPtr session, ApamaBreakpointType type, UInt64 address, UInt64 kind);
+		
+		[DllImport("libapama.so")]
+		private static extern ApamaReturnValue apama_continue(IntPtr session, UInt64 address);
+		
 		#endregion
 		public ApamaLinuxConnector ()
 		{
@@ -134,18 +140,27 @@ namespace Fuzzer.TargetConnectors
 			return writtenBytes;
 		}
 		
-		public void SetSoftwareBreakpoint(UInt64 address, UInt64 size)
+		public IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size)
 		{
 			AssertSession();
 			apama_breakpoint_set(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size).Assert();
+			
+			return new ApamaBreakpoint(this, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size);
+		}
+		
+		public void RemoveSoftwareBreakpoint(UInt64 address, UInt64 size)
+		{
+			AssertSession();
+			apama_breakpoint_remove(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size).Assert();
+		}
+		
+		public void DebugContinue()
+		{
+			AssertSession();
+			apama_continue(_currentSession.apama_session_ptr, 0).Assert();
 		}
 		
 		#endregion
-
-		#region IDisposable implementation
-
-		#endregion		
-
 
 		#region IDisposable implementation
 		public void Dispose ()
