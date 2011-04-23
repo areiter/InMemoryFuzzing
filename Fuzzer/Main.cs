@@ -26,7 +26,8 @@ namespace Fuzzer
 				connector.Setup(config);
 				connector.Connect();
 				Console.WriteLine("Connected={0}", connector.Connected);
-				IBreakpoint breakMain = connector.SetSoftwareBreakpoint(0x4004f7, 8);
+				IBreakpoint breakMain = connector.SetSoftwareBreakpoint(0x4004d9, 8);
+				connector.DebugContinue();
 				//connector.RemoveSoftwareBreakpoint(0x4004f7, 8);
 				breakMain.RemoveBreakpoint();
 			}

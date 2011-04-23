@@ -88,6 +88,11 @@ namespace Fuzzer.TargetConnectors
 		/// <param name="address">Address of the breakpoint</param>
 		/// <param name="size">Size of the instruction to restore</param>
 		void RemoveSoftwareBreakpoint(UInt64 address, UInt64 size);
+		
+		/// <summary>
+		/// Continues from the current position, to the next break
+		/// </summary>
+		void DebugContinue();
 	}
 }
 

@@ -154,10 +154,10 @@ namespace Fuzzer.TargetConnectors
 			apama_breakpoint_remove(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size).Assert();
 		}
 		
-		public void DebugContinue(UInt64? address)
+		public void DebugContinue()
 		{
 			AssertSession();
-			apama_continue(_currentSession.apama_session_ptr, address == null? 0: address.Value).Assert();
+			apama_continue(_currentSession.apama_session_ptr, 0).Assert();
 		}
 		
 		#endregion
