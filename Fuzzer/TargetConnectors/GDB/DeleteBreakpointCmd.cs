@@ -1,4 +1,4 @@
-// IBreakpoint.cs
+// DeleteBreakpointCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,33 +17,43 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-namespace Fuzzer.TargetConnectors
+namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Represents a breakpoint on the target system.
-	/// </summary>
-	public interface IBreakpoint : IDisposable
+	public class DeleteBreakpointCmd : GDBCommand
 	{
 		/// <summary>
-		/// Breakpoint address
+		/// Breakpoint id
 		/// </summary>
-		UInt64 Address{ get; }
+		private int _breakpointNum;
+		
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
+		public override GDBResponseHandler ResponseHandler 
+		{
+			get { return null; }
+		}
+		
+		
+		public override string Command 
+		{
+			get { return string.Format("delete breakpoints {0}",_breakpointNum);} 
+		}
+		
+		
+		protected override string LogIdentifier 
+		{
+			get { return "CMD_delete breakpoints"; }
+		}
+		
+		#endregion
 		
 		/// <summary>
-		/// Identifies the breakpoint
+		/// Constructs a new delete breakpoints command
 		/// </summary>
-		string Identifier {get;}
-		
-		/// <summary>
-		/// Checks if the breakpoint is enabled
-		/// </summary>
-		bool Enabled { get; }
-		
-		/// <summary>
-		/// Removes the specified breakpoint
-		/// </summary>
-		void Delete();
-		
+		/// <param name="num">Number of the breakpoint to delete</param>
+		public DeleteBreakpointCmd (int num)
+		{
+			_breakpointNum = num;
+		}
 	}
 }
 

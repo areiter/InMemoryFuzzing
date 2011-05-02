@@ -1,4 +1,4 @@
-// ApamaBreakpoint.cs
+// GDBBreakpoint.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,9 +17,9 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-namespace Fuzzer.TargetConnectors
+namespace Fuzzer.TargetConnectors.GDB
 {
-	public class ApamaBreakpoint : IBreakpoint
+	public class GDBBreakpoint : IBreakpoint
 	{
 		/// <summary>
 		/// Already destroyed?
@@ -29,12 +29,12 @@ namespace Fuzzer.TargetConnectors
 		/// <summary>
 		/// Associated connector
 		/// </summary>
-		private ApamaLinuxConnector _connector;
-		
+		private GDBConnector _connector;
+
 		/// <summary>
-		/// Type of the breakpoint (hw/sw(
+		/// The number of the breakpoint
 		/// </summary>
-		private ApamaBreakpointType _breakpointType;
+		private int _breakpointNum;
 		
 		/// <summary>
 		/// Address of the breakpoint
@@ -42,17 +42,26 @@ namespace Fuzzer.TargetConnectors
 		private UInt64 _address;
 		
 		/// <summary>
-		/// Size of the target command to patch
+		/// Identifier of the Breakpoint
 		/// </summary>
-		private UInt64 _size;
+		private string _identifier;
 		
-		internal ApamaBreakpoint (ApamaLinuxConnector connector, ApamaBreakpointType breakpointType,
-		                          UInt64 address, UInt64 size)
+		/// <summary>
+		/// Called on breakpoint removal
+		/// </summary>
+		private Action<int> _removeMe;
+		
+		internal GDBBreakpoint (GDBConnector connector,
+		                        int breakpointNum,
+		                        UInt64 address,
+		                        string identifier,
+		                        Action<int> removeMe)
 		{
 			_connector = connector;
-			_breakpointType = breakpointType;
+			_breakpointNum = breakpointNum;
 			_address = address;
-			_size = size;
+			_identifier = identifier;
+			_removeMe = removeMe;
 		}	
 
 		private void AssertBreakpoint()
@@ -64,13 +73,16 @@ namespace Fuzzer.TargetConnectors
 		#region IBreakpoint implementation
 		public void Delete ()
 		{
-			if(_breakpointType == ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT)
-			{
-				_connector.RemoveSoftwareBreakpoint(_address, _size);
-				_disposed = true;
-			}
+			_connector.QueueCommand(new DeleteBreakpointCmd(_breakpointNum));
+			_disposed = true;
+			_removeMe(_breakpointNum);
 		}
 
+		public bool Enabled 
+		{
+			get { return true; }
+		}
+		
 		public UInt64 Address
 		{
 			get{ return _address; }
@@ -78,12 +90,7 @@ namespace Fuzzer.TargetConnectors
 		
 		public string Identifier
 		{
-			get{ return null; }
-		}
-		
-		public bool Enabled 
-		{
-			get { return true; }
+			get{ return _identifier; }
 		}
 		#endregion
 
@@ -93,6 +100,6 @@ namespace Fuzzer.TargetConnectors
 			Delete();
 		}
 		#endregion
-}
+	}
 }
 

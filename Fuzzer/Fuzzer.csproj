@@ -55,6 +55,13 @@
     <Compile Include="TargetConnectors\GDB\TargetCmd.cs" />
     <Compile Include="TargetConnectors\GDB\TargetRH.cs" />
     <Compile Include="TargetConnectors\GDB\CloseCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\SetBreakpointCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\SetBreakpointRH.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBBreakpoint.cs" />
+    <Compile Include="TargetConnectors\GDB\DeleteBreakpointCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\ContinueCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\BreakpointRH.cs" />
+    <Compile Include="TargetConnectors\GDB\ContinueRH.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

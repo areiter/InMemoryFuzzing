@@ -80,19 +80,20 @@ namespace Fuzzer.TargetConnectors
 		/// </summary>
 		/// <param name="address">Address of the breakpoint</param>
 		/// <param name="size">Specify the size of the instruction at address to patch</param>
-		IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size);
-		
-		/// <summary>
-		/// Removes the specified software breakpoint
-		/// </summary>
-		/// <param name="address">Address of the breakpoint</param>
-		/// <param name="size">Size of the instruction to restore</param>
-		void RemoveSoftwareBreakpoint(UInt64 address, UInt64 size);
+		/// <param name="identifier">Readable identifier of the breakpoint</param>
+		IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size, string identifier);
 		
 		/// <summary>
 		/// Continues from the current position, to the next break
 		/// </summary>
 		void DebugContinue();
+	}
+	
+	/// <summary>
+	/// Contains information why the debugger has stopped
+	/// </summary>
+	public interface IDebuggerStop
+	{
 	}
 }
 

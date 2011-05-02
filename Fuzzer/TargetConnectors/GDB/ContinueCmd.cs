@@ -1,4 +1,4 @@
-// IBreakpoint.cs
+// ContinueRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,33 +17,38 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-namespace Fuzzer.TargetConnectors
+namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Represents a breakpoint on the target system.
+	/// Sends a continue command
 	/// </summary>
-	public interface IBreakpoint : IDisposable
+	public class ContinueCmd:GDBCommand
 	{
-		/// <summary>
-		/// Breakpoint address
-		/// </summary>
-		UInt64 Address{ get; }
+		private ContinueRH _continueRH;
 		
-		/// <summary>
-		/// Identifies the breakpoint
-		/// </summary>
-		string Identifier {get;}
 		
-		/// <summary>
-		/// Checks if the breakpoint is enabled
-		/// </summary>
-		bool Enabled { get; }
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
+		public override GDBResponseHandler ResponseHandler 
+		{
+			get { return _continueRH; }
+		}		
 		
-		/// <summary>
-		/// Removes the specified breakpoint
-		/// </summary>
-		void Delete();
+		public override string Command 
+		{
+			get { return "continue"; }
+		}
 		
+		
+		protected override string LogIdentifier 
+		{
+			get { return "CMD_continue"; }
+		}
+		
+		#endregion
+		public ContinueCmd (Action<bool> continueResult)
+		{
+			_continueRH = new ContinueRH(continueResult);
+		}
 	}
 }
 

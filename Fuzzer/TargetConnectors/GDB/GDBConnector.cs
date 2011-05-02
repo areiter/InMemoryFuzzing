@@ -44,6 +44,14 @@ namespace Fuzzer.TargetConnectors.GDB
 	[ClassIdentifier("general/gdb")]
 	public class GDBConnector : ConsoleProcess, ITargetConnector
 	{
+		public enum GdbStopReason
+		{
+			Breakpoint
+		}
+		
+		public delegate void GdbStopDelegate(GdbStopReason stopReason, GDBBreakpoint breakpoint, UInt64 address);
+		
+		
 		/// <summary>
 		/// Path to the gdb executable
 		/// </summary>
@@ -75,6 +83,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		private List<GDBResponseHandler> _permanentResponseHandlers = new List<GDBResponseHandler>();
 		
 		/// <summary>
+		/// Contains all current breakpoints
+		/// </summary>
+		private Dictionary<int, GDBBreakpoint> _breakpoints = new Dictionary<int, GDBBreakpoint>();
+		
+		/// <summary>
 		/// Current command, already sent to gdb
 		/// </summary>
 		private GDBCommand _currentCommand = null;
@@ -84,11 +97,21 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		private bool _gdbReadyForInput = false;
 		
+		private ManualResetEvent _gdbStopEventHandler = new ManualResetEvent(false);
+		
 		public GDBConnector()
 		{
+			RegisterPermanentResponseHandler(new BreakpointRH(this, GdbStopped));
 			RegisterPermanentResponseHandler(new UnhandledRH());
+			
 		}			
 		
+		private void GdbStopped(GdbStopReason stopReason, GDBBreakpoint breakpoint, UInt64 address)
+		{
+			_gdbStopEventHandler.Set();	
+		}
+		
+			                                                  
 		#region ITargetConnector implementation
 		public void Setup (IDictionary<string, string> config)
 		{
@@ -115,7 +138,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		{
 			StartProcess();
 			ThreadPool.QueueUserWorkItem(ReadThread);	       
-			
+
 			bool connected = false;
 			ManualResetEvent connectedEvt = new ManualResetEvent(false);
 			TargetCmd targetCmd = new TargetCmd(_target,
@@ -147,19 +170,60 @@ namespace Fuzzer.TargetConnectors.GDB
 			throw new NotImplementedException ();
 		}
 
-		public IBreakpoint SetSoftwareBreakpoint (ulong address, ulong size)
+		public IBreakpoint SetSoftwareBreakpoint (ulong address, ulong size, string identifier)
 		{
-			throw new NotImplementedException ();
+			int breakpointNum = 0;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			
+			
+			QueueCommand(new SetBreakpointCmd(address,
+			    (Action<int>)delegate(int num){
+					breakpointNum = num;
+					evt.Set();
+			}));
+			
+			evt.WaitOne();
+			GDBBreakpoint breakpoint = new GDBBreakpoint(this, breakpointNum, address, identifier, 
+			      BreakpointRemoveFromList );
+			
+			_breakpoints.Add(breakpointNum, breakpoint);
+			
+			return breakpoint;
 		}
 
-		public void RemoveSoftwareBreakpoint (ulong address, ulong size)
+		public GDBBreakpoint LookupBreakpoint(int breakpointNum)
 		{
-			throw new NotImplementedException ();
+			if(_breakpoints.ContainsKey(breakpointNum))
+				return _breakpoints[breakpointNum];
+			
+			return null;
 		}
-
+		
+		
+		
 		public void DebugContinue ()
 		{
-			throw new NotImplementedException ();
+			bool success = false;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			_gdbStopEventHandler.Reset();
+			QueueCommand(new ContinueCmd(
+			    (Action<bool>)delegate(bool bSuc)
+                {
+					success	= bSuc;
+					evt.Set();
+				}));
+			
+			while(true)
+			{
+				//If continue response was received and a negative response was received,
+				//throw an exception
+				if(evt.WaitOne(10) && success == false)
+					throw new ArgumentException("Continuing failed");
+				
+				
+				if(_gdbStopEventHandler.WaitOne(10))
+					break;
+			}
 		}
 
 		public bool Connected 
@@ -186,7 +250,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		protected override string Arguments 
 		{
-			get { return "--quiet --fullname " + _extraArguments; }
+			get { return "-quiet -fullname " + _extraArguments; }
 		}
 		
 		#endregion
@@ -277,6 +341,9 @@ namespace Fuzzer.TargetConnectors.GDB
 				
 				if(read == '\n' || read == '\r')
 				{
+					if(currentLine.ToString().Trim().Equals(string.Empty))
+						continue;
+					
 					currentLines.Add(currentLine.ToString());
 					currentLine.Remove(0, currentLine.Length);
 					
@@ -344,6 +411,13 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 
 		#endregion
+		
+		private void BreakpointRemoveFromList(int breakpointNum)
+		{	
+			_breakpoints.Remove(breakpointNum);
+		}
+		
+		
 	}
 }
 

@@ -140,7 +140,7 @@ namespace Fuzzer.TargetConnectors
 			return writtenBytes;
 		}
 		
-		public IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size)
+		public IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size, string identifier)
 		{
 			AssertSession();
 			apama_breakpoint_set(_currentSession.apama_session_ptr, ApamaBreakpointType.APAMA_MEMORY_BREAKPOINT, address, size).Assert();
