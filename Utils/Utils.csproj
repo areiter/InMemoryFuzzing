@@ -97,6 +97,8 @@
     <Compile Include="IO\TextWriterStream.cs" />
     <Compile Include="IO\HexFilterStream.cs" />
     <Compile Include="ConsoleUtils.cs" />
+    <Compile Include="IO\OneTimeStream.cs" />
+    <Compile Include="IO\MultiTextReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

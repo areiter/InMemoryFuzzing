@@ -34,6 +34,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>log4net.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -43,10 +47,21 @@
     <Compile Include="TargetConnectors\ApamaHelpers.cs" />
     <Compile Include="TargetConnectors\IBreakpoint.cs" />
     <Compile Include="TargetConnectors\ApamaBreakpoint.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBConnector.cs" />
+    <Compile Include="IO\ConsoleIO\ConsoleProcess.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBCommand.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBResponseHandler.cs" />
+    <Compile Include="TargetConnectors\GDB\UnhandledRH.cs" />
+    <Compile Include="TargetConnectors\GDB\TargetCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\TargetRH.cs" />
+    <Compile Include="TargetConnectors\GDB\CloseCmd.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="TargetConnectors\" />
+    <Folder Include="TargetConnectors\GDB\" />
+    <Folder Include="IO\" />
+    <Folder Include="IO\ConsoleIO\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">
