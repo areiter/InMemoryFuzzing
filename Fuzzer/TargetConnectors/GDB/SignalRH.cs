@@ -1,4 +1,4 @@
-// BreakpointRH.cs
+// SignalRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -22,14 +22,12 @@ using System.Globalization;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Handles breakpoint responses.
+	/// Handles Program exits.
 	/// </summary>
-	public class BreakpointRH : GDBResponseHandler
+	public class SignalRH : GDBResponseHandler
 	{
-		private GDBConnector _connector;
-		
 		/// <summary>
-		/// Is called if gdb receivesd a break
+		/// Is called if gdb receives a break
 		/// </summary>
 		private GDBConnector.GdbStopDelegate _gdbStopped;
 		
@@ -37,41 +35,41 @@ namespace Fuzzer.TargetConnectors.GDB
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		protected override string LogIdentifier 
 		{
-			get { return "RH_breakpoint"; }
+			get { return "RH_signal"; }
 		}
 		
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex r = new Regex(@"Breakpoint\s*(?<num>\d+)\s*,\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex r = new Regex(@"Program received signal (?<signal_name>\S*),\s*(?<friendly_signal_name>[\S*\s*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			
 			
 			foreach(string line in responseLines)
 			{
-				Match m = r.Match(line);
-				if(m.Success)
-				{
-					int breakpointNum = int.Parse(m.Result("${num}"));
-					GDBBreakpoint breakpoint = _connector.LookupBreakpoint(breakpointNum);
-					
-					if(breakpoint != null)
-					{
-						_gdbStopped(StopReasonEnum.Breakpoint, breakpoint,
-						            UInt64.Parse(m.Result("${at}"), NumberStyles.HexNumber), 0);
-						
-					}
+				Match match = r.Match(line);
 
+				if(match.Success)
+				{
+					string signal = match.Result("${signal_name}");
+					object oSignal = Enum.Parse(typeof(SignalEnum), signal, true);
 					
+					SignalEnum eSignal = SignalEnum.UNKNOWN;
+					
+					if(oSignal != null)
+						eSignal = (SignalEnum)oSignal;
+					
+					_gdbStopped(StopReasonEnum.Terminated, null, 0, (int)eSignal);					
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
+				
 			}
 			
 			return GDBResponseHandler.HandleResponseEnum.NotHandled;			
 		}
 		
 		#endregion
-		public BreakpointRH (GDBConnector connector, GDBConnector.GdbStopDelegate gdbStopped)
+		public SignalRH (GDBConnector.GdbStopDelegate gdbStopped)
 		{
-			_connector = connector;
 			_gdbStopped = gdbStopped;
 		}
 	}

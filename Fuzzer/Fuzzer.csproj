@@ -43,10 +43,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="TargetConnectors\ITargetConnector.cs" />
-    <Compile Include="TargetConnectors\ApamaLinuxConnector.cs" />
-    <Compile Include="TargetConnectors\ApamaHelpers.cs" />
     <Compile Include="TargetConnectors\IBreakpoint.cs" />
-    <Compile Include="TargetConnectors\ApamaBreakpoint.cs" />
     <Compile Include="TargetConnectors\GDB\GDBConnector.cs" />
     <Compile Include="IO\ConsoleIO\ConsoleProcess.cs" />
     <Compile Include="TargetConnectors\GDB\GDBCommand.cs" />
@@ -62,6 +59,8 @@
     <Compile Include="TargetConnectors\GDB\ContinueCmd.cs" />
     <Compile Include="TargetConnectors\GDB\BreakpointRH.cs" />
     <Compile Include="TargetConnectors\GDB\ContinueRH.cs" />
+    <Compile Include="TargetConnectors\GDB\ExitRH.cs" />
+    <Compile Include="TargetConnectors\GDB\SignalRH.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -25,24 +25,20 @@ namespace Fuzzer
 			config.Add("gdb_log", "stream:stderr");
 			config.Add("target", "extended-remote :1234");
 			
-			ITargetConnector connector = 
-				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb");
-			
-			try
+			using(ITargetConnector connector = 
+				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
 			{
+			
 				connector.Setup(config);
 				connector.Connect();
 
 				IBreakpoint breakMain = connector.SetSoftwareBreakpoint(0x4004d9, 8, "break_main");
-				connector.DebugContinue();
+				IDebuggerStop stop = connector.DebugContinue();
 
 				breakMain.Delete();
 				Console.ReadLine();
 			}
-			finally
-			{
-				connector.Close();
-			}
+
 			
 			Console.ReadLine();
 			

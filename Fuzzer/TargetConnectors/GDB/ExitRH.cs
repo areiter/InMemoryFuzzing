@@ -1,4 +1,4 @@
-// BreakpointRH.cs
+// ExitRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -22,14 +22,12 @@ using System.Globalization;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Handles breakpoint responses.
+	/// Handles Program exits.
 	/// </summary>
-	public class BreakpointRH : GDBResponseHandler
+	public class ExitRH : GDBResponseHandler
 	{
-		private GDBConnector _connector;
-		
 		/// <summary>
-		/// Is called if gdb receivesd a break
+		/// Is called if gdb receives a break
 		/// </summary>
 		private GDBConnector.GdbStopDelegate _gdbStopped;
 		
@@ -37,30 +35,27 @@ namespace Fuzzer.TargetConnectors.GDB
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		protected override string LogIdentifier 
 		{
-			get { return "RH_breakpoint"; }
+			get { return "RH_exit"; }
 		}
 		
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex r = new Regex(@"Breakpoint\s*(?<num>\d+)\s*,\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex normal = new Regex(@"Program has exited normally.", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex withCode = new Regex(@"Program exited with code (?<exit_code>\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			foreach(string line in responseLines)
 			{
-				Match m = r.Match(line);
-				if(m.Success)
+				Match mNormal = normal.Match(line);
+				Match mWithCode = withCode.Match(line);
+				if(mNormal.Success)
 				{
-					int breakpointNum = int.Parse(m.Result("${num}"));
-					GDBBreakpoint breakpoint = _connector.LookupBreakpoint(breakpointNum);
-					
-					if(breakpoint != null)
-					{
-						_gdbStopped(StopReasonEnum.Breakpoint, breakpoint,
-						            UInt64.Parse(m.Result("${at}"), NumberStyles.HexNumber), 0);
-						
-					}
-
-					
+					_gdbStopped(StopReasonEnum.Exit, null, 0, 0);					
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+				}
+				else if(mWithCode.Success)
+				{					
+					_gdbStopped(StopReasonEnum.Exit, null, 0, Convert.ToInt64(mWithCode.Result("${exit_code}"), 8));
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
 			}
@@ -69,9 +64,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public BreakpointRH (GDBConnector connector, GDBConnector.GdbStopDelegate gdbStopped)
+		public ExitRH (GDBConnector.GdbStopDelegate gdbStopped)
 		{
-			_connector = connector;
 			_gdbStopped = gdbStopped;
 		}
 	}

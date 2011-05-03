@@ -44,12 +44,9 @@ namespace Fuzzer.TargetConnectors.GDB
 	[ClassIdentifier("general/gdb")]
 	public class GDBConnector : ConsoleProcess, ITargetConnector
 	{
-		public enum GdbStopReason
-		{
-			Breakpoint
-		}
 		
-		public delegate void GdbStopDelegate(GdbStopReason stopReason, GDBBreakpoint breakpoint, UInt64 address);
+		
+		public delegate void GdbStopDelegate(StopReasonEnum stopReason, GDBBreakpoint breakpoint, UInt64 address, Int64 status);
 		
 		
 		/// <summary>
@@ -97,17 +94,25 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		private bool _gdbReadyForInput = false;
 		
+		/// <summary>
+		/// Contains informations about the last debugger stop
+		/// </summary>
+		private IDebuggerStop _lastDebuggerStop = null;
+		
 		private ManualResetEvent _gdbStopEventHandler = new ManualResetEvent(false);
 		
 		public GDBConnector()
 		{
 			RegisterPermanentResponseHandler(new BreakpointRH(this, GdbStopped));
+			RegisterPermanentResponseHandler(new ExitRH(GdbStopped));
+			RegisterPermanentResponseHandler(new SignalRH(GdbStopped));			                                              
 			RegisterPermanentResponseHandler(new UnhandledRH());
 			
 		}			
 		
-		private void GdbStopped(GdbStopReason stopReason, GDBBreakpoint breakpoint, UInt64 address)
+		private void GdbStopped(StopReasonEnum stopReason, GDBBreakpoint breakpoint, UInt64 address, Int64 status)
 		{
+			_lastDebuggerStop = new DebuggerStop(stopReason, breakpoint, address, status);
 			_gdbStopEventHandler.Set();	
 		}
 		
@@ -201,7 +206,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		
 		
-		public void DebugContinue ()
+		public IDebuggerStop DebugContinue ()
 		{
 			bool success = false;
 			ManualResetEvent evt = new ManualResetEvent(false);
@@ -215,7 +220,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			
 			while(true)
 			{
-				//If continue response was received and a negative response was received,
+				//If negative continue response was received,
 				//throw an exception
 				if(evt.WaitOne(10) && success == false)
 					throw new ArgumentException("Continuing failed");
@@ -224,6 +229,9 @@ namespace Fuzzer.TargetConnectors.GDB
 				if(_gdbStopEventHandler.WaitOne(10))
 					break;
 			}
+			
+			return _lastDebuggerStop;
+			
 		}
 
 		public bool Connected 
