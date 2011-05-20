@@ -1,4 +1,4 @@
-// ContinueRH.cs
+// RunRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -21,10 +21,10 @@ using System.Text.RegularExpressions;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Parses the continue response 
-	/// "Continue." on success and "The program is not being run." on failure
+	/// Parses the run response 
+	/// "Starting program: ...." on success and "The program being debugged has been started already." if we need to send 'y' to restart the program
 	/// </summary>
-	public class ContinueRH : GDBResponseHandler
+	public class RunRH : GDBResponseHandler
 	{
 		
 		private Action<bool> _cb;
@@ -38,8 +38,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex success = new Regex(@"\s*Continuing.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Regex failure = new Regex(@"\s*The program is not being run.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex success = new Regex(@"\s*Starting program:\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex success_commit = new Regex(@"\s*The program being debugged has been started already.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			foreach(string line in responseLines)
 			{
@@ -48,9 +48,9 @@ namespace Fuzzer.TargetConnectors.GDB
 					_cb(true);
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
-				else if(failure.Match(line).Success)
+				else if(success_commit.Match(line).Success)
 				{
-					connector.QueueCommand(new RunCmd(_cb));
+					connector.QueueCommand(new SimpleCmd("y", this));
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}				
 			}
@@ -61,7 +61,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		#endregion
 		
 		
-		public ContinueRH (Action<bool> cb)
+		public RunRH (Action<bool> cb)
 		{
 			_cb = cb;
 		}

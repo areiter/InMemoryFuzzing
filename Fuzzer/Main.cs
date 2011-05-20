@@ -22,6 +22,7 @@ namespace Fuzzer
 		private static void TestApamaLinux()
 		{	
 			IDictionary<string, string> config = new Dictionary<string, string>();
+			config.Add("gdb_exec", "/opt/gdb-7.2/bin/gdb");
 			config.Add("gdb_log", "stream:stderr");
 			config.Add("target", "extended-remote :1234");
 			
@@ -32,9 +33,12 @@ namespace Fuzzer
 				connector.Setup(config);
 				connector.Connect();
 
-				IBreakpoint breakMain = connector.SetSoftwareBreakpoint(0x4004d9, 8, "break_main");
+				IBreakpoint breakMain = connector.SetSoftwareBreakpoint(0x400553, 8, "break_main");
+				IBreakpoint breakfoo = connector.SetSoftwareBreakpoint(0x400539, 8, "break_foo");
 				IDebuggerStop stop = connector.DebugContinue();
-
+				ISnapshot snapshot = connector.CreateSnapshot();
+				stop = connector.DebugContinue();
+				snapshot.Restore();
 				breakMain.Delete();
 				Console.ReadLine();
 			}

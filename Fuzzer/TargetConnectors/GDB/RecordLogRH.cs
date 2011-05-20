@@ -1,4 +1,4 @@
-// SignalRH.cs
+// RecordLogRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -22,26 +22,28 @@ using System.Globalization;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Handles Program exits.
+	/// Handles responses where no more reverse execution information is available
 	/// </summary>
-	public class SignalRH : GDBResponseHandler
+	public class RecordLogRH : GDBResponseHandler
 	{
 		/// <summary>
 		/// Is called if gdb receives a break
 		/// </summary>
 		private GDBConnector.GdbStopDelegate _gdbStopped;
+		private GDBConnector _connector;
 		
 		
+	
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		protected override string LogIdentifier 
 		{
-			get { return "RH_signal"; }
+			get { return "RH_record_log"; }
 		}
 		
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex r = new Regex(@"Program received signal (?<signal_name>\S*),\s*(?<friendly_signal_name>[\S*\s*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex r = new Regex(@"No more reverse-execution history.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			Regex rAddress = new Regex(@"0x(?<at>\S*)\s*in[\S*\s*]*");
 			for(int i = 0; i<responseLines.Length ; i++)
 			{
@@ -74,16 +76,9 @@ namespace Fuzzer.TargetConnectors.GDB
 					if(address == null && allowRequestLine)
 						return GDBResponseHandler.HandleResponseEnum.RequestLine;
 					
-					
-					string signal = match.Result("${signal_name}");
-					object oSignal = Enum.Parse(typeof(SignalEnum), signal, true);
-					
-					SignalEnum eSignal = SignalEnum.UNKNOWN;
-					
-					if(oSignal != null)
-						eSignal = (SignalEnum)oSignal;
-					
-					_gdbStopped(StopReasonEnum.Terminated, null, address == null?0:address.Value, (int)eSignal);					
+					_gdbStopped(StopReasonEnum.Breakpoint, 
+					            address == null ? null : _connector.LookupBreakpointByAddress(address.Value), 
+					            address == null ? 0 : address.Value, 0);					
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
 				
@@ -93,8 +88,9 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public SignalRH (GDBConnector.GdbStopDelegate gdbStopped)
+		public RecordLogRH (GDBConnector connector, GDBConnector.GdbStopDelegate gdbStopped)
 		{
+			_connector = connector;
 			_gdbStopped = gdbStopped;
 		}
 	}

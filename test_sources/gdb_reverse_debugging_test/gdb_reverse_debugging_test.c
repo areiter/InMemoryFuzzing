@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int xyz;
 
 int bar ()
@@ -14,8 +16,16 @@ int foo ()
 
 int main ()
 {
+//  char* text = (char*) malloc(10000);
+//  int i;
+//  for(i=0; i< 150000; i++)
+//    text[i] = 'a';
+
   xyz = 0;      /* break in main */
+  puts("bubu");
   foo ();
-  return (xyz == 2 ? 0 : 1);
-} 
+  puts("huhu");
+
+  return (xyz == 2 ? 2 : 1);
+}
               /* end of main */

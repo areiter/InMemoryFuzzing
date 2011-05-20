@@ -1,4 +1,4 @@
-// ContinueRH.cs
+// SimpleCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -20,40 +20,36 @@ using System;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Sends a continue command
+	/// Sends a simple command, with a predefined response handler (e.g. for 'y' ack, or 'n' nak)
 	/// </summary>
-	public class ContinueCmd:GDBCommand
+	public class SimpleCmd:GDBCommand
 	{
-		private ContinueRH _continueRH;
-		private bool _reverse = false;
+		private string _cmd;
+		private GDBResponseHandler _responseHandler;
+			
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
 		{
-			get { return _continueRH; }
+			get { return _responseHandler; }
 		}		
 		
 		public override string Command 
 		{
-			get 
-			{
-				if(_reverse)
-					return "reverse-continue";
-				else
-					return "continue"; }
+			get { return _cmd; }
 		}
 		
 		
 		protected override string LogIdentifier 
 		{
-			get { return "CMD_continue" + (_reverse ? "_r": ""); }
+			get { return "CMD_simple_" + _cmd; }
 		}
 		
 		#endregion
-		public ContinueCmd (bool reverse, Action<bool> continueResult)
+		public SimpleCmd (string cmd, GDBResponseHandler rh)
 		{
-			_reverse = reverse;
-			_continueRH = new ContinueRH(continueResult);
+			_cmd = cmd;
+			_responseHandler = rh;
 		}
 	}
 }

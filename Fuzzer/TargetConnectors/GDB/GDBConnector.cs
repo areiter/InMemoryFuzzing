@@ -105,7 +105,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		{
 			RegisterPermanentResponseHandler(new BreakpointRH(this, GdbStopped));
 			RegisterPermanentResponseHandler(new ExitRH(GdbStopped));
-			RegisterPermanentResponseHandler(new SignalRH(GdbStopped));			                                              
+			RegisterPermanentResponseHandler(new SignalRH(GdbStopped));	
+			RegisterPermanentResponseHandler(new RecordLogRH(this, GdbStopped)); 
 			RegisterPermanentResponseHandler(new UnhandledRH());
 			
 		}			
@@ -167,12 +168,23 @@ namespace Fuzzer.TargetConnectors.GDB
 
 		public ulong ReadMemory (byte[] buffer, ulong address, ulong size)
 		{
-			throw new NotImplementedException ();
+			throw new NotImplementedException();
 		}
 
 		public ulong WriteMemory (byte[] buffer, ulong address, ulong size)
 		{
-			throw new NotImplementedException ();
+			string tempFile = System.IO.Path.GetTempFileName();
+			
+			using(FileStream fStream = new FileStream(tempFile, FileMode.OpenOrCreate, FileAccess.Write))
+			{
+				fStream.Write(buffer, 0, (int)size);
+			}
+			
+			QueueCommand(new RestoreCmd(tempFile, address));
+			
+			//File.Delete(tempFile);
+			
+			return size;
 		}
 
 		public IBreakpoint SetSoftwareBreakpoint (ulong address, ulong size, string identifier)
@@ -204,14 +216,29 @@ namespace Fuzzer.TargetConnectors.GDB
 			return null;
 		}
 		
+		public GDBBreakpoint LookupBreakpointByAddress(UInt64 address)
+		{
+			foreach(GDBBreakpoint br in _breakpoints.Values)
+			{
+				if(br.Address == address)
+					return br;
+			}
+			
+			return null;
+		}
 		
 		
-		public IDebuggerStop DebugContinue ()
+		public IDebuggerStop DebugContinue()
+		{
+			return DebugContinue(false);
+		}
+		
+		public IDebuggerStop DebugContinue (bool reverse)
 		{
 			bool success = false;
 			ManualResetEvent evt = new ManualResetEvent(false);
 			_gdbStopEventHandler.Reset();
-			QueueCommand(new ContinueCmd(
+			QueueCommand(new ContinueCmd( reverse,
 			    (Action<bool>)delegate(bool bSuc)
                 {
 					success	= bSuc;
@@ -234,6 +261,12 @@ namespace Fuzzer.TargetConnectors.GDB
 			
 		}
 
+		
+		public ISnapshot CreateSnapshot()
+		{
+			return new GDBSnapshot(this, _lastDebuggerStop);
+		}
+		
 		public bool Connected 
 		{
 			get { return Running; }
@@ -407,11 +440,20 @@ namespace Fuzzer.TargetConnectors.GDB
 				{
 					foreach(GDBResponseHandler permanentResponseHandler in _permanentResponseHandlers)
 					{
-						if(permanentResponseHandler.HandleResponse(this, lines.ToArray(), !_gdbReadyForInput) == GDBResponseHandler.HandleResponseEnum.Handled)
+						GDBResponseHandler.HandleResponseEnum responseEnum = permanentResponseHandler.HandleResponse(this, lines.ToArray(), !_gdbReadyForInput);
+						if(responseEnum == GDBResponseHandler.HandleResponseEnum.Handled)
 						{
 							lines.Clear();
 							break;
 						}
+						else if(responseEnum == GDBResponseHandler.HandleResponseEnum.RequestLine && _gdbReadyForInput)
+						{
+							//Wrong behaviour
+							throw new ArgumentException("Cannot request another response line if gdb is ready for input");
+						}
+						else if(responseEnum == GDBResponseHandler.HandleResponseEnum.RequestLine)
+							break;
+						
 					}
 				}
 			}					                                               
@@ -424,8 +466,6 @@ namespace Fuzzer.TargetConnectors.GDB
 		{	
 			_breakpoints.Remove(breakpointNum);
 		}
-		
-		
 	}
 }
 

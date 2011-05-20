@@ -61,6 +61,15 @@
     <Compile Include="TargetConnectors\GDB\ContinueRH.cs" />
     <Compile Include="TargetConnectors\GDB\ExitRH.cs" />
     <Compile Include="TargetConnectors\GDB\SignalRH.cs" />
+    <Compile Include="TargetConnectors\ISnapshot.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBSnapshot.cs" />
+    <Compile Include="TargetConnectors\GDB\RunCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\RunRH.cs" />
+    <Compile Include="TargetConnectors\GDB\SimpleCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\RecordCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\RecordLogRH.cs" />
+    <Compile Include="TargetConnectors\GDB\RestoreRH.cs" />
+    <Compile Include="TargetConnectors\GDB\RestoreCmd.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

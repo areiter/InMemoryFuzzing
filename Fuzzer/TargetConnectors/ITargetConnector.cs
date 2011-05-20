@@ -87,6 +87,12 @@ namespace Fuzzer.TargetConnectors
 		/// Continues from the current position, to the next break
 		/// </summary>
 		IDebuggerStop DebugContinue();
+		
+		/// <summary>
+		/// Snapshots the target process at its current state
+		/// </summary>
+		/// <returns>A <see cref="ISnapshot"/></returns>
+		ISnapshot CreateSnapshot();
 	}
 	
 	public enum StopReasonEnum
@@ -104,7 +110,8 @@ namespace Fuzzer.TargetConnectors
 		/// <summary>
 		/// The program unexpectedly terminated
 		/// </summary>
-		Terminated
+		Terminated	
+		
 	}
 	
 	public enum SignalEnum : int

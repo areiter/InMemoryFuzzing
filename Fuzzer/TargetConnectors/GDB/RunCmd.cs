@@ -1,4 +1,4 @@
-// ContinueRH.cs
+// RunCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -22,38 +22,32 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// <summary>
 	/// Sends a continue command
 	/// </summary>
-	public class ContinueCmd:GDBCommand
+	public class RunCmd:GDBCommand
 	{
-		private ContinueRH _continueRH;
-		private bool _reverse = false;
+		private RunRH _runRH;
+		
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
 		{
-			get { return _continueRH; }
+			get { return _runRH; }
 		}		
 		
 		public override string Command 
 		{
-			get 
-			{
-				if(_reverse)
-					return "reverse-continue";
-				else
-					return "continue"; }
+			get { return "run"; }
 		}
 		
 		
 		protected override string LogIdentifier 
 		{
-			get { return "CMD_continue" + (_reverse ? "_r": ""); }
+			get { return "CMD_run"; }
 		}
 		
 		#endregion
-		public ContinueCmd (bool reverse, Action<bool> continueResult)
+		public RunCmd (Action<bool> runResult)
 		{
-			_reverse = reverse;
-			_continueRH = new ContinueRH(continueResult);
+			_runRH = new RunRH(runResult);
 		}
 	}
 }

@@ -39,11 +39,16 @@ namespace Fuzzer.TargetConnectors.GDB
 			foreach(string line in responseLines)
 			{
 				Match m = r.Match(line);
-				_cb(int.Parse(m.Result("${num}")));
-				break;
+				
+				if(m.Success)
+				{
+					_cb(int.Parse(m.Result("${num}")));
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+				}
+				
 			}
 			
-			return GDBResponseHandler.HandleResponseEnum.Handled;
+			return GDBResponseHandler.HandleResponseEnum.NotHandled;
 		}
 		
 		#endregion

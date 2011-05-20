@@ -1,4 +1,4 @@
-// ContinueRH.cs
+// RestoreRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -18,53 +18,61 @@
 //    limitations under the License.
 using System;
 using System.Text.RegularExpressions;
+using System.Globalization;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Parses the continue response 
-	/// "Continue." on success and "The program is not being run." on failure
+	/// Handles breakpoint responses.
 	/// </summary>
-	public class ContinueRH : GDBResponseHandler
+	public class RestoreRH : GDBResponseHandler
 	{
+		private GDBConnector _connector;
 		
-		private Action<bool> _cb;
+		/// <summary>
+		/// Is called if gdb receivesd a break
+		/// </summary>
+		private GDBConnector.GdbStopDelegate _gdbStopped;
+		
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		protected override string LogIdentifier 
 		{
-			get { return "RH_continue"; }
+			get { return "RH_breakpoint"; }
 		}
 		
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex success = new Regex(@"\s*Continuing.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Regex failure = new Regex(@"\s*The program is not being run.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex r = new Regex(@"Breakpoint\s*(?<num>\d+)\s*,\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			foreach(string line in responseLines)
 			{
-				if(success.Match(line).Success)
+				Match m = r.Match(line);
+				if(m.Success)
 				{
-					_cb(true);
+					int breakpointNum = int.Parse(m.Result("${num}"));
+					GDBBreakpoint breakpoint = _connector.LookupBreakpoint(breakpointNum);
+					
+					if(breakpoint != null)
+					{
+						_gdbStopped(StopReasonEnum.Breakpoint, breakpoint,
+						            UInt64.Parse(m.Result("${at}"), NumberStyles.HexNumber), 0);
+						
+					}
+
+					
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
-				else if(failure.Match(line).Success)
-				{
-					connector.QueueCommand(new RunCmd(_cb));
-					return GDBResponseHandler.HandleResponseEnum.Handled;
-				}				
 			}
 			
-			return GDBResponseHandler.HandleResponseEnum.NotHandled;
+			return GDBResponseHandler.HandleResponseEnum.NotHandled;			
 		}
 		
 		#endregion
-		
-		
-		public ContinueRH (Action<bool> cb)
+		public RestoreRH (GDBConnector connector, GDBConnector.GdbStopDelegate gdbStopped)
 		{
-			_cb = cb;
+			_connector = connector;
+			_gdbStopped = gdbStopped;
 		}
 	}
 }
-

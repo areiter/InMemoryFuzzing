@@ -1,4 +1,4 @@
-// ContinueRH.cs
+// RestoreCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -20,40 +20,40 @@ using System;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Sends a continue command
+	/// Sends a restore command to write to target memory
+	/// restore FILE [OFFSET] [START] [END]
 	/// </summary>
-	public class ContinueCmd:GDBCommand
+	public class RestoreCmd:GDBCommand
 	{
-		private ContinueRH _continueRH;
-		private bool _reverse = false;
+
+		private string _file;
+		private UInt64 _address;
+		
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
 		{
-			get { return _continueRH; }
+			get { return null; }
 		}		
 		
 		public override string Command 
 		{
-			get 
-			{
-				if(_reverse)
-					return "reverse-continue";
-				else
-					return "continue"; }
+			get{ return string.Format("restore '{0}' {1}", _file, _address.ToString("X")); }				
 		}
 		
 		
 		protected override string LogIdentifier 
 		{
-			get { return "CMD_continue" + (_reverse ? "_r": ""); }
+			get { return "CMD_restore"; }
 		}
 		
 		#endregion
-		public ContinueCmd (bool reverse, Action<bool> continueResult)
+		public RestoreCmd (string filename, UInt64 address)
 		{
-			_reverse = reverse;
-			_continueRH = new ContinueRH(continueResult);
+			_file = filename;
+			_address = address;
+			
+			
 		}
 	}
 }
