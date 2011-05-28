@@ -36,7 +36,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		
-		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
+		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
 			Regex success = new Regex(@"\s*Continuing.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			Regex failure = new Regex(@"\s*The program is not being run.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);

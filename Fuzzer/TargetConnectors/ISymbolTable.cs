@@ -17,10 +17,52 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using System.Collections.Generic;
 namespace Fuzzer.TargetConnectors
 {
-	public interface ISymbolTable
+	/// <summary>
+	/// Converts Symbols to addresses and vice versa
+	/// </summary>
+	public interface ISymbolTable : IDisposable
 	{
+		/// <summary>
+		/// Sets up the symbol table connector
+		/// </summary>
+		/// <param name="config">
+		/// A <see cref="IDictrionary<System.String, System.Object>"/>
+		/// </param>
+		void Setup(IDictionary<string, string> config);
+
+
+		/// <summary>
+		/// Lists all available methods (debugging or linking symbols)
+		/// </summary>
+		ISymbolTableMethod[] ListMethods{ get; }
+			
+	}
+	
+	/// <summary>
+	/// Represents a single method with its parameters if available
+	/// </summary>
+	public interface ISymbolTableMethod
+	{
+		/// <summary>
+		/// Gets the name or identifier of the mthod
+		/// </summary>
+		string Name{ get; }
+		
+		/// <summary>
+		/// Gets the address of the method
+		/// </summary>
+		UInt64 Address{ get; }
+		
+		
+		
+	}
+	
+	public interface ISymbolTableVariable
+	{
+		string Name{ get; }
 	}
 }
 

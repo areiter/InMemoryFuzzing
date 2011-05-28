@@ -39,7 +39,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		
-		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
+		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
 			Regex r = new Regex(@"Program received signal (?<signal_name>\S*),\s*(?<friendly_signal_name>[\S*\s*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			Regex rAddress = new Regex(@"0x(?<at>\S*)\s*in[\S*\s*]*");

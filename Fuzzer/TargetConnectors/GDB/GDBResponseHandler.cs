@@ -63,7 +63,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// <param name="responseLines">At least a single response line</param>
 		/// <param name="allowRequestLine">Specifies if requesting more response lines is allowed</param>
 		/// <returns></returns>
-		public abstract HandleResponseEnum HandleResponse(GDBConnector connector, string[] responseLines, bool allowRequestLine);
+		public abstract HandleResponseEnum HandleResponse(GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine);
 	}
 }
 

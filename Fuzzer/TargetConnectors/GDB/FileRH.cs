@@ -1,4 +1,4 @@
-// SetBreakpointRH.cs
+// FileRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -18,46 +18,55 @@
 //    limitations under the License.
 using System;
 using System.Text.RegularExpressions;
+using System.Globalization;
 namespace Fuzzer.TargetConnectors.GDB
 {
-	public class SetBreakpointRH : GDBResponseHandler
+	/// <summary>
+	/// Handles File Responses
+	/// </summary>
+	public class FileRH : GDBResponseHandler
 	{
+		private Action<bool> _fileLoaded;
 		
-		private Action<int> _cb;
 		
+	
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		protected override string LogIdentifier 
 		{
-			get { return "RH_break"; }
+			get { return "RH_file"; }
 		}
 		
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex r = new Regex(@"Breakpoint\s*(?<num>\d+)\s*at\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			
-			foreach(string line in responseLines)
+			Regex fileRead = new Regex(@"Reading symbols from [\S*\s*]*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex fileNotFound = new Regex(@"[\S*\s*]*: No such file or directory.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			for(int i = 0; i<responseLines.Length ; i++)
 			{
-				Match m = r.Match(line);
+				string line = responseLines[i];
 				
+				Match m = fileNotFound.Match(line);
 				if(m.Success)
 				{
-					_cb(int.Parse(m.Result("${num}")));
+					_fileLoaded(false);
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
 				
+				m = fileRead.Match(line);
+				if(m.Success)
+				{
+					_fileLoaded(true);
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+				}				
 			}
 			
-			return GDBResponseHandler.HandleResponseEnum.NotHandled;
+			return GDBResponseHandler.HandleResponseEnum.NotHandled;			
 		}
 		
 		#endregion
-		
-		
-		public SetBreakpointRH (Action<int> cb)
+		public FileRH (Action<bool> fileLoaded)
 		{
-			_cb = cb;
+			_fileLoaded = fileLoaded;
 		}
 	}
 }
-

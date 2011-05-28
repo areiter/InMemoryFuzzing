@@ -1,4 +1,4 @@
-// UnhandledRH.cs
+// FileCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -20,32 +20,31 @@ using System;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// This should always be the last permanent response handler, it accepts all responses and writes them to the log file
+	/// Loads a file (with debug information) to gdb
 	/// </summary>
-	public class UnhandledRH : GDBResponseHandler
+	public class FileCmd : GDBCommand
 	{
+		private string _file;
+		private FileRH _rh;
 		
-		protected override string LogIdentifier
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
+		public override GDBResponseHandler ResponseHandler 
 		{
-			get{ return "Unhandled GDB Response"; }
+			get { return _rh; }
 		}
 		
-		public UnhandledRH ()
+		public override string Command 
 		{
-		}
-		
-		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
-		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
-		{
-			_logger.WarnFormat("Got {0} unhandled response lines:", responseLines.Length);
-			
-			foreach(string responseLine in responseLines)
-				_logger.Warn(responseLine);
-			return GDBResponseHandler.HandleResponseEnum.Handled;
+			get { return string.Format("file \"{0}\"", _file); }
 		}
 		
 		#endregion
 		
+		public FileCmd (string file, Action<bool> success)
+		{
+			_file = file;
+			_rh = new FileRH(success);
+		}
 	}
 }
 

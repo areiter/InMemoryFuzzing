@@ -25,6 +25,15 @@ namespace Fuzzer
 			config.Add("gdb_exec", "/opt/gdb-7.2/bin/gdb");
 			config.Add("gdb_log", "stream:stderr");
 			config.Add("target", "extended-remote :1234");
+			config.Add("file", "testing");
+			
+			using(ISymbolTable symbolTable = 
+				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ISymbolTable>("symbol_table/gdb"))
+			{
+				symbolTable.Setup(config);
+			}
+			
+			return;
 			
 			using(ITargetConnector connector = 
 				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))

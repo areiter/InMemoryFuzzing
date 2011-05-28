@@ -28,13 +28,13 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// <summary>
 		/// Associated Response handler, if response handler is not set, command is sent without processing any response
 		/// </summary>
-		public abstract GDBResponseHandler ResponseHandler{ get; }
+		public virtual GDBResponseHandler ResponseHandler{ get{return null;} }
 		
 		protected ILog _logger = null;
 		
 		public abstract string Command { get; }
 		
-		protected abstract string LogIdentifier{get;}
+		protected virtual string LogIdentifier{get{return "CMD_" + Command;}}
 		
 		public GDBCommand ()
 		{

@@ -39,7 +39,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		
-		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
+		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
 			Regex normal = new Regex(@"Program has exited normally.", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			Regex withCode = new Regex(@"Program exited with code (?<exit_code>\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);

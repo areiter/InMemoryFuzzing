@@ -30,7 +30,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		
-		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBConnector connector, string[] responseLines, bool allowRequestLine)
+		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
 			foreach(string line in responseLines)
 			{
