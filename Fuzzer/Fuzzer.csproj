@@ -75,6 +75,8 @@
     <Compile Include="TargetConnectors\GDB\GDBSubProcess.cs" />
     <Compile Include="TargetConnectors\GDB\FileCmd.cs" />
     <Compile Include="TargetConnectors\GDB\FileRH.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoFunctionsCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoFunctionsRH.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
