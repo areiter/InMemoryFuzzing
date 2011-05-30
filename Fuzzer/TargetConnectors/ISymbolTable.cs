@@ -38,13 +38,41 @@ namespace Fuzzer.TargetConnectors
 		/// Lists all available methods (debugging or linking symbols)
 		/// </summary>
 		ISymbolTableMethod[] ListMethods{ get; }
-			
+		
+		/// <summary>
+		/// Looks for a method with the specified name
+		/// </summary>
+		/// <param name="methodName">A <see cref="System.String"/></param>
+		/// <returns>A <see cref="ISymbolTableMethod"/></returns>
+		ISymbolTableMethod FindMethod(string methodName);
+		
+		/// <summary>
+		/// Resolves the specified symbol to an address
+		/// </summary>
+		/// <param name="symbol">
+		/// A <see cref="ISymbol"/>
+		/// </param>
+		/// <returns>
+		/// A <see cref="System.Nullable<UInt64>"/>
+		/// </returns>
+		UInt64? ResolveSymbol(ISymbol symbol);
+	}
+	
+	/// <summary>
+	/// Implemented by symbols that can be resolved to addresses
+	/// </summary>
+	public interface ISymbol
+	{
+		/// <summary>
+		/// Returns the symbol of this instance
+		/// </summary>
+		string Symbol{get;}
 	}
 	
 	/// <summary>
 	/// Represents a single method with its parameters if available
 	/// </summary>
-	public interface ISymbolTableMethod
+	public interface ISymbolTableMethod : ISymbol
 	{
 		/// <summary>
 		/// Gets the name or identifier of the mthod
@@ -54,9 +82,13 @@ namespace Fuzzer.TargetConnectors
 		/// <summary>
 		/// Gets the address of the method
 		/// </summary>
-		UInt64 Address{ get; }
+		UInt64? Address{ get; }
 		
-		
+		/// <summary>
+		/// Resolves the symbol to an address, call with caution, it depends on the symbol table implementation
+		/// if it is allowed to call this method
+		/// </summary>
+		void Resolve();
 		
 	}
 	

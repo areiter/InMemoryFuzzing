@@ -240,6 +240,10 @@ namespace Fuzzer.TargetConnectors.GDB
 					{
 						currentLine.Remove(0, currentLine.Length);
 						_gdbReadyForInput = true;
+						
+						//Call ReceivedNewLine for response handlers that wait for the (gdb) prompt
+						ReceivedNewLine(currentLines);
+						
 						ProcessQueue();
 					}
 				}

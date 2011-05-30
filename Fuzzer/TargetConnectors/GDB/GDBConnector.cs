@@ -157,6 +157,14 @@ namespace Fuzzer.TargetConnectors.GDB
 			
 			return breakpoint;
 		}
+		
+		public IBreakpoint SetSoftwareBreakpoint(ISymbolTableMethod method, UInt64 size, string identifier)
+		{
+			if(method == null || method.Address == null)
+				return null;
+			
+			return SetSoftwareBreakpoint(method.Address.Value, size, identifier);
+		}
 
 		public GDBBreakpoint LookupBreakpoint(int breakpointNum)
 		{
@@ -217,12 +225,35 @@ namespace Fuzzer.TargetConnectors.GDB
 			return new GDBSnapshot(this, _lastDebuggerStop);
 		}
 		
+		public UInt64? GetRegisterValue(string register)
+		{
+			UInt64? address = null;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			QueueCommand(new PrintCmd(PrintCmd.Format.Hex, "$" + register,
+			    delegate(object value){
+					if(value is UInt64)
+						address = (UInt64)value;
+				
+					evt.Set();
+			    }));
+			
+			evt.WaitOne();
+			
+			return address;
+		}
+		
+		public void SetRegisterValue(string name, string value)
+		{
+			QueueCommand(new SetCmd("$" + name, value));
+		}
+		
 		public bool Connected 
 		{
 			get { return Running; }
 		}
 		#endregion	
 
+		
 		
 		private void BreakpointRemoveFromList(int breakpointNum)
 		{	

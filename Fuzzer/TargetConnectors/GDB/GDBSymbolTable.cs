@@ -37,6 +37,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		protected string _file = null;
 		 
+		/// <summary>
+		/// The cached methods
+		/// </summary>
+		private ISymbolTableMethod[] _cachedMethods = null;
 		
 		public GDBSymbolTable ()
 		{
@@ -68,8 +72,69 @@ namespace Fuzzer.TargetConnectors.GDB
 		{
 			get
 			{
-				throw new NotImplementedException();
+				CheckCachedMethods(false);
+				
+				return _cachedMethods;
 			}
+		}
+		
+		public ISymbolTableMethod FindMethod(string methodName)
+		{
+			CheckCachedMethods(false);
+			
+			foreach(ISymbolTableMethod m in _cachedMethods)
+			{
+				if(m.Name.Equals(methodName))
+					return m;
+			}
+			
+			return null;
+		}
+		
+		public UInt64? ResolveSymbol(ISymbol symbol)
+		{
+			ManualResetEvent evt = new ManualResetEvent(false);
+			UInt64? myAddress = null;
+			
+			QueueCommand(new InfoAddressCmd(symbol,
+			     delegate(ISymbol s, UInt64? address){
+				 	myAddress = address;
+					evt.Set();
+			     }));
+			
+			evt.WaitOne();
+			
+			return myAddress;
+		}
+		
+		
+		private void CheckCachedMethods(bool forced)
+		{
+			if(_cachedMethods == null || forced)
+			{
+				ManualResetEvent evt = new ManualResetEvent(false);
+				ISymbolTableMethod[] myResolvedMethods = null;
+				ISymbolTableMethod[] myUnresolvedMethods = null;
+				
+				QueueCommand(new InfoFunctionsCmd(this, 
+				   delegate(ISymbolTableMethod[] resolvedMethods, ISymbolTableMethod[] unresolvedMethods){
+					  myResolvedMethods = resolvedMethods;
+					  myUnresolvedMethods = unresolvedMethods;
+					  evt.Set();
+				}));
+				
+				evt.WaitOne();
+				
+				List<ISymbolTableMethod> methods = new List<ISymbolTableMethod>();
+				methods.AddRange(myResolvedMethods);
+				
+				foreach(ISymbolTableMethod m in myUnresolvedMethods)
+					m.Resolve();
+				
+				methods.AddRange(myUnresolvedMethods);
+				_cachedMethods = methods.ToArray();
+			}
+			
 		}
 	}
 }

@@ -37,6 +37,9 @@ namespace Fuzzer.TargetConnectors.GDB
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
+			if(responseLines.Length == 0)
+				return GDBResponseHandler.HandleResponseEnum.Handled;
+				
 			_logger.WarnFormat("Got {0} unhandled response lines:", responseLines.Length);
 			
 			foreach(string responseLine in responseLines)

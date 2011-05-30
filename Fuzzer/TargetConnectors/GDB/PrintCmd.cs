@@ -1,4 +1,4 @@
-// InfoFunctionsCmd.cs
+// PrintCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,31 +17,51 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using System.Text;
 namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Looks for all available function symbols (debugging symbols or linker symbols)
-	/// </summary>
-	public class InfoFunctionsCmd : GDBCommand
+	public class PrintCmd : GDBCommand
 	{
-
-		private InfoFunctionsRH _rh;
+		public enum Format
+		{
+			Hex,
+			None
+		}
+		
+		private Format _format;
+		private string _expression;
+		private PrintRH _rh;
+		
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		
 		public override GDBResponseHandler ResponseHandler 
 		{
 			get { return _rh; }
 		}
 		
-		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override string Command 
 		{
-			get { return "info functions"; }
+			get 
+			{				
+				StringBuilder cmd = new StringBuilder();
+				cmd.Append("print");
+				
+				if(_format == PrintCmd.Format.Hex)
+					cmd.Append("/x");
+				
+				cmd.Append(" ");
+				cmd.Append(_expression);
+				
+				return cmd.ToString();
+			}
 		}
 		
 		#endregion
-		public InfoFunctionsCmd (ISymbolTable symbolTable, InfoFunctionsRH.FunctionsIdentifiedDelegate callback)
+		public PrintCmd (Format format, string expression, Action<object> callback)
 		{
-			_rh = new InfoFunctionsRH(symbolTable, callback);
+			_format = format;
+			_expression = expression;
+			_rh = new PrintRH(format, callback);
 		}
 	}
 }

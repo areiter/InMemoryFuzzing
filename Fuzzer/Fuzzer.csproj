@@ -77,6 +77,12 @@
     <Compile Include="TargetConnectors\GDB\FileRH.cs" />
     <Compile Include="TargetConnectors\GDB\InfoFunctionsCmd.cs" />
     <Compile Include="TargetConnectors\GDB\InfoFunctionsRH.cs" />
+    <Compile Include="TargetConnectors\SymbolTableMethod.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoAddressCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoAddressRH.cs" />
+    <Compile Include="TargetConnectors\GDB\PrintCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\PrintRH.cs" />
+    <Compile Include="TargetConnectors\GDB\SetCmd.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

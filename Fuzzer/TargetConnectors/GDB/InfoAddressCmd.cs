@@ -1,4 +1,4 @@
-// InfoFunctionsCmd.cs
+// InfoAddressCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -22,10 +22,11 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// <summary>
 	/// Looks for all available function symbols (debugging symbols or linker symbols)
 	/// </summary>
-	public class InfoFunctionsCmd : GDBCommand
+	public class InfoAddressCmd : GDBCommand
 	{
 
-		private InfoFunctionsRH _rh;
+		private InfoAddressRH _rh;
+		private ISymbol _symbol;
 		
 		public override GDBResponseHandler ResponseHandler 
 		{
@@ -35,13 +36,19 @@ namespace Fuzzer.TargetConnectors.GDB
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override string Command 
 		{
-			get { return "info functions"; }
+			get { return "info address " + _symbol.Symbol; }
+		}
+		
+		protected override string LogIdentifier 
+		{
+			get { return "info address"; }
 		}
 		
 		#endregion
-		public InfoFunctionsCmd (ISymbolTable symbolTable, InfoFunctionsRH.FunctionsIdentifiedDelegate callback)
+		public InfoAddressCmd (ISymbol symbol, InfoAddressRH.SymbolResolvedDelegate resolvedCallback)
 		{
-			_rh = new InfoFunctionsRH(symbolTable, callback);
+			_symbol = symbol;
+			_rh = new InfoAddressRH(symbol, resolvedCallback);
 		}
 	}
 }

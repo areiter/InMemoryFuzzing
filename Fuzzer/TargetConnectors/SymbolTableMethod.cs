@@ -1,4 +1,4 @@
-// InfoFunctionsCmd.cs
+// SymbolTableMethod.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,32 +17,45 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-namespace Fuzzer.TargetConnectors.GDB
+namespace Fuzzer.TargetConnectors
 {
-	/// <summary>
-	/// Looks for all available function symbols (debugging symbols or linker symbols)
-	/// </summary>
-	public class InfoFunctionsCmd : GDBCommand
+	public class SymbolTableMethod : ISymbolTableMethod
 	{
+		private string _name;
+		private UInt64? _address;
+		private ISymbolTable _symbolTable;
+		
+		public SymbolTableMethod (ISymbolTable symbolTable, string name, UInt64 address)
+		{
+			_symbolTable = symbolTable;
+			_name = name;
+			_address = address;
+		}
+	
 
-		private InfoFunctionsRH _rh;
-		
-		public override GDBResponseHandler ResponseHandler 
+		#region ISymbolTableMethod implementation
+		public string Name 
 		{
-			get { return _rh; }
+			get { return _name; }
 		}
-		
-		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
-		public override string Command 
+
+		public ulong? Address 
 		{
-			get { return "info functions"; }
+			get { return _address; }
 		}
-		
+	
+		public void Resolve()
+		{
+			_address = _symbolTable.ResolveSymbol(this);
+		}
 		#endregion
-		public InfoFunctionsCmd (ISymbolTable symbolTable, InfoFunctionsRH.FunctionsIdentifiedDelegate callback)
+		
+		#region ISymbol implementation
+		public string Symbol 
 		{
-			_rh = new InfoFunctionsRH(symbolTable, callback);
+			get { return Name; }
 		}
-	}
+		#endregion
+}
 }
 

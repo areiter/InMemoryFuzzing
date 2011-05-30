@@ -25,31 +25,38 @@ namespace Fuzzer
 			config.Add("gdb_exec", "/opt/gdb-7.2/bin/gdb");
 			config.Add("gdb_log", "stream:stderr");
 			config.Add("target", "extended-remote :1234");
-			config.Add("file", "testing");
+			config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
 			
 			using(ISymbolTable symbolTable = 
 				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ISymbolTable>("symbol_table/gdb"))
 			{
 				symbolTable.Setup(config);
-			}
+				
 			
-			return;
 			
-			using(ITargetConnector connector = 
-				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
-			{
-			
-				connector.Setup(config);
-				connector.Connect();
-
-				IBreakpoint breakMain = connector.SetSoftwareBreakpoint(0x400553, 8, "break_main");
-				IBreakpoint breakfoo = connector.SetSoftwareBreakpoint(0x400539, 8, "break_foo");
-				IDebuggerStop stop = connector.DebugContinue();
-				ISnapshot snapshot = connector.CreateSnapshot();
-				stop = connector.DebugContinue();
-				snapshot.Restore();
-				breakMain.Delete();
-				Console.ReadLine();
+				using(ITargetConnector connector = 
+					GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
+				{
+				
+					connector.Setup(config);
+					connector.Connect();
+	
+					IBreakpoint breakMain = connector.SetSoftwareBreakpoint(symbolTable.FindMethod("main"), 0, "break_main");
+					UInt64? rbp = connector.GetRegisterValue("rbp");
+					IBreakpoint breakfoo = connector.SetSoftwareBreakpoint(symbolTable.FindMethod("foo"), 0, "break_foo");
+					IDebuggerStop stop = connector.DebugContinue();
+					rbp = connector.GetRegisterValue("rbp");
+					ISnapshot snapshot = connector.CreateSnapshot();
+					stop = connector.DebugContinue();
+					rbp = connector.GetRegisterValue("rbp");
+					connector.SetRegisterValue("rbp", "123");
+					rbp = connector.GetRegisterValue("rbp");
+					snapshot.Restore();
+					rbp = connector.GetRegisterValue("rbp");
+					breakMain.Delete();
+					breakfoo.Delete();
+					Console.ReadLine();
+				}
 			}
 
 			

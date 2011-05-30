@@ -75,6 +75,8 @@ namespace Fuzzer.TargetConnectors
 		/// <returns>Returns the number of actual written bytes</returns>
 		UInt64 WriteMemory(byte[] buffer, UInt64 address, UInt64 size);
 		
+		
+			
 		/// <summary>
 		/// Sets a software breakpoint at the specified address
 		/// </summary>
@@ -82,6 +84,15 @@ namespace Fuzzer.TargetConnectors
 		/// <param name="size">Specify the size of the instruction at address to patch</param>
 		/// <param name="identifier">Readable identifier of the breakpoint</param>
 		IBreakpoint SetSoftwareBreakpoint(UInt64 address, UInt64 size, string identifier);
+		
+		/// <summary>
+		/// Sets a software breakpoint at the specified method
+		/// </summary>
+		/// <param name="method">A <see cref="ISymbolTableMethod"/></param>
+		/// <param name="size">A <see cref="UInt64"/></param>
+		/// <param name="identifier">A <see cref="System.String"/></param>
+		/// <returns>A <see cref="IBreakpoint"/></returns>
+		IBreakpoint SetSoftwareBreakpoint(ISymbolTableMethod method, UInt64 size, string identifier);
 		
 		/// <summary>
 		/// Continues from the current position, to the next break
@@ -93,6 +104,18 @@ namespace Fuzzer.TargetConnectors
 		/// </summary>
 		/// <returns>A <see cref="ISnapshot"/></returns>
 		ISnapshot CreateSnapshot();
+		
+		/// <summary>
+		/// Retrieves the value of the specified register
+		/// </summary>
+		/// <param name="register">A <see cref="System.String"/></param>
+		/// <returns>A <see cref="UInt64"/></returns>
+		UInt64? GetRegisterValue(string register);
+		
+		/// <summary>
+		/// Sets the specified register to the specified value
+		/// </summary>
+		void SetRegisterValue(string name, string value);
 	}
 	
 	public enum StopReasonEnum

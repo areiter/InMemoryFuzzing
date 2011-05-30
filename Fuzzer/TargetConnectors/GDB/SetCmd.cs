@@ -1,4 +1,4 @@
-// InfoFunctionsCmd.cs
+// SetCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,31 +17,27 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using System.Text;
 namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Looks for all available function symbols (debugging symbols or linker symbols)
-	/// </summary>
-	public class InfoFunctionsCmd : GDBCommand
+	public class SetCmd : GDBCommand
 	{
-
-		private InfoFunctionsRH _rh;
-		
-		public override GDBResponseHandler ResponseHandler 
-		{
-			get { return _rh; }
-		}
+		private string _register;
+		private string _value;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
+		
+		
 		public override string Command 
 		{
-			get { return "info functions"; }
+			get{ return string.Format("set {0}={1}", _register, _value); }
 		}
 		
 		#endregion
-		public InfoFunctionsCmd (ISymbolTable symbolTable, InfoFunctionsRH.FunctionsIdentifiedDelegate callback)
+		public SetCmd (string register, string value)
 		{
-			_rh = new InfoFunctionsRH(symbolTable, callback);
+			_register = register;
+			_value = value;
 		}
 	}
 }

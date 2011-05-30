@@ -17,10 +17,18 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Globalization;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	public class InfoFunctionsRH : GDBResponseHandler
 	{
+		public delegate void FunctionsIdentifiedDelegate(ISymbolTableMethod[] resolvedFunctions, ISymbolTableMethod[] unresolvedFunctions);
+		
+		private FunctionsIdentifiedDelegate _functionsIdentifier;
+		private ISymbolTable _symbolTable;
+		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		protected override string LogIdentifier 
 		{
@@ -30,35 +38,73 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
-			Regex fileRead = new Regex(@"Reading symbols from [\S*\s*]*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Regex fileNotFound = new Regex(@"[\S*\s*]*: No such file or directory.\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			//Request as many lines as available
+			if(allowRequestLine)
+				return GDBResponseHandler.HandleResponseEnum.RequestLine;
+			
+			Regex rFile = new Regex(@"File\s*(?<filename>[\s*\S*]*)\:", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rMethodWithDebuggingInfo = new Regex(@"(?<returntype>\S*)\s*(?<method>\S*)\([\s*\S*]*\);", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			
+			Regex rNoDebugInfo = new Regex(@"Non-debugging symbols:", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rMethodNoDebuggingInfo = new Regex(@"0x(?<at>\S*)\s*(?<method>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			
+			bool debuggingInfo = false;
+			string lastFile = "";
+			List<ISymbolTableMethod> resolvedFunctions = new List<ISymbolTableMethod>();
+			List<ISymbolTableMethod> unresolvedfunctions = new List<ISymbolTableMethod>();
+			
 			for(int i = 0; i<responseLines.Length ; i++)
 			{
 				string line = responseLines[i];
 				
-				Match m = fileNotFound.Match(line);
-				if(m.Success)
+				Match mHeaderFile = rFile.Match(line);
+				
+				//We got a File header, this means we got debugging information
+				if(mHeaderFile.Success)
 				{
-					_fileLoaded(false);
-					return GDBResponseHandler.HandleResponseEnum.Handled;
+					lastFile = mHeaderFile.Result("${filename}");
+					debuggingInfo = true;
+					continue;
 				}
 				
-				m = fileRead.Match(line);
-				if(m.Success)
+				Match mNoDebugInfo = rNoDebugInfo.Match(line);
+				
+				//We got linker debugging methods
+				if(mNoDebugInfo.Success)
 				{
-					_fileLoaded(true);
-					return GDBResponseHandler.HandleResponseEnum.Handled;
-				}				
+					lastFile = "";
+					debuggingInfo = false;
+					continue;
+				}
+				
+				Match mMethodWithDebuggingInfo = rMethodWithDebuggingInfo.Match(line);
+				if(debuggingInfo && mMethodWithDebuggingInfo.Success)
+				{
+					unresolvedfunctions.Add(new SymbolTableMethod(_symbolTable, mMethodWithDebuggingInfo.Result("${method}"), 0));
+					continue;
+				}
+				
+
+				Match mMethodNoDebuggingInfo = rMethodNoDebuggingInfo.Match(line);
+				if(!debuggingInfo && mMethodNoDebuggingInfo.Success)
+				{
+					resolvedFunctions.Add(new SymbolTableMethod(_symbolTable, mMethodNoDebuggingInfo.Result("${method}"),
+						UInt64.Parse(mMethodNoDebuggingInfo.Result("${at}"), NumberStyles.HexNumber)));
+					continue;
+				}
+
 			}
 			
-			return GDBResponseHandler.HandleResponseEnum.NotHandled;			
+			_functionsIdentifier(resolvedFunctions.ToArray(), unresolvedfunctions.ToArray());
+			return GDBResponseHandler.HandleResponseEnum.Handled;			
 		}
-		
-		}
+
 		
 		#endregion
-		public InfoFunctionsRH ()
+		public InfoFunctionsRH (ISymbolTable symbolTable, FunctionsIdentifiedDelegate functionsIdentified)
 		{
+			_functionsIdentifier = functionsIdentified;
+			_symbolTable = symbolTable;
 		}
 	}
 }
