@@ -1,4 +1,4 @@
-// RestoreCmd.cs
+// ReadMemoryCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,45 +17,48 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-using System.IO;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Sends a restore command to write to target memory
-	/// restore FILE [OFFSET] [START] [END]
+	/// Reads raw memory starting at the specified position
 	/// </summary>
-	public class RestoreCmd:GDBCommand
+	public class ReadMemoryCmd:GDBCommand
 	{
 
-		private string _file;
 		private UInt64 _address;
-		
+		private UInt64 _size;
+		private byte[] _buffer;
+		private ReadMemoryRH _rh;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
 		{
-			get { return null; }
+			get { return _rh; }
 		}		
 		
 		public override string Command 
 		{
-			get{ return string.Format("restore '{0}' {1}", _file, _address.ToString("X")); }				
+			get{ return string.Format("x/{0}bx 0x{1}", _size, _address.ToString("X")); }				
 		}
 		
 		
 		protected override string LogIdentifier 
 		{
-			get { return "CMD_restore"; }
+			get { return "CMD_read memory"; }
 		}
 		
-		
 		#endregion
-		public RestoreCmd (string filename, UInt64 address)
+		public ReadMemoryCmd (UInt64 address, UInt64 size, byte[] buffer, ReadMemoryRH.ReadMemoryDelegate readMemory)
 		{
-			_file = filename;
+			if((UInt64)buffer.Length < size)
+				throw new ArgumentException("Buffer too small");
+			
 			_address = address;
+			_size = size;
+			_buffer = buffer;
 			
-			
+			_rh = new ReadMemoryRH(readMemory, _buffer, _size);
+			                       
 		}
 	}
 }

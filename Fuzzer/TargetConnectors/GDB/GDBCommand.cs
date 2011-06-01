@@ -26,6 +26,11 @@ namespace Fuzzer.TargetConnectors.GDB
 	public abstract class GDBCommand
 	{
 		/// <summary>
+		/// Gets called once the command has finished
+		/// </summary>
+		public Action<GDBCommand> CommandFinishedEvent;
+		
+		/// <summary>
 		/// Associated Response handler, if response handler is not set, command is sent without processing any response
 		/// </summary>
 		public virtual GDBResponseHandler ResponseHandler{ get{return null;} }
@@ -35,6 +40,15 @@ namespace Fuzzer.TargetConnectors.GDB
 		public abstract string Command { get; }
 		
 		protected virtual string LogIdentifier{get{return "CMD_" + Command;}}
+		
+		/// <summary>
+		/// Gets called once the command has been processed
+		/// </summary>
+		public virtual void CommandFinished()
+		{
+			if(CommandFinishedEvent != null)
+				CommandFinishedEvent(this);
+		}
 		
 		public GDBCommand ()
 		{

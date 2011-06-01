@@ -83,6 +83,8 @@
     <Compile Include="TargetConnectors\GDB\PrintCmd.cs" />
     <Compile Include="TargetConnectors\GDB\PrintRH.cs" />
     <Compile Include="TargetConnectors\GDB\SetCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\ReadMemoryCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\ReadMemoryRH.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -45,6 +45,9 @@ namespace Fuzzer
 					UInt64? rbp = connector.GetRegisterValue("rbp");
 					IBreakpoint breakfoo = connector.SetSoftwareBreakpoint(symbolTable.FindMethod("foo"), 0, "break_foo");
 					IDebuggerStop stop = connector.DebugContinue();
+					
+					byte[] buffer = new byte[1024*1024];
+					connector.ReadMemory(buffer, symbolTable.FindMethod("main").Address.Value, 10000);
 					rbp = connector.GetRegisterValue("rbp");
 					ISnapshot snapshot = connector.CreateSnapshot();
 					stop = connector.DebugContinue();

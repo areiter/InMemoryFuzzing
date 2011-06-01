@@ -175,7 +175,10 @@ namespace Fuzzer.TargetConnectors.GDB
 				
 				//If no response handler is specified, we don't need the command anymore
 				if(_currentCommand.ResponseHandler == null)
+				{
+					_currentCommand.CommandFinished();
 					_currentCommand = null;
+				}
 			}
 		}
 		
@@ -274,6 +277,7 @@ namespace Fuzzer.TargetConnectors.GDB
 					else if(responseEnum == GDBResponseHandler.HandleResponseEnum.Handled)
 					{
 						//Last command and response processed
+						_currentCommand.CommandFinished();
 						_currentCommand = null;
 						lines.Clear();
 					}

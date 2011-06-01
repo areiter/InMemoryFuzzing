@@ -108,8 +108,6 @@ namespace Fuzzer.TargetConnectors.GDB
 			if(!connected)
 				throw new Exception("Could not establish connection");
 		}
-	
-		
 			                            
 		public void Close ()
 		{
@@ -118,7 +116,14 @@ namespace Fuzzer.TargetConnectors.GDB
 
 		public ulong ReadMemory (byte[] buffer, ulong address, ulong size)
 		{
-			throw new NotImplementedException();
+			UInt64 readSize = 0;
+			
+			QueueCommand(new ReadMemoryCmd(address, size, buffer, 
+			     delegate(UInt64 innerSize, byte[] innerBuffer){
+					readSize = innerSize;
+			     }));
+			
+			return readSize;
 		}
 
 		public ulong WriteMemory (byte[] buffer, ulong address, ulong size)
@@ -130,10 +135,13 @@ namespace Fuzzer.TargetConnectors.GDB
 				fStream.Write(buffer, 0, (int)size);
 			}
 			
-			QueueCommand(new RestoreCmd(tempFile, address));
+			RestoreCmd cmd = new RestoreCmd(tempFile, address);
+			cmd.CommandFinishedEvent += (Action<GDBCommand>)delegate(GDBCommand cmd)
+			{
+				File.Delete(tempFile);	
+			};
 			
-			//File.Delete(tempFile);
-			
+			QueueCommand(cmd);
 			return size;
 		}
 
