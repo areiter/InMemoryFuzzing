@@ -25,11 +25,13 @@ namespace Fuzzer.TargetConnectors
 		private IAddressSpecifier _address;
 		private IAddressSpecifier _breakpointAddress;
 		private ISymbolTable _symbolTable;
+		private ISymbolTableVariable[] _parameters;
 		
-		public SymbolTableMethod (ISymbolTable symbolTable, string name)
+		public SymbolTableMethod (ISymbolTable symbolTable, string name, ISymbolTableVariable[] parameters)
 		{
 			_symbolTable = symbolTable;
 			_name = name;
+			_parameters = parameters;
 		}
 
 		#region ISymbolTableMethod implementation

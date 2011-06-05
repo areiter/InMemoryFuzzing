@@ -76,6 +76,13 @@ namespace Fuzzer.TargetConnectors
 		/// A <see cref="System.Nullable<UInt64>"/>
 		/// </returns>
 		IAddressSpecifier ResolveSymbolToBreakpointAddress(ISymbolTableMethod symbol);
+		
+		/// <summary>
+		/// Gets the parameters of the specified method
+		/// </summary>
+		/// <param name="method">A <see cref="ISymbolTableMethod"/></param>
+		/// <returns>A <see cref="ISymbolTableVariable[]"/></returns>
+		ISymbolTableVariable[] GetParametersForMethod(ISymbolTableMethod method);
 	}
 	
 	/// <summary>
@@ -113,10 +120,17 @@ namespace Fuzzer.TargetConnectors
 		IAddressSpecifier BreakpointAddressSpecifier{ get; }
 		
 		/// <summary>
+		/// Returns the parameters of the method if available
+		/// </summary>
+		ISymbolTableVariable[] Parameters{ get; }
+		
+		/// <summary>
 		/// Resolves the symbol to an address, call with caution, it depends on the symbol table implementation
 		/// if it is allowed to call this method
 		/// </summary>
 		void Resolve();
+		
+		
 		
 	}
 	

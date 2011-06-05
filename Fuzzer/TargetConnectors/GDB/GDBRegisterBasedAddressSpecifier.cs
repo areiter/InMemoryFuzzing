@@ -38,6 +38,12 @@ namespace Fuzzer.TargetConnectors.GDB
 	
 
 		#region IAddressSpecifier implementation
+		/// <summary>
+		/// Writes print/x $reg+8-30 to gdb
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.Nullable<UInt64>"/>
+		/// </returns>
 		public UInt64? ResolveAddress() 
 		{
 			UInt64? myAddress = null;

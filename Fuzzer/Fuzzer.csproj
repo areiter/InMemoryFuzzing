@@ -91,6 +91,8 @@
     <Compile Include="TargetConnectors\GDB\SetBreakpointNameCmd.cs" />
     <Compile Include="TargetConnectors\StaticAddress.cs" />
     <Compile Include="TargetConnectors\GDB\GDBRegisterBasedAddressSpecifier.cs" />
+    <Compile Include="TargetConnectors\GDB\WhatIsCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\WhatIsRH.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

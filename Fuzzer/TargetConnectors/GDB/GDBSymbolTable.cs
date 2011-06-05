@@ -124,6 +124,11 @@ namespace Fuzzer.TargetConnectors.GDB
 			return address;
 		}
 		
+		public ISymbolTableVariable[] GetParametersForMethod(ISymbolTableMethod method)
+		{
+			
+		}
+		
 		
 		private void CheckCachedMethods(bool forced)
 		{
