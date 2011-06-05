@@ -85,6 +85,7 @@
     <Compile Include="TargetConnectors\GDB\SetCmd.cs" />
     <Compile Include="TargetConnectors\GDB\ReadMemoryCmd.cs" />
     <Compile Include="TargetConnectors\GDB\ReadMemoryRH.cs" />
+    <Compile Include="TargetConnectors\IAddressSpecifier.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

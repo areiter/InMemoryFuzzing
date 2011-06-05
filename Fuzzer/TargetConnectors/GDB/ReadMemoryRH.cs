@@ -49,19 +49,31 @@ namespace Fuzzer.TargetConnectors.GDB
 				
 				Match m = rSuccess.Match(responseLine);
 				
-				if(m.Success)
+				try
 				{
-					string values = m.Result("${values}").Trim();
-					string[] splittedValues = values.Split('\t');
-					
-					foreach(string v in splittedValues)
+					if(m.Success)
 					{
-						if(readBytes >= (UInt64)_buffer.Length)
-							break;
-				
-						_buffer[readBytes] = Byte.Parse(v.Substring(2), NumberStyles.HexNumber);
-						readBytes++;
+						string values = m.Result("${values}").Trim();
+						string[] splittedValues = values.Split('\t');
+						
+						foreach(string v in splittedValues)
+						{
+							if(readBytes >= (UInt64)_buffer.Length)
+								break;
+					
+							byte outVal;
+							if(!v.StartsWith("0x") && Byte.TryParse(v.Substring(2), NumberStyles.HexNumber, 
+							                                        null, out outVal) == false)
+								break;
+							
+							_buffer[readBytes] = outVal;
+							readBytes++;
+						}
 					}
+				}
+				catch(Exception ex)
+				{
+					Console.WriteLine("123");
 				}
 			}
 			

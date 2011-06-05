@@ -117,12 +117,14 @@ namespace Fuzzer.TargetConnectors.GDB
 		public ulong ReadMemory (byte[] buffer, ulong address, ulong size)
 		{
 			UInt64 readSize = 0;
-			
+			ManualResetEvent evt = new ManualResetEvent(false);
 			QueueCommand(new ReadMemoryCmd(address, size, buffer, 
 			     delegate(UInt64 innerSize, byte[] innerBuffer){
 					readSize = innerSize;
+					evt.Set();
 			     }));
 			
+			evt.WaitOne();
 			return readSize;
 		}
 
@@ -136,7 +138,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			}
 			
 			RestoreCmd cmd = new RestoreCmd(tempFile, address);
-			cmd.CommandFinishedEvent += (Action<GDBCommand>)delegate(GDBCommand cmd)
+			cmd.CommandFinishedEvent += (Action<GDBCommand>)delegate(GDBCommand thisCmd)
 			{
 				File.Delete(tempFile);	
 			};

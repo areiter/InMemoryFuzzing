@@ -47,7 +47,7 @@ namespace Fuzzer
 					IDebuggerStop stop = connector.DebugContinue();
 					
 					byte[] buffer = new byte[1024*1024];
-					connector.ReadMemory(buffer, symbolTable.FindMethod("main").Address.Value, 10000);
+					UInt64 readSize = connector.ReadMemory(buffer, symbolTable.FindMethod("main").Address.Value, 10000);
 					rbp = connector.GetRegisterValue("rbp");
 					ISnapshot snapshot = connector.CreateSnapshot();
 					stop = connector.DebugContinue();
