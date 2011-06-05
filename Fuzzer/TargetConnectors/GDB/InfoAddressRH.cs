@@ -25,14 +25,14 @@ namespace Fuzzer.TargetConnectors.GDB
 	public class InfoAddressRH : GDBResponseHandler
 	{
 		
-		public delegate void SymbolResolvedDelegate(ISymbol symbol, UInt64? address);
+		public delegate void SymbolResolvedDelegate(ISymbol symbol, IAddressSpecifier address);
 		
 		private ISymbol _symbol;
 		private SymbolResolvedDelegate _resolvedCallback;
 		
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
-		protected override string LogIdentifier 
+		public override string LogIdentifier 
 		{
 			get { return "RH_info address"; }
 		}
@@ -40,24 +40,35 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
-			Regex r = new Regex("Symbol \"(?<symbol_name>\\S*)\"\\s*is\\s*a\\s*(?<type>\\S*)[\\s*\\S*]*0x(?<at>\\S*).", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rStaticSymbol = new Regex("Symbol \"(?<symbol_name>\\S*)\"\\s*is\\s*(?<type>[\\S*\\s*]*) at address 0x(?<at>\\S*).", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rVariableSymbol = new Regex("Symbol \"(?<symbol_name>\\S*)\"\\s*is\\s*(?<type>[\\S*\\s*]*) at (?<reg_desc>[\\s*\\S*]*) $(?<reg_name>\\S*) offset (?<offset>[\\S*\\s*]*).", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			Regex rNoSymbol = new Regex("No\\s*symbol\\s*\"(?<symbol_name>\\S*)\"\\s*in\\s*current\\s*context.", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			for(int i = 0; i<responseLines.Length ; i++)
 			{
 				string line = responseLines[i];
 				
-				Match m = r.Match(line);
-				
-				if(m.Success)
+				Match mStatic = rStaticSymbol.Match(line);
+				if(mStatic.Success)
 				{
-					_resolvedCallback(_symbol, UInt64.Parse(m.Result("${at}"), NumberStyles.HexNumber));
+					_resolvedCallback(_symbol, new StaticAddress(UInt64.Parse(mStatic.Result("${at}"), NumberStyles.HexNumber)));
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}	
 				
-				m = rNoSymbol.Match(line);
+				Match mVariable = rVariableSymbol.Match(line);
+				if(mVariable.Success)
+				{
+					_resolvedCallback(_symbol,
+					                  new GDBRegisterBasedAddressSpecifier(mVariable.Result("${reg_name}"),
+					                                                       mVariable.Result("${offset}"),
+					                                                       _gdbProc));
+					return GDBResponseHandler.HandleResponseEnum.Handled;						
+					                                                       
+				}
 				
-				if(m.Success)
+				Match mNoSymbol = rNoSymbol.Match(line);
+				
+				if(mNoSymbol.Success)
 				{
 					_resolvedCallback(_symbol, null);
 					return GDBResponseHandler.HandleResponseEnum.Handled;
@@ -68,7 +79,8 @@ namespace Fuzzer.TargetConnectors.GDB
 
 		
 		#endregion
-		public InfoAddressRH (ISymbol symbol, SymbolResolvedDelegate resolvedCallback)
+		public InfoAddressRH (ISymbol symbol, SymbolResolvedDelegate resolvedCallback, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_symbol = symbol;
 			_resolvedCallback = resolvedCallback;

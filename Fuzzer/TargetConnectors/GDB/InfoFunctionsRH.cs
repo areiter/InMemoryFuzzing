@@ -30,7 +30,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		private ISymbolTable _symbolTable;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
-		protected override string LogIdentifier 
+		public override string LogIdentifier 
 		{
 			get { return "RH_info functions"; }
 		}
@@ -80,7 +80,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				Match mMethodWithDebuggingInfo = rMethodWithDebuggingInfo.Match(line);
 				if(debuggingInfo && mMethodWithDebuggingInfo.Success)
 				{
-					unresolvedfunctions.Add(new SymbolTableMethod(_symbolTable, mMethodWithDebuggingInfo.Result("${method}"), 0));
+					unresolvedfunctions.Add(new SymbolTableMethod(_symbolTable, mMethodWithDebuggingInfo.Result("${method}")));
 					continue;
 				}
 				
@@ -88,8 +88,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				Match mMethodNoDebuggingInfo = rMethodNoDebuggingInfo.Match(line);
 				if(!debuggingInfo && mMethodNoDebuggingInfo.Success)
 				{
-					resolvedFunctions.Add(new SymbolTableMethod(_symbolTable, mMethodNoDebuggingInfo.Result("${method}"),
-						UInt64.Parse(mMethodNoDebuggingInfo.Result("${at}"), NumberStyles.HexNumber)));
+					resolvedFunctions.Add(new SymbolTableMethod(_symbolTable, mMethodNoDebuggingInfo.Result("${method}")));
 					continue;
 				}
 
@@ -101,7 +100,8 @@ namespace Fuzzer.TargetConnectors.GDB
 
 		
 		#endregion
-		public InfoFunctionsRH (ISymbolTable symbolTable, FunctionsIdentifiedDelegate functionsIdentified)
+		public InfoFunctionsRH (ISymbolTable symbolTable, FunctionsIdentifiedDelegate functionsIdentified, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_functionsIdentifier = functionsIdentified;
 			_symbolTable = symbolTable;

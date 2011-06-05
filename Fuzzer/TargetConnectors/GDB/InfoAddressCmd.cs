@@ -45,10 +45,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public InfoAddressCmd (ISymbol symbol, InfoAddressRH.SymbolResolvedDelegate resolvedCallback)
+		public InfoAddressCmd (ISymbol symbol, InfoAddressRH.SymbolResolvedDelegate resolvedCallback, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_symbol = symbol;
-			_rh = new InfoAddressRH(symbol, resolvedCallback);
+			_rh = new InfoAddressRH(symbol, resolvedCallback, _gdbProc);
 		}
 	}
 }

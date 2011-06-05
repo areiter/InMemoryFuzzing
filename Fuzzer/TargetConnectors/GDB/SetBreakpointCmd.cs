@@ -51,11 +51,12 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// Constructs a new break command
 		/// </summary>
 		/// <param name="address">Address to set a breakpoint at. Use Symbol Table to translate named symbols to addresses</param>
-		public SetBreakpointCmd (UInt64 address, Action<int> rhCb)
+		public SetBreakpointCmd (UInt64 address, SetBreakpointRH.SetBreakpointDelegate rhCb, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_address = address;
 			
-			_rh = new SetBreakpointRH(rhCb);
+			_rh = new SetBreakpointRH(rhCb, _gdbProc);
 		}
 	}
 }

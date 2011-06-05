@@ -24,7 +24,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		private Action<bool> _connectionStatusCb;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
-		protected override string LogIdentifier 
+		public override string LogIdentifier 
 		{
 			get { return "RH_target"; }
 		}
@@ -50,7 +50,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public TargetRH (Action<bool> connectionStatusCb)
+		public TargetRH (Action<bool> connectionStatusCb, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_connectionStatusCb = connectionStatusCb;
 		}

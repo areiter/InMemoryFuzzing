@@ -34,7 +34,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public SetCmd (string register, string value)
+		public SetCmd (string register, string value, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_register = register;
 			_value = value;

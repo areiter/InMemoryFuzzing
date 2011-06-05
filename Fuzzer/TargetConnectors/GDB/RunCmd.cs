@@ -45,9 +45,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public RunCmd (Action<bool> runResult)
+		public RunCmd (Action<bool> runResult, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
-			_runRH = new RunRH(runResult);
+			_runRH = new RunRH(runResult, _gdbProc);
 		}
 	}
 }

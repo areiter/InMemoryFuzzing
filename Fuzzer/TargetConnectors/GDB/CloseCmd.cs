@@ -45,7 +45,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		#endregion
 		
-		public CloseCmd ()
+		public CloseCmd (GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 		}
 	}

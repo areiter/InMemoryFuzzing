@@ -39,9 +39,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public InfoFunctionsCmd (ISymbolTable symbolTable, InfoFunctionsRH.FunctionsIdentifiedDelegate callback)
+		public InfoFunctionsCmd (ISymbolTable symbolTable, InfoFunctionsRH.FunctionsIdentifiedDelegate callback, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
-			_rh = new InfoFunctionsRH(symbolTable, callback);
+			_rh = new InfoFunctionsRH(symbolTable, callback, _gdbProc);
 		}
 	}
 }

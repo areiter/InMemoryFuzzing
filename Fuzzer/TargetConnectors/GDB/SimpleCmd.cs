@@ -46,7 +46,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public SimpleCmd (string cmd, GDBResponseHandler rh)
+		public SimpleCmd (string cmd, GDBResponseHandler rh, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_cmd = cmd;
 			_responseHandler = rh;

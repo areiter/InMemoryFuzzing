@@ -35,7 +35,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 	
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
-		protected override string LogIdentifier 
+		public override string LogIdentifier 
 		{
 			get { return "RH_record_log"; }
 		}
@@ -89,6 +89,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		#endregion
 		public RecordLogRH (GDBConnector connector, GDBConnector.GdbStopDelegate gdbStopped)
+			:base(connector)
 		{
 			_connector = connector;
 			_gdbStopped = gdbStopped;

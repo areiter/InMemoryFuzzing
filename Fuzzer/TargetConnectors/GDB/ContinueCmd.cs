@@ -50,10 +50,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public ContinueCmd (bool reverse, Action<bool> continueResult)
+		public ContinueCmd (bool reverse, Action<bool> continueResult, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_reverse = reverse;
-			_continueRH = new ContinueRH(continueResult);
+			_continueRH = new ContinueRH(continueResult, _gdbProc);
 		}
 	}
 }

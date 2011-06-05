@@ -22,16 +22,15 @@ namespace Fuzzer.TargetConnectors
 	public class SymbolTableMethod : ISymbolTableMethod
 	{
 		private string _name;
-		private UInt64? _address;
+		private IAddressSpecifier _address;
+		private IAddressSpecifier _breakpointAddress;
 		private ISymbolTable _symbolTable;
 		
-		public SymbolTableMethod (ISymbolTable symbolTable, string name, UInt64 address)
+		public SymbolTableMethod (ISymbolTable symbolTable, string name)
 		{
 			_symbolTable = symbolTable;
 			_name = name;
-			_address = address;
 		}
-	
 
 		#region ISymbolTableMethod implementation
 		public string Name 
@@ -39,14 +38,20 @@ namespace Fuzzer.TargetConnectors
 			get { return _name; }
 		}
 
-		public ulong? Address 
+		public IAddressSpecifier AddressSpecifier
 		{
 			get { return _address; }
+		}
+		
+		public IAddressSpecifier BreakpointAddressSpecifier
+		{
+			get{ return _breakpointAddress; }
 		}
 	
 		public void Resolve()
 		{
 			_address = _symbolTable.ResolveSymbol(this);
+			_breakpointAddress = _symbolTable.ResolveSymbolToBreakpointAddress(this);
 		}
 		#endregion
 		

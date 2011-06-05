@@ -31,7 +31,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 	
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
-		protected override string LogIdentifier 
+		public override string LogIdentifier 
 		{
 			get { return "RH_file"; }
 		}
@@ -64,7 +64,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public FileRH (Action<bool> fileLoaded)
+		public FileRH (Action<bool> fileLoaded, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_fileLoaded = fileLoaded;
 		}

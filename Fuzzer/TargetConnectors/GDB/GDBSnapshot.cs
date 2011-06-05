@@ -42,7 +42,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			_myBreakpoint = connector.SetSoftwareBreakpoint(lastDebuggerStop.Address, 0, "_snapshot");
 			
 			//Activate reverse debugging
-			connector.QueueCommand(new RecordCmd());
+			connector.QueueCommand(new RecordCmd(_connector));
 		}
 	
 

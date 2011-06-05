@@ -50,7 +50,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		
 		#endregion
-		public RestoreCmd (string filename, UInt64 address)
+		public RestoreCmd (string filename, UInt64 address, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_file = filename;
 			_address = address;

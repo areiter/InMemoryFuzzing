@@ -50,7 +50,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// Constructs a new delete breakpoints command
 		/// </summary>
 		/// <param name="num">Number of the breakpoint to delete</param>
-		public DeleteBreakpointCmd (int num)
+		public DeleteBreakpointCmd (int num, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_breakpointNum = num;
 		}

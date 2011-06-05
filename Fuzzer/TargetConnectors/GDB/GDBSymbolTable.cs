@@ -44,7 +44,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public GDBSymbolTable ()
 		{
-			RegisterPermanentResponseHandler(new UnhandledRH());
+			RegisterPermanentResponseHandler(new UnhandledRH(this));
 		}
 		
 		public override void Setup (IDictionary<string, string> config)
@@ -62,7 +62,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			QueueCommand(new FileCmd(_file, 
 			   delegate(bool s){ 
 				success = s;
-				evt.Set();}));
+				evt.Set();}, this));
 			
 			evt.WaitOne();
 			if(!success) throw new ArgumentException("Could not load file");
@@ -91,20 +91,37 @@ namespace Fuzzer.TargetConnectors.GDB
 			return null;
 		}
 		
-		public UInt64? ResolveSymbol(ISymbol symbol)
+		public IAddressSpecifier ResolveSymbol(ISymbol symbol)
 		{
 			ManualResetEvent evt = new ManualResetEvent(false);
-			UInt64? myAddress = null;
+			IAddressSpecifier myAddress = null;
 			
 			QueueCommand(new InfoAddressCmd(symbol,
-			     delegate(ISymbol s, UInt64? address){
+			     delegate(ISymbol s, IAddressSpecifier address){
 				 	myAddress = address;
 					evt.Set();
-			     }));
+			     }, this));
 			
 			evt.WaitOne();
 			
 			return myAddress;
+		}
+		
+		public IAddressSpecifier ResolveSymbolToBreakpointAddress(ISymbolTableMethod symbol)
+		{
+			IAddressSpecifier address = null;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			
+			QueueCommand(new SetBreakpointNameCmd(symbol,
+			       delegate(int breakpointNum, UInt64 breakpointAddress)
+			       {
+					  address = new StaticAddress(breakpointAddress);
+						
+				      QueueCommand(new DeleteBreakpointCmd(breakpointNum, this));
+					  evt.Set();
+				   }, this));
+			evt.WaitOne();
+			return address;
 		}
 		
 		
@@ -121,7 +138,7 @@ namespace Fuzzer.TargetConnectors.GDB
 					  myResolvedMethods = resolvedMethods;
 					  myUnresolvedMethods = unresolvedMethods;
 					  evt.Set();
-				}));
+				}, this));
 				
 				evt.WaitOne();
 				

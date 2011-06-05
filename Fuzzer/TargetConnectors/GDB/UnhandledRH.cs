@@ -25,12 +25,13 @@ namespace Fuzzer.TargetConnectors.GDB
 	public class UnhandledRH : GDBResponseHandler
 	{
 		
-		protected override string LogIdentifier
+		public override string LogIdentifier
 		{
 			get{ return "Unhandled GDB Response"; }
 		}
 		
-		public UnhandledRH ()
+		public UnhandledRH (GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 		}
 		

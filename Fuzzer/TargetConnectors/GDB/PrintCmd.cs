@@ -57,11 +57,12 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public PrintCmd (Format format, string expression, Action<object> callback)
+		public PrintCmd (Format format, string expression, Action<object> callback, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_format = format;
 			_expression = expression;
-			_rh = new PrintRH(format, callback);
+			_rh = new PrintRH(format, callback, _gdbProc);
 		}
 	}
 }

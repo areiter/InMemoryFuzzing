@@ -47,11 +47,12 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		#endregion
 		
-		public TargetCmd (string targetSpecifier, Action<bool> connectionStatusCb)
+		public TargetCmd (string targetSpecifier, Action<bool> connectionStatusCb, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_targetSpecifier = targetSpecifier;
 			
-			_responseHandler = new TargetRH(connectionStatusCb);
+			_responseHandler = new TargetRH(connectionStatusCb, _gdbProc);
 		}
 	}
 }

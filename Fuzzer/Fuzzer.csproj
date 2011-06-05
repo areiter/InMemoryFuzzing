@@ -86,6 +86,11 @@
     <Compile Include="TargetConnectors\GDB\ReadMemoryCmd.cs" />
     <Compile Include="TargetConnectors\GDB\ReadMemoryRH.cs" />
     <Compile Include="TargetConnectors\IAddressSpecifier.cs" />
+    <Compile Include="TargetConnectors\GDB\AddressSpecifierMethod.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBSymbolTableVariable.cs" />
+    <Compile Include="TargetConnectors\GDB\SetBreakpointNameCmd.cs" />
+    <Compile Include="TargetConnectors\StaticAddress.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBRegisterBasedAddressSpecifier.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

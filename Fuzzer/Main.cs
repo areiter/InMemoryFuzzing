@@ -41,13 +41,17 @@ namespace Fuzzer
 					connector.Setup(config);
 					connector.Connect();
 	
+					ISymbolTableMethod fooMethod = symbolTable.FindMethod("foo");
+					Console.WriteLine("Address:\t0x{0:X}", fooMethod.AddressSpecifier.ResolveAddress());
+					Console.WriteLine("BAddress:\t0x{0:X}", fooMethod.BreakpointAddressSpecifier.ResolveAddress());
+					
 					IBreakpoint breakMain = connector.SetSoftwareBreakpoint(symbolTable.FindMethod("main"), 0, "break_main");
 					UInt64? rbp = connector.GetRegisterValue("rbp");
 					IBreakpoint breakfoo = connector.SetSoftwareBreakpoint(symbolTable.FindMethod("foo"), 0, "break_foo");
 					IDebuggerStop stop = connector.DebugContinue();
 					
 					byte[] buffer = new byte[1024*1024];
-					UInt64 readSize = connector.ReadMemory(buffer, symbolTable.FindMethod("main").Address.Value, 10000);
+					UInt64 readSize = connector.ReadMemory(buffer, symbolTable.FindMethod("main").AddressSpecifier.ResolveAddress().Value, 10000);
 					rbp = connector.GetRegisterValue("rbp");
 					ISnapshot snapshot = connector.CreateSnapshot();
 					stop = connector.DebugContinue();

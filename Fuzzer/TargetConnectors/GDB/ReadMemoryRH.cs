@@ -83,13 +83,14 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		
-		protected override string LogIdentifier 
+		public override string LogIdentifier 
 		{
 			get { return "RH_read memory"; }
 		}
 		
 		#endregion
-		public ReadMemoryRH (ReadMemoryDelegate readMemory, byte[] buffer, UInt64 size)
+		public ReadMemoryRH (ReadMemoryDelegate readMemory, byte[] buffer, UInt64 size, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_readMemory = readMemory;
 			_buffer = buffer;

@@ -70,10 +70,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		public GDBConnector()
 		{
 			RegisterPermanentResponseHandler(new BreakpointRH(this, GdbStopped));
-			RegisterPermanentResponseHandler(new ExitRH(GdbStopped));
-			RegisterPermanentResponseHandler(new SignalRH(GdbStopped));	
+			RegisterPermanentResponseHandler(new ExitRH(GdbStopped, this));
+			RegisterPermanentResponseHandler(new SignalRH(GdbStopped, this));	
 			RegisterPermanentResponseHandler(new RecordLogRH(this, GdbStopped)); 
-			RegisterPermanentResponseHandler(new UnhandledRH());
+			RegisterPermanentResponseHandler(new UnhandledRH(this));
 			
 		}			
 		
@@ -101,7 +101,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			    (Action<bool>)delegate(bool connectionStatus){
 					connected = connectionStatus;
 					connectedEvt.Set();
-			});
+			}, this);
 			QueueCommand(targetCmd);
 			connectedEvt.WaitOne();
 			
@@ -111,7 +111,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			                            
 		public void Close ()
 		{
-			QueueCommand(new CloseCmd());
+			QueueCommand(new CloseCmd(this));
 		}
 
 		public ulong ReadMemory (byte[] buffer, ulong address, ulong size)
@@ -122,7 +122,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			     delegate(UInt64 innerSize, byte[] innerBuffer){
 					readSize = innerSize;
 					evt.Set();
-			     }));
+			     }, this));
 			
 			evt.WaitOne();
 			return readSize;
@@ -137,7 +137,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				fStream.Write(buffer, 0, (int)size);
 			}
 			
-			RestoreCmd cmd = new RestoreCmd(tempFile, address);
+			RestoreCmd cmd = new RestoreCmd(tempFile, address, this);
 			cmd.CommandFinishedEvent += (Action<GDBCommand>)delegate(GDBCommand thisCmd)
 			{
 				File.Delete(tempFile);	
@@ -154,10 +154,10 @@ namespace Fuzzer.TargetConnectors.GDB
 			
 			
 			QueueCommand(new SetBreakpointCmd(address,
-			    (Action<int>)delegate(int num){
+			    delegate(int num, UInt64 breakpointAddress){
 					breakpointNum = num;
 					evt.Set();
-			}));
+			}, this));
 			
 			evt.WaitOne();
 			GDBBreakpoint breakpoint = new GDBBreakpoint(this, breakpointNum, address, identifier, 
@@ -170,10 +170,14 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public IBreakpoint SetSoftwareBreakpoint(ISymbolTableMethod method, UInt64 size, string identifier)
 		{
-			if(method == null || method.Address == null)
+			if(method == null || method.AddressSpecifier == null)
 				return null;
 			
-			return SetSoftwareBreakpoint(method.Address.Value, size, identifier);
+			UInt64? myAddress = method.AddressSpecifier.ResolveAddress();
+			if(myAddress == null)
+				return null;
+			
+			return SetSoftwareBreakpoint(myAddress.Value, size, identifier);
 		}
 
 		public GDBBreakpoint LookupBreakpoint(int breakpointNum)
@@ -211,7 +215,7 @@ namespace Fuzzer.TargetConnectors.GDB
                 {
 					success	= bSuc;
 					evt.Set();
-				}));
+				}, this));
 			
 			while(true)
 			{
@@ -245,7 +249,7 @@ namespace Fuzzer.TargetConnectors.GDB
 						address = (UInt64)value;
 				
 					evt.Set();
-			    }));
+			    }, this));
 			
 			evt.WaitOne();
 			
@@ -254,7 +258,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public void SetRegisterValue(string name, string value)
 		{
-			QueueCommand(new SetCmd("$" + name, value));
+			QueueCommand(new SetCmd("$" + name, value, this));
 		}
 		
 		public bool Connected 

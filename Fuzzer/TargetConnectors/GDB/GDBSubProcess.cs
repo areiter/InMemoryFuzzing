@@ -267,24 +267,33 @@ namespace Fuzzer.TargetConnectors.GDB
 				
 				if(_currentCommand != null && _currentCommand.ResponseHandler != null)
 				{
-					GDBResponseHandler.HandleResponseEnum responseEnum = (GDBResponseHandler.HandleResponseEnum)
-					    _currentCommand.ResponseHandler.HandleResponse(this, lines.ToArray(), !_gdbReadyForInput);
-
-					if(responseEnum == GDBResponseHandler.HandleResponseEnum.NotHandled)
+					try
 					{
-						//TODO: Forward to permanent handlers
+						GDBResponseHandler.HandleResponseEnum responseEnum = (GDBResponseHandler.HandleResponseEnum)
+						    _currentCommand.ResponseHandler.HandleResponse(this, lines.ToArray(), !_gdbReadyForInput);
+	
+						if(responseEnum == GDBResponseHandler.HandleResponseEnum.NotHandled)
+						{
+							//TODO: Forward to permanent handlers
+						}
+						else if(responseEnum == GDBResponseHandler.HandleResponseEnum.Handled)
+						{
+							//Last command and response processed
+							_currentCommand.CommandFinished();
+							_currentCommand = null;
+							lines.Clear();
+						}
+						else if(responseEnum == GDBResponseHandler.HandleResponseEnum.RequestLine && _gdbReadyForInput)
+						{
+							//Wrong behaviour
+							throw new ArgumentException("Cannot request another response line if gdb is ready for input");
+						}
 					}
-					else if(responseEnum == GDBResponseHandler.HandleResponseEnum.Handled)
+					catch(Exception e)
 					{
-						//Last command and response processed
-						_currentCommand.CommandFinished();
-						_currentCommand = null;
-						lines.Clear();
-					}
-					else if(responseEnum == GDBResponseHandler.HandleResponseEnum.RequestLine && _gdbReadyForInput)
-					{
-						//Wrong behaviour
-						throw new ArgumentException("Cannot request another response line if gdb is ready for input");
+						GdbLogLine(string.Format("Error Handling response for handler '{0}': {1}",
+						           _currentCommand.ResponseHandler.LogIdentifier,
+						           e));
 					}
 				}
 				else

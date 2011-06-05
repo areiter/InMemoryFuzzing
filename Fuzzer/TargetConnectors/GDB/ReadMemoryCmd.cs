@@ -48,7 +48,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public ReadMemoryCmd (UInt64 address, UInt64 size, byte[] buffer, ReadMemoryRH.ReadMemoryDelegate readMemory)
+		public ReadMemoryCmd (UInt64 address, UInt64 size, byte[] buffer, ReadMemoryRH.ReadMemoryDelegate readMemory, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			if((UInt64)buffer.Length < size)
 				throw new ArgumentException("Buffer too small");
@@ -57,7 +58,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			_size = size;
 			_buffer = buffer;
 			
-			_rh = new ReadMemoryRH(readMemory, _buffer, _size);
+			_rh = new ReadMemoryRH(readMemory, _buffer, _size, _gdbProc);
 			                       
 		}
 	}

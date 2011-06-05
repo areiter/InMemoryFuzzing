@@ -47,7 +47,9 @@ namespace Fuzzer.TargetConnectors
 		ISymbolTableMethod FindMethod(string methodName);
 		
 		/// <summary>
-		/// Resolves the specified symbol to an address
+		/// Resolves the specified symbol to an address.
+		/// It resolves to the address where the first 
+		/// instruction of the method is located (BEFORE THE PROLOG of a method if one exists)
 		/// </summary>
 		/// <param name="symbol">
 		/// A <see cref="ISymbol"/>
@@ -55,7 +57,25 @@ namespace Fuzzer.TargetConnectors
 		/// <returns>
 		/// A <see cref="System.Nullable<UInt64>"/>
 		/// </returns>
-		UInt64? ResolveSymbol(ISymbol symbol);
+		IAddressSpecifier ResolveSymbol(ISymbol symbol);
+		
+		/// <summary>
+		/// Resolves the specified symbol to an address.
+		/// It resolves to the address where all parameters
+		/// already got their values (AFTER METHOD PROLOG).
+		/// This is needed to properly place breakpoints,
+		/// and to be able to modify the method parameters.
+		/// If no complete debuggoing information s available,
+		/// always return the address after the parameters got assigned.
+		/// Calling this method of course is only valid for ISymbolTableMethods
+		/// </summary>
+		/// <param name="symbol">
+		/// A <see cref="ISymbol"/>
+		/// </param>
+		/// <returns>
+		/// A <see cref="System.Nullable<UInt64>"/>
+		/// </returns>
+		IAddressSpecifier ResolveSymbolToBreakpointAddress(ISymbolTableMethod symbol);
 	}
 	
 	/// <summary>
@@ -82,7 +102,15 @@ namespace Fuzzer.TargetConnectors
 		/// <summary>
 		/// Gets the address of the method
 		/// </summary>
-		UInt64? Address{ get; }
+		IAddressSpecifier AddressSpecifier{ get; }
+		
+		/// <summary>
+		/// Gets the address to set the breakpoint to. 
+		/// Is greater than Address if a method prolog exists and
+		/// is set to the address after all method parameters got
+		/// ther initial values
+		/// </summary>
+		IAddressSpecifier BreakpointAddressSpecifier{ get; }
 		
 		/// <summary>
 		/// Resolves the symbol to an address, call with caution, it depends on the symbol table implementation
@@ -94,7 +122,16 @@ namespace Fuzzer.TargetConnectors
 	
 	public interface ISymbolTableVariable
 	{
+		/// <summary>
+		/// Name of the variable or any identifier
+		/// </summary>
 		string Name{ get; }
+		
+		/// <summary>
+		/// Returns the address of the variable or null 
+		/// if the variable is not valid in the current scope
+		/// </summary>
+		UInt64? Address{ get; }
 	}
 }
 

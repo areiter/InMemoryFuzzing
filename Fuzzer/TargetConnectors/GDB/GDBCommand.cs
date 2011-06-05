@@ -25,6 +25,8 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// </summary>
 	public abstract class GDBCommand
 	{
+		protected GDBSubProcess _gdbProc;
+		
 		/// <summary>
 		/// Gets called once the command has finished
 		/// </summary>
@@ -50,9 +52,10 @@ namespace Fuzzer.TargetConnectors.GDB
 				CommandFinishedEvent(this);
 		}
 		
-		public GDBCommand ()
+		public GDBCommand (GDBSubProcess gdbProc)
 		{
 			_logger = LogManager.GetLogger(LogIdentifier);
+			_gdbProc = gdbProc;
 		}
 		
 		

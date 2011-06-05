@@ -57,13 +57,14 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		
-		protected override string LogIdentifier 
+		public override string LogIdentifier 
 		{
 			get { return "RH_print"; }
 		}
 		
 		#endregion
-		public PrintRH (PrintCmd.Format format, Action<object> callback)
+		public PrintRH (PrintCmd.Format format, Action<object> callback, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_format = format;
 			_callback = callback;

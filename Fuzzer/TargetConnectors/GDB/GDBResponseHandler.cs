@@ -48,13 +48,15 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		protected ILog _logger = null;
+		protected GDBSubProcess _gdbProc;
 		
-		public GDBResponseHandler ()
+		public GDBResponseHandler (GDBSubProcess gdbProc)
 		{
 			_logger = LogManager.GetLogger(LogIdentifier);
+			_gdbProc = gdbProc;
 		}
 		
-		protected abstract string LogIdentifier{get;}
+		public abstract string LogIdentifier{get;}
 		
 		/// <summary>
 		/// Handles the specified response

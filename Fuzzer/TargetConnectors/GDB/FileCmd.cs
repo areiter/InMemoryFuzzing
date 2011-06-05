@@ -40,10 +40,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		#endregion
 		
-		public FileCmd (string file, Action<bool> success)
+		public FileCmd (string file, Action<bool> success, GDBSubProcess gdbProc)
+			:base(gdbProc)
 		{
 			_file = file;
-			_rh = new FileRH(success);
+			_rh = new FileRH(success, _gdbProc);
 		}
 	}
 }

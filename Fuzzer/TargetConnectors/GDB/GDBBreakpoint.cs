@@ -73,7 +73,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		#region IBreakpoint implementation
 		public void Delete ()
 		{
-			_connector.QueueCommand(new DeleteBreakpointCmd(_breakpointNum));
+			_connector.QueueCommand(new DeleteBreakpointCmd(_breakpointNum, _connector));
 			_disposed = true;
 			_removeMe(_breakpointNum);
 		}
