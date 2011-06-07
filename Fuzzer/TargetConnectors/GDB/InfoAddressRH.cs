@@ -41,7 +41,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
 			Regex rStaticSymbol = new Regex("Symbol \"(?<symbol_name>\\S*)\"\\s*is\\s*(?<type>[\\S*\\s*]*) at address 0x(?<at>\\S*).", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Regex rVariableSymbol = new Regex("Symbol \"(?<symbol_name>\\S*)\"\\s*is\\s*(?<type>[\\S*\\s*]*) at (?<reg_desc>[\\s*\\S*]*) $(?<reg_name>\\S*) offset (?<offset>[\\S*\\s*]*).", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rVariableSymbol = new Regex("Symbol \"(?<symbol_name>\\S*)\"\\s*is\\s*(?<type>[\\S*\\s*]*) at (?<reg_desc>[\\s*\\S*]*) \\$(?<reg_name>\\S*) offset (?<offset>[\\S*\\s*]*).", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			Regex rNoSymbol = new Regex("No\\s*symbol\\s*\"(?<symbol_name>\\S*)\"\\s*in\\s*current\\s*context.", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			for(int i = 0; i<responseLines.Length ; i++)

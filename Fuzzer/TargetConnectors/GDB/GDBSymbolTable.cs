@@ -42,6 +42,15 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		private ISymbolTableMethod[] _cachedMethods = null;
 		
+		
+		private GDBConnector _connector = null;
+		
+		public GDBConnector Connector
+		{
+			get{ return _connector; }
+			set{ _connector = value; }
+		}
+		
 		public GDBSymbolTable ()
 		{
 			RegisterPermanentResponseHandler(new UnhandledRH(this));
@@ -126,7 +135,46 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public ISymbolTableVariable[] GetParametersForMethod(ISymbolTableMethod method)
 		{
+			List<ISymbolTableVariable> variables = new List<ISymbolTableVariable>();
+			string[] myParameterTypes = null;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			QueueCommand(
+			  new WhatIsCmd(this, method, 
+			    delegate(ISymbol symbol, string returnType, string[] parameterTypes)
+                {
+					myParameterTypes = parameterTypes;
+					evt.Set();
+				}));
 			
+			evt.WaitOne();
+			
+			if(myParameterTypes != null)
+			{
+				ISymbol[] myDiscoveredSymbols = null;
+				evt.Reset();
+				QueueCommand(new InfoScopeCmd(this, method.Name, 
+				   delegate(ISymbol[] discoveredSymbols)
+				   {
+					  myDiscoveredSymbols = discoveredSymbols;
+					  evt.Set();
+				   }));
+				
+				evt.WaitOne();
+				if(myDiscoveredSymbols.Length >= myParameterTypes.Length)
+				{
+					//Now we know the number of parameters and got all local variables valid in the
+					//method-scope. GDB (hopefully) always outputs the parameters first, so we got
+					//the parameter names.....is there a simpler method??
+					for(int i = 0; i<myParameterTypes.Length; i++)
+					{
+						//TODO: Maybe include the type in ISymbolTableVariable?
+						variables.Add(new GDBSymbolTableVariable(this, myDiscoveredSymbols[i].Symbol));
+					}
+				}
+				return variables.ToArray();
+			}
+			else
+				return null;
 		}
 		
 		
@@ -154,6 +202,12 @@ namespace Fuzzer.TargetConnectors.GDB
 					m.Resolve();
 				
 				methods.AddRange(myUnresolvedMethods);
+				
+				
+				//Resolve method parameters, gdb cannot discover and resolve in a single step
+				foreach(SymbolTableMethod m in methods)
+					m.Parameters = GetParametersForMethod(m);
+				
 				_cachedMethods = methods.ToArray();
 			}
 			

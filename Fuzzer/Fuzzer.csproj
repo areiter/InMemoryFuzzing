@@ -71,7 +71,6 @@
     <Compile Include="TargetConnectors\GDB\RestoreRH.cs" />
     <Compile Include="TargetConnectors\GDB\RestoreCmd.cs" />
     <Compile Include="TargetConnectors\ISymbolTable.cs" />
-    <Compile Include="TargetConnectors\GDB\GDBSymbolTable.cs" />
     <Compile Include="TargetConnectors\GDB\GDBSubProcess.cs" />
     <Compile Include="TargetConnectors\GDB\FileCmd.cs" />
     <Compile Include="TargetConnectors\GDB\FileRH.cs" />
@@ -93,6 +92,9 @@
     <Compile Include="TargetConnectors\GDB\GDBRegisterBasedAddressSpecifier.cs" />
     <Compile Include="TargetConnectors\GDB\WhatIsCmd.cs" />
     <Compile Include="TargetConnectors\GDB\WhatIsRH.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoScopeCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoScopeRH.cs" />
+    <Compile Include="TargetConnectors\SimpleSymbol.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

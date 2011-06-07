@@ -35,6 +35,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			//else
 				r = new Regex(@"[\s*\S*]*=\s*(?<value>[\s*\S*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+			Regex rNoRegisters = new Regex(@"No registers", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			for(int i = 0; i<responseLines.Length ; i++)
 			{
 				string line = responseLines[i];
@@ -51,7 +52,14 @@ namespace Fuzzer.TargetConnectors.GDB
 					
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
+				
+				if(rNoRegisters.Match(line).Success)
+				{
+					_callback(null);
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+				}
 			}
+			
 			
 			return GDBResponseHandler.HandleResponseEnum.NotHandled;			
 		}

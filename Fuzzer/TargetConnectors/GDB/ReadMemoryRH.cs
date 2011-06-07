@@ -32,41 +32,48 @@ namespace Fuzzer.TargetConnectors.GDB
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
-			if(allowRequestLine)
+			if (allowRequestLine)
 				return GDBResponseHandler.HandleResponseEnum.RequestLine;
 			
-			Regex rError = new Regex(@"0x[\s*\S*]*:\s*Cannot access memory at address[\s*\S*]*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Regex rSuccess = new Regex(@"0x[\s*\S*]*:\s*(?<values>[\s*\S*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rError = new Regex (@"0x[\s*\S*]*:\s*Cannot access memory at address[\s*\S*]*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rSuccess = new Regex (@"0x[\s*\S*]*:\s*(?<values>[\s*\S*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			UInt64 readBytes = 0;
-			foreach(string responseLine in responseLines)
+			foreach (string responseLine in responseLines)
 			{
-				if(readBytes >= (UInt64)_buffer.Length)
+				if (readBytes >= (UInt64)_buffer.Length)
 					break;
 				
-				if(rError.Match(responseLine).Success)
+				if (rError.Match (responseLine).Success)
 					break;
 				
-				Match m = rSuccess.Match(responseLine);
+				Match m = rSuccess.Match (responseLine);
 				
 				try
 				{
-					if(m.Success)
+					if (m.Success)
 					{
-						string values = m.Result("${values}").Trim();
-						string[] splittedValues = values.Split('\t');
+						string values = m.Result ("${values}").Trim ();
+						string[] splittedValues = values.Split ('\t');
 						
-						foreach(string v in splittedValues)
+						foreach (string v in splittedValues)
 						{
-							if(readBytes >= (UInt64)_buffer.Length)
+							if (readBytes >= (UInt64)_buffer.Length)
 								break;
 					
 							byte outVal;
-							if(!v.StartsWith("0x") && Byte.TryParse(v.Substring(2), NumberStyles.HexNumber, 
-							                                        null, out outVal) == false)
+							if (!v.StartsWith ("0x"))
 								break;
 							
-							_buffer[readBytes] = outVal;
+							try
+							{
+								_buffer[readBytes] = Byte.Parse (v.Substring (2), NumberStyles.HexNumber);
+							}
+							catch (Exception)
+							{
+								//Byte.TryParse does not work, for whatever reason.....maybe something wrong with mono implementation?
+								continue;
+							}
 							readBytes++;
 						}
 					}

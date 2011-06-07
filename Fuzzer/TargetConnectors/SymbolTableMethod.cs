@@ -50,6 +50,12 @@ namespace Fuzzer.TargetConnectors
 			get{ return _breakpointAddress; }
 		}
 	
+		public ISymbolTableVariable[] Parameters
+		{
+			get{ return _parameters; }
+			set{ _parameters = value;}
+		}
+		
 		public void Resolve()
 		{
 			_address = _symbolTable.ResolveSymbol(this);

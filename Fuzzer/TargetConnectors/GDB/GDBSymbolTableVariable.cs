@@ -1,4 +1,4 @@
-// SymbolTableVariable.cs
+// GDBSymbolTableVariable.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,6 +17,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using System.Threading;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
@@ -25,13 +26,11 @@ namespace Fuzzer.TargetConnectors.GDB
 	public class GDBSymbolTableVariable : ISymbolTableVariable
 	{
 		private GDBConnector _connector;
-		private GDBSymbolTable _symbolTable;
 		private string _name;
 		
-		public GDBSymbolTableVariable (GDBConnector connector, GDBSymbolTable symbolTable, string name)
+		public GDBSymbolTableVariable (GDBConnector connector, string name)
 		{
 			_connector = connector;
-			_symbolTable = symbolTable;
 			_name = name;
 		}
 	
@@ -42,13 +41,33 @@ namespace Fuzzer.TargetConnectors.GDB
 			get { return _name; }
 		}
 
+		public string Symbol
+		{
+			get { return Name; }
+		}
+		
 		public UInt64? Address 
 		{
 			get 
 			{
 				//Resolve the address
+				IAddressSpecifier myAddress = null;
+				ManualResetEvent evt = new ManualResetEvent (false);
 				
-				throw new NotImplementedException();
+				//Step 1: "info address <name>" to get the location of the value
+				_connector.QueueCommand (new InfoAddressCmd (this, 
+				delegate(ISymbol symbol, IAddressSpecifier address)
+				{
+					myAddress = address;
+					evt.Set ();
+				}, _connector));
+				
+				evt.WaitOne ();
+				
+				if (myAddress == null)
+					return null;
+				
+				return myAddress.ResolveAddress ();
 			}
 		}
 		#endregion

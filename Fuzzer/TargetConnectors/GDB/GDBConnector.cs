@@ -42,12 +42,21 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// 
 	/// </remarks>
 	[ClassIdentifier("general/gdb")]
-	public class GDBConnector : GDBSubProcess, ITargetConnector
+	public class GDBConnector : GDBSubProcess, ITargetConnector, ISymbolTable
 	{
 		
 		
 		public delegate void GdbStopDelegate(StopReasonEnum stopReason, GDBBreakpoint breakpoint, UInt64 address, Int64 status);
 		
+		/// <summary>
+		/// File to read the symbol table from.
+		/// </summary>
+		protected string _file = null;
+		 
+		/// <summary>
+		/// The cached methods
+		/// </summary>
+		private ISymbolTableMethod[] _cachedMethods = null;		
 	
 		/// <summary>
 		/// Target specifier
@@ -88,13 +97,27 @@ namespace Fuzzer.TargetConnectors.GDB
 		public override void Setup (IDictionary<string, string> config)
 		{
 			base.Setup(config);
-			_target = DictionaryHelper.GetString("target", config, "extended-remote :1234");
+			_target = DictionaryHelper.GetString("target", config, "extended-remote :1234");			
+			_file = DictionaryHelper.GetString("file", config, null);
 		}
 
 		public void Connect ()
 		{
 			StartProcess();
 
+			if(_file != null)
+			{
+				ManualResetEvent evt = new ManualResetEvent(false);
+				bool success = false;
+				QueueCommand(new FileCmd(_file, 
+				   delegate(bool s){ 
+					success = s;
+					evt.Set();}, this));
+				
+				evt.WaitOne();
+				if(!success) throw new ArgumentException("Could not load file");
+			}
+			
 			bool connected = false;
 			ManualResetEvent connectedEvt = new ManualResetEvent(false);
 			TargetCmd targetCmd = new TargetCmd(_target,
@@ -117,10 +140,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		public ulong ReadMemory (byte[] buffer, ulong address, ulong size)
 		{
 			UInt64 readSize = 0;
-			ManualResetEvent evt = new ManualResetEvent(false);
-			QueueCommand(new ReadMemoryCmd(address, size, buffer, 
-			     delegate(UInt64 innerSize, byte[] innerBuffer){
-					readSize = innerSize;
+			ManualResetEvent evt = new ManualResetEvent (false);
+			QueueCommand (new ReadMemoryCmd (address, size, buffer, 
+			     delegate(UInt64 innerSize, byte[] innerBuffer) {
+				    readSize = innerSize;
 					evt.Set();
 			     }, this));
 			
@@ -173,7 +196,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			if(method == null || method.AddressSpecifier == null)
 				return null;
 			
-			UInt64? myAddress = method.AddressSpecifier.ResolveAddress();
+			UInt64? myAddress = method.BreakpointAddressSpecifier.ResolveAddress();
 			if(myAddress == null)
 				return null;
 			
@@ -208,25 +231,45 @@ namespace Fuzzer.TargetConnectors.GDB
 		public IDebuggerStop DebugContinue (bool reverse)
 		{
 			bool success = false;
-			ManualResetEvent evt = new ManualResetEvent(false);
-			_gdbStopEventHandler.Reset();
-			QueueCommand(new ContinueCmd( reverse,
+			ManualResetEvent evt = new ManualResetEvent (false);
+			_gdbStopEventHandler.Reset ();
+			QueueCommand (new ContinueCmd (reverse,
 			    (Action<bool>)delegate(bool bSuc)
                 {
-					success	= bSuc;
-					evt.Set();
-				}, this));
+				success = bSuc;
+				evt.Set ();
+			}, this));
 			
-			while(true)
+			while (true)
 			{
 				//If negative continue response was received,
 				//throw an exception
-				if(evt.WaitOne(10) && success == false)
-					throw new ArgumentException("Continuing failed");
+				if (evt.WaitOne (10) && success == false)
+					throw new ArgumentException ("Continuing failed");
 				
 				
-				if(_gdbStopEventHandler.WaitOne(10))
+				if (_gdbStopEventHandler.WaitOne (10))
 					break;
+			}
+			
+			//There are situations where no address is available. e.g. the debugger only returns symbols on
+			//break. Retrieve the current location in this situations
+			if (_lastDebuggerStop.Address == 0)
+			{
+				evt.Reset ();
+				QueueCommand (new PrintCmd (PrintCmd.Format.Hex, "$pc",
+					delegate(object value) {
+					if (value is UInt64)
+						_lastDebuggerStop = new DebuggerStop (
+							_lastDebuggerStop.StopReason, 
+							_lastDebuggerStop.Breakpoint,
+							(UInt64)value,
+							_lastDebuggerStop.Status);
+					
+					  evt.Set ();
+				}, this));
+				
+				evt.WaitOne ();
 			}
 			
 			return _lastDebuggerStop;
@@ -259,6 +302,143 @@ namespace Fuzzer.TargetConnectors.GDB
 		public void SetRegisterValue(string name, string value)
 		{
 			QueueCommand(new SetCmd("$" + name, value, this));
+		}
+		
+		
+		public ISymbolTableMethod[] ListMethods
+		{
+			get
+			{
+				CheckCachedMethods(false);
+				
+				return _cachedMethods;
+			}
+		}
+		
+		public ISymbolTableMethod FindMethod(string methodName)
+		{
+			CheckCachedMethods(false);
+			
+			foreach(ISymbolTableMethod m in _cachedMethods)
+			{
+				if(m.Name.Equals(methodName))
+					return m;
+			}
+			
+			return null;
+		}
+		
+		public IAddressSpecifier ResolveSymbol(ISymbol symbol)
+		{
+			ManualResetEvent evt = new ManualResetEvent(false);
+			IAddressSpecifier myAddress = null;
+			
+			QueueCommand(new InfoAddressCmd(symbol,
+			     delegate(ISymbol s, IAddressSpecifier address){
+				 	myAddress = address;
+					evt.Set();
+			     }, this));
+			
+			evt.WaitOne();
+			
+			return myAddress;
+		}
+		
+		public IAddressSpecifier ResolveSymbolToBreakpointAddress(ISymbolTableMethod symbol)
+		{
+			IAddressSpecifier address = null;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			
+			QueueCommand(new SetBreakpointNameCmd(symbol,
+			       delegate(int breakpointNum, UInt64 breakpointAddress)
+			       {
+					  address = new StaticAddress(breakpointAddress);
+						
+				      QueueCommand(new DeleteBreakpointCmd(breakpointNum, this));
+					  evt.Set();
+				   }, this));
+			evt.WaitOne();
+			return address;
+		}
+		
+		public ISymbolTableVariable[] GetParametersForMethod(ISymbolTableMethod method)
+		{
+			List<ISymbolTableVariable> variables = new List<ISymbolTableVariable>();
+			string[] myParameterTypes = null;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			QueueCommand(
+			  new WhatIsCmd(this, method, 
+			    delegate(ISymbol symbol, string returnType, string[] parameterTypes)
+                {
+					myParameterTypes = parameterTypes;
+					evt.Set();
+				}));
+			
+			evt.WaitOne();
+			
+			if(myParameterTypes != null)
+			{
+				ISymbol[] myDiscoveredSymbols = null;
+				evt.Reset();
+				QueueCommand(new InfoScopeCmd(this, method.Name, 
+				   delegate(ISymbol[] discoveredSymbols)
+				   {
+					  myDiscoveredSymbols = discoveredSymbols;
+					  evt.Set();
+				   }));
+				
+				evt.WaitOne();
+				if(myDiscoveredSymbols.Length >= myParameterTypes.Length)
+				{
+					//Now we know the number of parameters and got all local variables valid in the
+					//method-scope. GDB (hopefully) always outputs the parameters first, so we got
+					//the parameter names.....is there a simpler method??
+					for(int i = 0; i<myParameterTypes.Length; i++)
+					{
+						//TODO: Maybe include the type in ISymbolTableVariable?
+						variables.Add(new GDBSymbolTableVariable(this, myDiscoveredSymbols[i].Symbol));
+					}
+				}
+				return variables.ToArray();
+			}
+			else
+				return null;
+		}
+		
+		
+		private void CheckCachedMethods(bool forced)
+		{
+			if(_cachedMethods == null || forced)
+			{
+				ManualResetEvent evt = new ManualResetEvent(false);
+				ISymbolTableMethod[] myResolvedMethods = null;
+				ISymbolTableMethod[] myUnresolvedMethods = null;
+				
+				QueueCommand(new InfoFunctionsCmd(this, 
+				   delegate(ISymbolTableMethod[] resolvedMethods, ISymbolTableMethod[] unresolvedMethods){
+					  myResolvedMethods = resolvedMethods;
+					  myUnresolvedMethods = unresolvedMethods;
+					  evt.Set();
+				}, this));
+				
+				evt.WaitOne();
+				
+				List<ISymbolTableMethod> methods = new List<ISymbolTableMethod>();
+				methods.AddRange(myResolvedMethods);
+				
+				foreach(ISymbolTableMethod m in myUnresolvedMethods)
+					m.Resolve();
+				
+				methods.AddRange(myUnresolvedMethods);
+				
+				
+				//Resolve method parameters, gdb cannot discover and resolve in a single step
+				foreach(SymbolTableMethod m in methods)
+					m.Parameters = GetParametersForMethod(m);
+				
+				_cachedMethods = methods.ToArray();
+			}
+			
 		}
 		
 		public bool Connected 

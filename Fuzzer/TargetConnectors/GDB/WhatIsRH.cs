@@ -38,18 +38,30 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
-			Regex r = new Regex(@"type = (?<return_type>\S*) \((?<parameters>[\s*\S*]*)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			Regex r = new Regex (@"type = (?<return_type>\S*) \((?<parameters>[\s*\S*]*)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			Regex rNoSymbol = new Regex (@"No symbol [\s*\S*]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			
-			Match m = r.Match(responseLines[0]);
-			if(m.Success)
+			if (rNoSymbol.Match (responseLines[0]).Success)
 			{
-				string returnType = m.Result("${return_type}");
-				string[] parameters = m.Result("${parameters}").Split(',');
+				_cb (_symbol, null, null);
+				return GDBResponseHandler.HandleResponseEnum.Handled;
+			}
+			
+			Match m = r.Match (responseLines[0]);
+			if (m.Success)
+			{
+				string returnType = m.Result ("${return_type}");
+				string[] parameters = m.Result ("${parameters}").Split (',');
 				
-				List<string> realParameters = new List<string>();
+				List<string> realParameters = new List<string> ();
 				
-				foreach(string param in parameters)
-					realParameters.Add(param.Trim());
+				foreach (string param in parameters)
+				{
+					string paramName = param.Trim ();
+					
+					if(!paramName.Equals(String.Empty))
+						realParameters.Add (paramName);
+				}
 
 				_cb(_symbol, returnType, realParameters.ToArray());
 				

@@ -134,7 +134,7 @@ namespace Fuzzer.TargetConnectors
 		
 	}
 	
-	public interface ISymbolTableVariable
+	public interface ISymbolTableVariable : ISymbol
 	{
 		/// <summary>
 		/// Name of the variable or any identifier

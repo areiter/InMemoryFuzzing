@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Iaik.Utils.IO;
 using System.Globalization;
 using System.Reflection;
+using Iaik.Utils;
 
 namespace Fuzzer
 {
@@ -27,44 +28,51 @@ namespace Fuzzer
 			config.Add("target", "extended-remote :1234");
 			config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
 			
-			using(ISymbolTable symbolTable = 
-				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ISymbolTable>("symbol_table/gdb"))
+			using(ITargetConnector connector = 
+				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
 			{
-				symbolTable.Setup(config);
+				ISymbolTable symbolTable = (ISymbolTable)connector;
 				
-			
-			
-				using(ITargetConnector connector = 
-					GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
+				connector.Setup(config);
+				connector.Connect();
+				
+				ISymbolTableMethod bar = symbolTable.FindMethod("bar");
+				IBreakpoint breakBar = connector.SetSoftwareBreakpoint(bar, 0, "break_bar");
+				IDebuggerStop stop = null;
+				
+				while(stop == null || stop.Breakpoint != breakBar)
 				{
-				
-					connector.Setup(config);
-					connector.Connect();
-	
-					ISymbolTableMethod fooMethod = symbolTable.FindMethod("foo");
-					Console.WriteLine("Address:\t0x{0:X}", fooMethod.AddressSpecifier.ResolveAddress());
-					Console.WriteLine("BAddress:\t0x{0:X}", fooMethod.BreakpointAddressSpecifier.ResolveAddress());
-					
-					IBreakpoint breakMain = connector.SetSoftwareBreakpoint(symbolTable.FindMethod("main"), 0, "break_main");
-					UInt64? rbp = connector.GetRegisterValue("rbp");
-					IBreakpoint breakfoo = connector.SetSoftwareBreakpoint(symbolTable.FindMethod("foo"), 0, "break_foo");
-					IDebuggerStop stop = connector.DebugContinue();
-					
-					byte[] buffer = new byte[1024*1024];
-					UInt64 readSize = connector.ReadMemory(buffer, symbolTable.FindMethod("main").AddressSpecifier.ResolveAddress().Value, 10000);
-					rbp = connector.GetRegisterValue("rbp");
-					ISnapshot snapshot = connector.CreateSnapshot();
 					stop = connector.DebugContinue();
-					rbp = connector.GetRegisterValue("rbp");
-					connector.SetRegisterValue("rbp", "123");
-					rbp = connector.GetRegisterValue("rbp");
-					snapshot.Restore();
-					rbp = connector.GetRegisterValue("rbp");
-					breakMain.Delete();
-					breakfoo.Delete();
-					Console.ReadLine();
+					
+					if(stop.StopReason == StopReasonEnum.Exit || stop.StopReason == StopReasonEnum.Terminated)
+						break;
 				}
+
+				byte[] buffer = new byte[1024*1024];
+				foreach(ISymbolTableVariable variable in bar.Parameters)
+				{
+					UInt64? address = variable.Address;
+					if(address != null)
+					{
+						UInt64 varReadSize = connector.ReadMemory(buffer, address.Value, 4);
+						byte[] b = new byte[varReadSize];
+						Array.Copy(buffer, b, (long)varReadSize);
+						Console.WriteLine("{0}[at 0x{1:X}]=[{2}]", variable.Name, address, ByteHelper.ByteArrayToHexString(b));
+						int val = BitConverter.ToInt32(buffer, 0);
+					}
+				}
+				
+				
+				
+				buffer = new byte[1024*1024];
+				UInt64 readSize = connector.ReadMemory(buffer, symbolTable.FindMethod("main").AddressSpecifier.ResolveAddress().Value, 10000);
+				ISnapshot snapshot = connector.CreateSnapshot();
+				stop = connector.DebugContinue();
+				snapshot.Restore();
+				breakBar.Delete();
+				Console.ReadLine();
 			}
+			
 
 			
 			Console.ReadLine();

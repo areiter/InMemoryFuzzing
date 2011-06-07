@@ -43,11 +43,14 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex r = new Regex(@"Breakpoint\s*(?<num>\d+)\s*,\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rAddress = new Regex(@"Breakpoint\s*(?<num>\d+)\s*,\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			
+			//Is there an option to tell GDB to always output the current pc on break?
+			Regex rSymbol = new Regex(@"Breakpoint\s*(?<num>\d+)\s*,\s*(?<symbol>\S*)\s*\((?<args>[\s*\S*]*)\)\s*at\s*(?<file>[\S*\s*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			foreach(string line in responseLines)
 			{
-				Match m = r.Match(line);
+				Match m = rAddress.Match(line);
 				if(m.Success)
 				{
 					int breakpointNum = int.Parse(m.Result("${num}"));
@@ -60,6 +63,20 @@ namespace Fuzzer.TargetConnectors.GDB
 						
 					}
 
+					
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+				}
+				
+				m = rSymbol.Match(line);
+				if(m.Success)
+				{
+					int breakpointNum = int.Parse(m.Result("${num}"));
+					GDBBreakpoint breakpoint = _connector.LookupBreakpoint(breakpointNum);
+					
+					if(breakpoint != null)
+					{
+						_gdbStopped(StopReasonEnum.Breakpoint, breakpoint, 0, 0);
+					}
 					
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}

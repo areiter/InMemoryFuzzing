@@ -80,7 +80,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				Match mMethodWithDebuggingInfo = rMethodWithDebuggingInfo.Match(line);
 				if(debuggingInfo && mMethodWithDebuggingInfo.Success)
 				{
-					unresolvedfunctions.Add(new SymbolTableMethod(_symbolTable, mMethodWithDebuggingInfo.Result("${method}")));
+					unresolvedfunctions.Add(new SymbolTableMethod(_symbolTable, mMethodWithDebuggingInfo.Result("${method}"), null));
 					continue;
 				}
 				
@@ -88,7 +88,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				Match mMethodNoDebuggingInfo = rMethodNoDebuggingInfo.Match(line);
 				if(!debuggingInfo && mMethodNoDebuggingInfo.Success)
 				{
-					resolvedFunctions.Add(new SymbolTableMethod(_symbolTable, mMethodNoDebuggingInfo.Result("${method}")));
+					resolvedFunctions.Add(new SymbolTableMethod(_symbolTable, mMethodNoDebuggingInfo.Result("${method}"), null));
 					continue;
 				}
 
