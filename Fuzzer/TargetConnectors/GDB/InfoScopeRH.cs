@@ -23,7 +23,7 @@ namespace Fuzzer.TargetConnectors.GDB
 {
 	public class InfoScopeRH : GDBResponseHandler
 	{
-		public delegate void InfoScopeResponseDelegate(ISymbol[] discoveredVariables);
+		public delegate void InfoScopeResponseDelegate(ISymbol[] discoveredVariables, int[] discoveredLengths);
 		
 		public InfoScopeResponseDelegate _cb;
 		
@@ -48,34 +48,39 @@ namespace Fuzzer.TargetConnectors.GDB
 			Regex rNoLocals = new Regex (@"Scope for (?<symbol>\S*) contains no locals or arguments.", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			Regex rUndefinedSymbol = new Regex (@"[\s*\S*]* not defined.", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			Regex rHeader = new Regex (@"Scope for (?<symbol>\S*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-			Regex rVar = new Regex (@"Symbol (?<symbol>\S*) [\s*\S*]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			Regex rVar = new Regex (@"Symbol (?<symbol>\S*) [\s*\S*]* length (?<length>\S*).", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			
-			List<ISymbol> discoveredSymbols = new List<ISymbol>();
-			foreach(string line in responseLines)
+			List<ISymbol> discoveredSymbols = new List<ISymbol> ();
+			List<int> discoveredLengths = new List<int> ();
+			foreach (string line in responseLines)
 			{
-				Match m = rNoLocals.Match(line);
-				if(m.Success)
+				Match m = rNoLocals.Match (line);
+				if (m.Success)
 					break;
 
-				m = rUndefinedSymbol.Match(line);
-				if(m.Success)
-					break;					
-					
-			    m = rHeader.Match(line);
+				m = rUndefinedSymbol.Match (line);
+				if (m.Success)
+					break;
 				
-				if(m.Success)
+			    m = rHeader.Match (line);
+				
+				if (m.Success)
 				{
 					continue;
 				}
 				
-				m = rVar.Match(line);
-				if(m.Success)
+				m = rVar.Match (line);
+				if (m.Success)
 				{
-					discoveredSymbols.Add(new SimpleSymbol(m.Result("${symbol}")));
+					discoveredSymbols.Add (new SimpleSymbol (m.Result ("${symbol}")));
+					
+					int length = 0;
+					Int32.TryParse (m.Result ("${length}"), out length);
+					discoveredLengths.Add (length);
 				}					
 			}
 			
-			_cb(discoveredSymbols.ToArray());
+			_cb(discoveredSymbols.ToArray(), discoveredLengths.ToArray());
 			
 			return GDBResponseHandler.HandleResponseEnum.Handled;
 		}

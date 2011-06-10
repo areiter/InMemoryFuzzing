@@ -29,17 +29,17 @@ namespace Fuzzer.TargetConnectors.GDB
 
 		private string _file;
 		private UInt64 _address;
-		
+		private RestoreRH _rh;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
 		{
-			get { return null; }
+			get { return _rh; }
 		}		
 		
 		public override string Command 
 		{
-			get{ return string.Format("restore '{0}' {1}", _file, _address.ToString("X")); }				
+			get{ return string.Format("restore {0} binary 0x{1}", _file.Replace(" ", "\\ "), _address.ToString("X")); }				
 		}
 		
 		
@@ -49,13 +49,14 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		
+		
 		#endregion
 		public RestoreCmd (string filename, UInt64 address, GDBSubProcess gdbProc)
-			:base(gdbProc)
+			: base(gdbProc)
 		{
 			_file = filename;
 			_address = address;
-			
+			_rh = new RestoreRH (gdbProc);
 			
 		}
 	}

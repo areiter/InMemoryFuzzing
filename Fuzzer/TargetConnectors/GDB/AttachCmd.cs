@@ -1,4 +1,4 @@
-// StaticAddress.cs
+// AttachCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,47 +17,41 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-namespace Fuzzer.TargetConnectors
+namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Just returns the specified address
+	/// Attaches GDB to another process
 	/// </summary>
-	public class StaticAddress : IAddressSpecifier, IAllocatedMemory
+	public class AttachCmd : GDBCommand
 	{
-		private UInt64? _address;
-		private UInt64? _size = null;
-		
-		public StaticAddress (UInt64? address)
-		{
-			_address = address;
-		}
-		
-		public StaticAddress (UInt64? address, UInt64? size)
-			:this(address)
-		{
-			_size = size;
-		}
+		private int _pid;
+		private AttachRH _rh;
 	
-		#region IAllocatedMemory implementation
-		public ulong Address 
+		public AttachCmd (GDBSubProcess gdbProc, int pid, Action<string> cb)
+			: base(gdbProc)
 		{
-			get { return _address.Value; }
+			_pid = pid;
+			_rh = new AttachRH (_gdbProc, cb);
+		}
+		
+		
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
+		public override string Command 
+		{
+			get { return string.Format ("attach {0}", _pid); }
+		}
+		
+		
+		protected override string LogIdentifier 
+		{
+			get { return "CMD_attach"; }
+		}
+		
+		public override GDBResponseHandler ResponseHandler 
+		{
+			get { return _rh; }
 		}
 		#endregion
-
-		#region IAllocatedMemory implementation
-		public UInt64? Size
-		{
-			get { return _size; }
-		}
-		#endregion
-
-		#region IAddressSpecifier implementation
-		public ulong? ResolveAddress() 
-		{
-			return _address;
-		}
-		#endregion
-}
+	}
 }
 

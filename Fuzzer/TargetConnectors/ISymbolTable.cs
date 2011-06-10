@@ -142,6 +142,11 @@ namespace Fuzzer.TargetConnectors
 		string Name{ get; }
 		
 		/// <summary>
+		/// Byte Size of the variable
+		/// </summary>
+		int Size { get; }
+		
+		/// <summary>
 		/// Returns the address of the variable or null 
 		/// if the variable is not valid in the current scope
 		/// </summary>

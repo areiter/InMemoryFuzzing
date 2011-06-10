@@ -1,4 +1,4 @@
-// StaticAddress.cs
+// IDataGenerator.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,47 +17,23 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-namespace Fuzzer.TargetConnectors
+namespace Fuzzer.DataGenerators
 {
 	/// <summary>
-	/// Just returns the specified address
+	/// Implemented by classes that generate data for the fuzzing process
 	/// </summary>
-	public class StaticAddress : IAddressSpecifier, IAllocatedMemory
+	public interface IDataGenerator
 	{
-		private UInt64? _address;
-		private UInt64? _size = null;
-		
-		public StaticAddress (UInt64? address)
-		{
-			_address = address;
-		}
-		
-		public StaticAddress (UInt64? address, UInt64? size)
-			:this(address)
-		{
-			_size = size;
-		}
-	
-		#region IAllocatedMemory implementation
-		public ulong Address 
-		{
-			get { return _address.Value; }
-		}
-		#endregion
-
-		#region IAllocatedMemory implementation
-		public UInt64? Size
-		{
-			get { return _size; }
-		}
-		#endregion
-
-		#region IAddressSpecifier implementation
-		public ulong? ResolveAddress() 
-		{
-			return _address;
-		}
-		#endregion
-}
+		/// <summary>
+		/// Generate the next byte series.
+		/// </summary>
+		/// <remarks>
+		/// The amount of bytes returned depends on the data generator implementation.
+		/// E.g. a simple data generator which only generates data for int values may only return
+		/// four bytes. Another one may return hundreds of bytes
+		/// </remarks>
+		/// <returns></returns>
+		byte[] GenerateData();
+	}
 }
 

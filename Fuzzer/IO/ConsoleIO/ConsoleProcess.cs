@@ -78,9 +78,11 @@ namespace Fuzzer.IO.ConsoleIO
 		/// <summary>
 		/// Starts the process specified by the inherited class
 		/// </summary>
-		protected virtual void StartProcess()
+		protected virtual void StartProcess ()
 		{
-			ProcessStartInfo startInfo = new ProcessStartInfo("/bin/sh", string.Format("-c \"{0} {1} 2>&1\"", Execfile, Arguments));
+			//HACK: Howto redirect stderr to stdout?
+			ProcessStartInfo startInfo = new ProcessStartInfo ("/bin/sh", string.Format ("-c \"{0} {1} 2>&1\"", Execfile, Arguments));
+			
 			startInfo.UseShellExecute = false;
 			startInfo.RedirectStandardInput = true;
 			startInfo.RedirectStandardOutput = true;

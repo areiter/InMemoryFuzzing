@@ -27,11 +27,13 @@ namespace Fuzzer.TargetConnectors.GDB
 	{
 		private GDBConnector _connector;
 		private string _name;
+		private int _size;
 		
-		public GDBSymbolTableVariable (GDBConnector connector, string name)
+		public GDBSymbolTableVariable (GDBConnector connector, string name, int size)
 		{
 			_connector = connector;
 			_name = name;
+			_size = size;
 		}
 	
 
@@ -39,6 +41,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		public string Name 
 		{
 			get { return _name; }
+		}
+		
+		public int Size
+		{
+			get { return _size; }
 		}
 
 		public string Symbol

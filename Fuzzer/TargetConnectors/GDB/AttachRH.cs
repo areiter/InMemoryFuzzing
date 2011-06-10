@@ -1,4 +1,4 @@
-// RestoreRH.cs
+// AttachRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -18,32 +18,43 @@
 //    limitations under the License.
 using System;
 using System.Text.RegularExpressions;
-using System.Globalization;
 namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Handles breakpoint responses.
-	/// </summary>
-	public class RestoreRH : GDBResponseHandler
+	public class AttachRH : GDBResponseHandler
 	{
-		
+		private Action<string> _cb;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
-		public override string LogIdentifier 
+		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
-			get { return "RH_restore"; }
+			Regex r = new Regex (@"Attaching to program: (?<file>[\s*\S*]*), process (?<process_id>\S*)");
+			
+			foreach (string line in responseLines)
+			{
+				Match m = r.Match (line);
+				
+				if (m.Success)
+				{
+					_cb (m.Result ("${file}"));
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+				}
+			}
+			
+			return GDBResponseHandler.HandleResponseEnum.NotHandled;
 		}
 		
 		
-		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
+		public override string LogIdentifier 
 		{
-			return GDBResponseHandler.HandleResponseEnum.Handled;
+			get { return "RH_attach"; }
 		}
 		
 		#endregion
-		public RestoreRH (GDBSubProcess gdbProc)
-			:base(gdbProc)
+		public AttachRH (GDBSubProcess gdbProc, Action<string> cb)
+			: base(gdbProc)
 		{
+			_cb = cb;
 		}
 	}
 }
+

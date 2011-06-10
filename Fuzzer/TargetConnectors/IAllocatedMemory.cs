@@ -1,4 +1,4 @@
-// StaticAddress.cs
+// IAllocatedMemory.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -20,44 +20,20 @@ using System;
 namespace Fuzzer.TargetConnectors
 {
 	/// <summary>
-	/// Just returns the specified address
+	/// Represents a chunk of allocated memory
 	/// </summary>
-	public class StaticAddress : IAddressSpecifier, IAllocatedMemory
+	/// <remarks>
+	/// It is nearly the same than an ISymbolTableVariable, but it marks
+	/// memory chunks that can be freed by the connector.
+	/// 
+	/// Ordinary ISymbolTableVariables cannot be freed
+	/// </remarks>
+	public interface IAllocatedMemory
 	{
-		private UInt64? _address;
-		private UInt64? _size = null;
-		
-		public StaticAddress (UInt64? address)
-		{
-			_address = address;
-		}
-		
-		public StaticAddress (UInt64? address, UInt64? size)
-			:this(address)
-		{
-			_size = size;
-		}
-	
-		#region IAllocatedMemory implementation
-		public ulong Address 
-		{
-			get { return _address.Value; }
-		}
-		#endregion
-
-		#region IAllocatedMemory implementation
-		public UInt64? Size
-		{
-			get { return _size; }
-		}
-		#endregion
-
-		#region IAddressSpecifier implementation
-		public ulong? ResolveAddress() 
-		{
-			return _address;
-		}
-		#endregion
-}
+		/// <summary>
+		/// Returns the address of the allocated memory
+		/// </summary>
+		UInt64 Address { get; }
+	}
 }
 

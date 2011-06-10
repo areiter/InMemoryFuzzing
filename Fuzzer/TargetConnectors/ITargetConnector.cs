@@ -40,6 +40,11 @@ namespace Fuzzer.TargetConnectors
 		bool Connected{ get; }
 		
 		/// <summary>
+		/// Returns the last stop reason
+		/// </summary>
+		IDebuggerStop LastDebuggerStop{ get; }
+		
+		/// <summary>
 		/// Sets up the connector
 		/// </summary>
 		/// <param name="config">
@@ -73,9 +78,9 @@ namespace Fuzzer.TargetConnectors
 		/// <param name="address">Address to start writing to </param>
 		/// <param name="size">Number of bytes to write</param>
 		/// <returns>Returns the number of actual written bytes</returns>
-		UInt64 WriteMemory(byte[] buffer, UInt64 address, UInt64 size);
+		UInt64 WriteMemory(byte[] buffer, UInt64 address, UInt64 size, ref ISnapshot aSnapshot);
 		
-		
+		UInt64 WriteMemory (byte[] buffer, UInt64 address, UInt64 size);
 			
 		/// <summary>
 		/// Sets a software breakpoint at the specified address
@@ -116,6 +121,19 @@ namespace Fuzzer.TargetConnectors
 		/// Sets the specified register to the specified value
 		/// </summary>
 		void SetRegisterValue(string name, string value);
+		
+		/// <summary>
+		/// Allocates memory of the given size on the target
+		/// </summary>
+		/// <param name="size">size to allocate</param>
+		/// <returns></returns>
+		IAllocatedMemory AllocateMemory(UInt64 size);
+		
+		/// <summary>
+		/// Frees a previously allocated chunk of memory
+		/// </summary>
+		/// <param name="memory">Memory to free</param>
+		void FreeMemory(IAllocatedMemory memory);
 	}
 	
 	public enum StopReasonEnum

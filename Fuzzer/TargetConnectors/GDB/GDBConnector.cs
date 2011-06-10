@@ -63,6 +63,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		private string _target = null;
 		
+		private string _targetOptions = null;
 		
 		/// <summary>
 		/// Contains all current breakpoints
@@ -94,42 +95,67 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 			                                                  
 		#region ITargetConnector implementation
+		public IDebuggerStop LastDebuggerStop
+		{
+			get { return _lastDebuggerStop;}
+		}
+		
 		public override void Setup (IDictionary<string, string> config)
 		{
-			base.Setup(config);
-			_target = DictionaryHelper.GetString("target", config, "extended-remote :1234");			
+			base.Setup (config);
+			_target = DictionaryHelper.GetString ("target", config, "extended-remote :1234");
+			_targetOptions = DictionaryHelper.GetString ("target-options", config, "");
 			_file = DictionaryHelper.GetString("file", config, null);
 		}
 
 		public void Connect ()
 		{
-			StartProcess();
+			StartProcess ();
 
-			if(_file != null)
+			if (_file != null)
 			{
-				ManualResetEvent evt = new ManualResetEvent(false);
+				ManualResetEvent evt = new ManualResetEvent (false);
 				bool success = false;
-				QueueCommand(new FileCmd(_file, 
-				   delegate(bool s){ 
+				QueueCommand (new FileCmd (_file, 
+				   delegate(bool s) {
 					success = s;
-					evt.Set();}, this));
+					evt.Set ();
+				}, this));
 				
-				evt.WaitOne();
-				if(!success) throw new ArgumentException("Could not load file");
+				evt.WaitOne ();
+				if (!success)
+					throw new ArgumentException ("Could not load file");
 			}
 			
-			bool connected = false;
-			ManualResetEvent connectedEvt = new ManualResetEvent(false);
-			TargetCmd targetCmd = new TargetCmd(_target,
-			    (Action<bool>)delegate(bool connectionStatus){
+			if (_target == "run_local")
+			{
+			}
+			else if (_target == "attach_local")
+			{
+				ManualResetEvent attachEvt = new ManualResetEvent (false);
+				QueueCommand (new AttachCmd (this, int.Parse (_targetOptions),
+				delegate(string file) {
+					attachEvt.Set ();
+				}));
+				
+				attachEvt.WaitOne ();
+			}
+			else
+			{
+				bool connected = false;
+				ManualResetEvent connectedEvt = new ManualResetEvent (false);
+				TargetCmd targetCmd = new TargetCmd (_target,
+			    (Action<bool>)delegate(bool connectionStatus) {
 					connected = connectionStatus;
-					connectedEvt.Set();
-			}, this);
-			QueueCommand(targetCmd);
-			connectedEvt.WaitOne();
+					connectedEvt.Set ();
+				}, this);
+				QueueCommand (targetCmd);
+				connectedEvt.WaitOne ();
 			
-			if(!connected)
-				throw new Exception("Could not establish connection");
+				if (!connected)
+					throw new Exception ("Could not establish connection");
+			}
+			
 		}
 			                            
 		public void Close ()
@@ -151,22 +177,35 @@ namespace Fuzzer.TargetConnectors.GDB
 			return readSize;
 		}
 
+		public ulong WriteMemory (byte[] buffer, ulong address, ulong size, ref ISnapshot aSnapshot)
+		{
+			//Writing memory is not compatible with reverse-debugging snapshots, so lets delete the 
+			//snapshot and recreate it afterwards
+			aSnapshot.Destroy ();
+			
+			UInt64 returnValue = WriteMemory (buffer, address, size);
+			aSnapshot = CreateSnapshot ();
+			return returnValue;
+		}
+		
 		public ulong WriteMemory (byte[] buffer, ulong address, ulong size)
 		{
-			string tempFile = System.IO.Path.GetTempFileName();
+		
+			string tempFile = System.IO.Path.GetTempFileName ();
 			
-			using(FileStream fStream = new FileStream(tempFile, FileMode.OpenOrCreate, FileAccess.Write))
-			{
-				fStream.Write(buffer, 0, (int)size);
+			using (FileStream fStream = new FileStream (tempFile, FileMode.OpenOrCreate, FileAccess.Write)) {
+				fStream.Write (buffer, 0, (int)size);
 			}
 			
-			RestoreCmd cmd = new RestoreCmd(tempFile, address, this);
-			cmd.CommandFinishedEvent += (Action<GDBCommand>)delegate(GDBCommand thisCmd)
-			{
-				File.Delete(tempFile);	
+			ManualResetEvent evt = new ManualResetEvent (false);
+			RestoreCmd cmd = new RestoreCmd (tempFile, address, this);
+			cmd.CommandFinishedEvent += (Action<GDBCommand>)delegate(GDBCommand thisCmd) {
+				File.Delete (tempFile);
+				evt.Set ();
 			};
 			
-			QueueCommand(cmd);
+			QueueCommand (cmd);
+			evt.WaitOne ();
 			return size;
 		}
 
@@ -272,6 +311,16 @@ namespace Fuzzer.TargetConnectors.GDB
 				evt.WaitOne ();
 			}
 			
+			if (_lastDebuggerStop.StopReason == StopReasonEnum.Breakpoint &&
+				_lastDebuggerStop.Breakpoint == null)
+			{
+				_lastDebuggerStop = new DebuggerStop (
+					_lastDebuggerStop.StopReason, 
+					LookupBreakpointByAddress (_lastDebuggerStop.Address), 
+					_lastDebuggerStop.Address,
+					_lastDebuggerStop.Status);
+			}
+			
 			return _lastDebuggerStop;
 			
 		}
@@ -361,29 +410,31 @@ namespace Fuzzer.TargetConnectors.GDB
 			return address;
 		}
 		
-		public ISymbolTableVariable[] GetParametersForMethod(ISymbolTableMethod method)
+		public ISymbolTableVariable[] GetParametersForMethod (ISymbolTableMethod method)
 		{
-			List<ISymbolTableVariable> variables = new List<ISymbolTableVariable>();
+			List<ISymbolTableVariable> variables = new List<ISymbolTableVariable> ();
 			string[] myParameterTypes = null;
-			ManualResetEvent evt = new ManualResetEvent(false);
-			QueueCommand(
-			  new WhatIsCmd(this, method, 
+			ManualResetEvent evt = new ManualResetEvent (false);
+			QueueCommand (
+			  new WhatIsCmd (this, method, 
 			    delegate(ISymbol symbol, string returnType, string[] parameterTypes)
                 {
-					myParameterTypes = parameterTypes;
-					evt.Set();
-				}));
+				myParameterTypes = parameterTypes;
+				evt.Set ();
+			}));
 			
-			evt.WaitOne();
+			evt.WaitOne ();
 			
-			if(myParameterTypes != null)
+			if (myParameterTypes != null)
 			{
 				ISymbol[] myDiscoveredSymbols = null;
-				evt.Reset();
-				QueueCommand(new InfoScopeCmd(this, method.Name, 
-				   delegate(ISymbol[] discoveredSymbols)
+				int[] myDiscoveredLengths = null;
+				evt.Reset ();
+				QueueCommand (new InfoScopeCmd (this, method.Name, 
+				   delegate(ISymbol[] discoveredSymbols, int[] discoveredLengths)
 				   {
-					  myDiscoveredSymbols = discoveredSymbols;
+					myDiscoveredSymbols = discoveredSymbols;
+					myDiscoveredLengths = discoveredLengths;
 					  evt.Set();
 				   }));
 				
@@ -395,8 +446,8 @@ namespace Fuzzer.TargetConnectors.GDB
 					//the parameter names.....is there a simpler method??
 					for(int i = 0; i<myParameterTypes.Length; i++)
 					{
-						//TODO: Maybe include the type in ISymbolTableVariable?
-						variables.Add(new GDBSymbolTableVariable(this, myDiscoveredSymbols[i].Symbol));
+						//TODO: Maybe include the type and size in ISymbolTableVariable?
+						variables.Add(new GDBSymbolTableVariable(this, myDiscoveredSymbols[i].Symbol, myDiscoveredLengths[i]));
 					}
 				}
 				return variables.ToArray();
@@ -405,6 +456,50 @@ namespace Fuzzer.TargetConnectors.GDB
 				return null;
 		}
 		
+		
+		/// <summary>
+		/// Uses malloc to allocate some more memory, there might be problems if 
+		/// malloc is not available in the current process.
+		/// Maybe there is a better GDB-only solution?
+		/// </summary>
+		/// <param name="size">
+		/// A <see cref="UInt64"/>
+		/// </param>
+		/// <returns>
+		/// A <see cref="IAllocatedMemory"/>
+		/// </returns>
+		public IAllocatedMemory AllocateMemory (UInt64 size)
+		{
+			
+			UInt64 address = 0;
+			ManualResetEvent evt = new ManualResetEvent (false);
+			QueueCommand (new PrintCmd (PrintCmd.Format.Hex, string.Format ("malloc({0})", size),
+			delegate(object value)
+			{
+				if (value is UInt64)
+					address = (UInt64)value;
+				evt.Set ();
+			}, this));
+			
+			evt.WaitOne ();
+			
+			if (address == 0)
+				return null;
+			else
+				return new StaticAddress (address, size);
+		}
+
+		/// <summary>
+		/// <see cref="AllocateMemory"/>
+		/// </summary>
+		/// <param name="memory">
+		/// A <see cref="IAllocatedMemory"/>
+		/// </param>
+		public void FreeMemory (IAllocatedMemory memory)
+		{
+			if(memory != null)
+				QueueCommand (new PrintCmd (PrintCmd.Format.Hex, string.Format ("free({0})", memory.Address), delegate(object value) { }, this));
+		}
 		
 		private void CheckCachedMethods(bool forced)
 		{

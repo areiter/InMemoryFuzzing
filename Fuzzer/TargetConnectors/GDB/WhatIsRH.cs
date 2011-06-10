@@ -39,6 +39,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
 			Regex r = new Regex (@"type = (?<return_type>\S*) \((?<parameters>[\s*\S*]*)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			Regex rNoDebugInfo = new Regex (@"type = (?<type>[\S*\s*]*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			Regex rNoSymbol = new Regex (@"No symbol [\s*\S*]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			
 			if (rNoSymbol.Match (responseLines[0]).Success)
@@ -59,13 +60,18 @@ namespace Fuzzer.TargetConnectors.GDB
 				{
 					string paramName = param.Trim ();
 					
-					if(!paramName.Equals(String.Empty))
+					if (!paramName.Equals (String.Empty))
 						realParameters.Add (paramName);
 				}
 
-				_cb(_symbol, returnType, realParameters.ToArray());
+				_cb (_symbol, returnType, realParameters.ToArray ());
 				
 				
+				return GDBResponseHandler.HandleResponseEnum.Handled;
+			}
+			else if (rNoDebugInfo.Match (responseLines[0]).Success)
+			{
+				_cb (_symbol, "", null);
 				return GDBResponseHandler.HandleResponseEnum.Handled;
 			}
 			

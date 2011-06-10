@@ -60,7 +60,8 @@ namespace Fuzzer.TargetConnectors.GDB
 
 		public void Destroy ()
 		{
-			_myBreakpoint.Delete();
+			_myBreakpoint.Delete ();
+			_connector.QueueCommand (new RecordCmd (_connector, "stop"));
 		}
 		#endregion
 		

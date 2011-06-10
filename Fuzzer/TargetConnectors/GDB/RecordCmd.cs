@@ -24,6 +24,7 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// </summary>
 	public class RecordCmd : GDBCommand
 	{
+		private string _subCommand = null;
 	
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
@@ -34,7 +35,13 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override string Command 
 		{
-			get { return "record"; }
+			get 
+			{
+				if (_subCommand == null)
+					return "record";
+				else
+					return "record " + _subCommand;
+			}
 		}
 		
 		
@@ -45,10 +52,17 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		#endregion
 		
-		public RecordCmd ( GDBSubProcess gdbProc)
-			:base(gdbProc)
+		public RecordCmd (GDBSubProcess gdbProc)
+			: base(gdbProc)
 		{
 		}
+		
+		public RecordCmd (GDBSubProcess gdbProc, string subCommand) 
+			: base(gdbProc)
+		{
+			_subCommand = subCommand;
+		}
+
 	}
 }
 

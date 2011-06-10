@@ -95,6 +95,15 @@
     <Compile Include="TargetConnectors\GDB\InfoScopeCmd.cs" />
     <Compile Include="TargetConnectors\GDB\InfoScopeRH.cs" />
     <Compile Include="TargetConnectors\SimpleSymbol.cs" />
+    <Compile Include="FuzzController.cs" />
+    <Compile Include="TargetConnectors\IAllocatedMemory.cs" />
+    <Compile Include="FuzzDescriptions\IFuzzDescription.cs" />
+    <Compile Include="FuzzDescriptions\SingleValueFuzzDescription.cs" />
+    <Compile Include="DataGenerators\IDataGenerator.cs" />
+    <Compile Include="DataGenerators\RandomByteGenerator.cs" />
+    <Compile Include="FuzzDescriptions\PointerValueFuzzDescription.cs" />
+    <Compile Include="TargetConnectors\GDB\AttachCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\AttachRH.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -102,6 +111,8 @@
     <Folder Include="TargetConnectors\GDB\" />
     <Folder Include="IO\" />
     <Folder Include="IO\ConsoleIO\" />
+    <Folder Include="FuzzDescriptions\" />
+    <Folder Include="DataGenerators\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">

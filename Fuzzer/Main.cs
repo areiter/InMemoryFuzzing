@@ -8,6 +8,8 @@ using Iaik.Utils.IO;
 using System.Globalization;
 using System.Reflection;
 using Iaik.Utils;
+using Fuzzer.FuzzDescriptions;
+using Fuzzer.DataGenerators;
 
 namespace Fuzzer
 {
@@ -25,7 +27,10 @@ namespace Fuzzer
 			IDictionary<string, string> config = new Dictionary<string, string>();
 			config.Add("gdb_exec", "/opt/gdb-7.2/bin/gdb");
 			config.Add("gdb_log", "stream:stderr");
-			config.Add("target", "extended-remote :1234");
+			//config.Add("target", "extended-remote :1234");
+			//config.Add("target", "run_local");
+			config.Add("target", "attach_local");
+			config.Add("target-options", "14577");
 			config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
 			
 			using(ITargetConnector connector = 
@@ -37,40 +42,21 @@ namespace Fuzzer
 				connector.Connect();
 				
 				ISymbolTableMethod bar = symbolTable.FindMethod("bar");
-				IBreakpoint breakBar = connector.SetSoftwareBreakpoint(bar, 0, "break_bar");
-				IDebuggerStop stop = null;
+				IBreakpoint snapshotBreakpoint = connector.SetSoftwareBreakpoint(bar, 0, "break_snapshot");
+				IBreakpoint restoreBreakpoint = connector.SetSoftwareBreakpoint (0x40068d, 0, "break_restore");
 				
-				while(stop == null || stop.Breakpoint != breakBar)
-				{
-					stop = connector.DebugContinue();
+//				IFuzzDescription barVar1_Description = new SingleValueFuzzDescription(bar.Parameters[0], 
+//					new RandomByteGenerator( 4, 4, RandomByteGenerator.ByteType.All));		
+				IFuzzDescription barVar1_readableChar = new PointerValueFuzzDescription(bar.Parameters[0],
+					new RandomByteGenerator(5, 1000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
+				
+				FuzzController fuzzController = new FuzzController(
+					connector,
+					snapshotBreakpoint,
+					restoreBreakpoint,
+					barVar1_readableChar);
 					
-					if(stop.StopReason == StopReasonEnum.Exit || stop.StopReason == StopReasonEnum.Terminated)
-						break;
-				}
-
-				byte[] buffer = new byte[1024*1024];
-				foreach(ISymbolTableVariable variable in bar.Parameters)
-				{
-					UInt64? address = variable.Address;
-					if(address != null)
-					{
-						UInt64 varReadSize = connector.ReadMemory(buffer, address.Value, 4);
-						byte[] b = new byte[varReadSize];
-						Array.Copy(buffer, b, (long)varReadSize);
-						Console.WriteLine("{0}[at 0x{1:X}]=[{2}]", variable.Name, address, ByteHelper.ByteArrayToHexString(b));
-						int val = BitConverter.ToInt32(buffer, 0);
-					}
-				}
-				
-				
-				
-				buffer = new byte[1024*1024];
-				UInt64 readSize = connector.ReadMemory(buffer, symbolTable.FindMethod("main").AddressSpecifier.ResolveAddress().Value, 10000);
-				ISnapshot snapshot = connector.CreateSnapshot();
-				stop = connector.DebugContinue();
-				snapshot.Restore();
-				breakBar.Delete();
-				Console.ReadLine();
+				fuzzController.Fuzz();
 			}
 			
 
