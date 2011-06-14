@@ -36,7 +36,7 @@ namespace Fuzzer
 			//config.Add("target-options", "14577");
 			
 			//config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
-			config.Add("file", "/home/andi/hacklet/prog0-x64");
+			config.Add("file", "/home/andi/Downloads/hacklets/prog0-x64");
 			
 			using(ITargetConnector connector = 
 				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
@@ -48,7 +48,7 @@ namespace Fuzzer
 				
 				ISymbolTableMethod main = symbolTable.FindMethod("main");
 				IBreakpoint snapshotBreakpoint = connector.SetSoftwareBreakpoint(main, 0, "break_snapshot");
-				IBreakpoint restoreBreakpoint = connector.SetSoftwareBreakpoint (0x400797, 0, "break_restore");
+				IBreakpoint restoreBreakpoint = connector.SetSoftwareBreakpoint (0x400792, 0, "break_restore");
 				
 //				IFuzzDescription barVar1_Description = new SingleValueFuzzDescription(bar.Parameters[0], 
 //					new RandomByteGenerator( 4, 4, RandomByteGenerator.ByteType.All));		
@@ -60,7 +60,10 @@ namespace Fuzzer
 			 	ISymbolTableVariable argv = main.Parameters[1];
 				ISymbolTableVariable dereferencedArgv = argv.Dereference();
 				
-				
+				IFuzzDescription fuzzArgv = new PointerValueFuzzDescription(
+					dereferencedArgv, new RandomByteGenerator(
+				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
+				                                                            
 //				FuzzController fuzzController = new FuzzController(
 //					connector,
 //					snapshotBreakpoint,

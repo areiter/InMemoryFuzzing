@@ -117,5 +117,26 @@ namespace Iaik.Utils
 			}
 		}
 		
+		/// <summary>
+		/// Decodes the number encoded in data as a little endian number
+		/// </summary>
+		/// <param name="data">A <see cref="System.Byte[]"/></param>
+		/// <param name="offset">A <see cref="System.Int32"/></param>
+		/// <param name="length">A <see cref="System.Int32"/></param>
+		/// <returns>A <see cref="UInt64"/></returns>
+		public static UInt64 ByteArrayToUInt64(byte[] data, int offset, int length)
+		{
+			UInt64 myNumber = 0;
+			
+			for(int i = offset; i <offset + length; i++)
+			{
+				myNumber +=  ((UInt64)data[i]) << 8*(i-offset);
+			}
+			
+			return myNumber;
+		}
+		
+		
+		
 	}
 }

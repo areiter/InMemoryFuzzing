@@ -18,6 +18,7 @@
 //    limitations under the License.
 using System;
 using System.Threading;
+using Iaik.Utils;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
@@ -80,17 +81,21 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public ISymbolTableVariable Dereference ()
 		{
+			
 			UInt64? newAddress = null;
-			ManualResetEvent evt = new ManualResetEvent (false);
-			_connector.QueueCommand (new PrintCmd (PrintCmd.Format.Hex, Name, 
-			delegate(object value) {
-				if (value is UInt64)
-					newAddress = (UInt64)value;
-				evt.Set ();
-			}, _connector));
+			byte[] buffer =  new byte[Size];
+			UInt64? myAddress = Address;
 			
-			evt.WaitOne ();
+			if(myAddress == null)
+				return null;
 			
+			
+		 	UInt64 readSize = _connector.ReadMemory(buffer, myAddress.Value, (UInt64)Size);
+			
+			if(readSize != (UInt64)Size)
+				return null;
+			
+			newAddress = ByteHelper.ByteArrayToUInt64(buffer, 0, Size);
 			if (newAddress == null)
 				return null;
 			
@@ -116,6 +121,28 @@ namespace Fuzzer.TargetConnectors.GDB
 			return new GDBSymbolTableVariableAddress (_connector, new StaticAddress (newAddress), _size);
 		}
 		#endregion
+		
+		protected ISymbolTableVariable InternalDereference(UInt64? address, int size)
+		{
+			UInt64? newAddress = null;
+			byte[] buffer =  new byte[size];
+			
+			if(address == null)
+				return null;
+			
+			
+		 	UInt64 readSize = _connector.ReadMemory(buffer, address.Value, (UInt64)size);
+			
+			if(readSize != (UInt64)size)
+				return null;
+			
+			newAddress = ByteHelper.ByteArrayToUInt64(buffer, 0, size);
+			if (newAddress == null)
+				return null;
+			
+			return new GDBSymbolTableVariableAddress (_connector, new StaticAddress (newAddress), size);
+
+		}
 }
 }
 
