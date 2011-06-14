@@ -36,7 +36,7 @@ namespace Fuzzer
 			
 		public ITargetConnector Connector
 		{
-			get { return _connector;}
+			get { return _connector; }
 		}
 		
 		/// <summary>

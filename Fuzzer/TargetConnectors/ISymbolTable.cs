@@ -150,7 +150,14 @@ namespace Fuzzer.TargetConnectors
 		/// Returns the address of the variable or null 
 		/// if the variable is not valid in the current scope
 		/// </summary>
-		UInt64? Address{ get; }
+		UInt64? Address { get; }
+		
+		/// <summary>
+		/// Dereferences the current variable.
+		/// This means that the value stored at the variables-address is interpreted as address
+		/// </summary>
+		/// <returns></returns>
+		ISymbolTableVariable Dereference();
 	}
 }
 

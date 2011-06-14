@@ -33,29 +33,37 @@ namespace Fuzzer.TargetConnectors.GDB
 			//if(_format == PrintCmd.Format.Hex)
 			//	r = new Regex(@"[\s*\S*]*=\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			//else
-				r = new Regex(@"[\s*\S*]*=\s*(?<value>[\s*\S*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			r = new Regex (@"[\s*\S*]*=\s*(?<value>[\s*\S*]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-			Regex rNoRegisters = new Regex(@"No registers", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			for(int i = 0; i<responseLines.Length ; i++)
+			Regex rNoRegisters = new Regex (@"No registers", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rNoSymbol = new Regex ("No symbol \"(?<symbol_name>\\S*)\" in current context.", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			
+			for (int i = 0; i < responseLines.Length; i++)
 			{
 				string line = responseLines[i];
 				
-				Match match = r.Match(line);
+				Match match = r.Match (line);
 
-				if(match.Success)
+				if (match.Success)
 				{
-					string value = match.Result("${value}");
-					if(_format == PrintCmd.Format.Hex && value.Trim().StartsWith("0x"))
-						_callback(UInt64.Parse(value.Trim().Substring(2), NumberStyles.HexNumber));
+					string value = match.Result ("${value}");
+					if (_format == PrintCmd.Format.Hex && value.Trim ().StartsWith ("0x"))
+						_callback (UInt64.Parse (value.Trim ().Substring (2), NumberStyles.HexNumber));
 					else
-						_callback(match.Result("${value}"));
+						_callback (match.Result ("${value}"));
 					
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
 				
-				if(rNoRegisters.Match(line).Success)
+				if (rNoRegisters.Match (line).Success)
 				{
-					_callback(null);
+					_callback (null);
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+				}
+				
+				if (rNoSymbol.Match (line).Success)
+				{
+					_callback (null);
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
 			}

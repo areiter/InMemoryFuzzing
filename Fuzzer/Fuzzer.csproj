@@ -104,6 +104,7 @@
     <Compile Include="FuzzDescriptions\PointerValueFuzzDescription.cs" />
     <Compile Include="TargetConnectors\GDB\AttachCmd.cs" />
     <Compile Include="TargetConnectors\GDB\AttachRH.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBSymbolTableVariableAddress.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

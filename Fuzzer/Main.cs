@@ -27,11 +27,16 @@ namespace Fuzzer
 			IDictionary<string, string> config = new Dictionary<string, string>();
 			config.Add("gdb_exec", "/opt/gdb-7.2/bin/gdb");
 			config.Add("gdb_log", "stream:stderr");
+			
 			//config.Add("target", "extended-remote :1234");
-			//config.Add("target", "run_local");
-			config.Add("target", "attach_local");
-			config.Add("target-options", "14577");
-			config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
+			
+			config.Add("target", "run_local");
+			
+			//config.Add("target", "attach_local");
+			//config.Add("target-options", "14577");
+			
+			//config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
+			config.Add("file", "/home/andi/hacklet/prog0-x64");
 			
 			using(ITargetConnector connector = 
 				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
@@ -41,22 +46,28 @@ namespace Fuzzer
 				connector.Setup(config);
 				connector.Connect();
 				
-				ISymbolTableMethod bar = symbolTable.FindMethod("bar");
-				IBreakpoint snapshotBreakpoint = connector.SetSoftwareBreakpoint(bar, 0, "break_snapshot");
-				IBreakpoint restoreBreakpoint = connector.SetSoftwareBreakpoint (0x40068d, 0, "break_restore");
+				ISymbolTableMethod main = symbolTable.FindMethod("main");
+				IBreakpoint snapshotBreakpoint = connector.SetSoftwareBreakpoint(main, 0, "break_snapshot");
+				IBreakpoint restoreBreakpoint = connector.SetSoftwareBreakpoint (0x400797, 0, "break_restore");
 				
 //				IFuzzDescription barVar1_Description = new SingleValueFuzzDescription(bar.Parameters[0], 
 //					new RandomByteGenerator( 4, 4, RandomByteGenerator.ByteType.All));		
-				IFuzzDescription barVar1_readableChar = new PointerValueFuzzDescription(bar.Parameters[0],
-					new RandomByteGenerator(5, 1000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
+//				IFuzzDescription barVar1_readableChar = new PointerValueFuzzDescription(bar.Parameters[0],
+//					new RandomByteGenerator(5, 1000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
 				
-				FuzzController fuzzController = new FuzzController(
-					connector,
-					snapshotBreakpoint,
-					restoreBreakpoint,
-					barVar1_readableChar);
+				connector.DebugContinue ();
+				
+			 	ISymbolTableVariable argv = main.Parameters[1];
+				ISymbolTableVariable dereferencedArgv = argv.Dereference();
+				
+				
+//				FuzzController fuzzController = new FuzzController(
+//					connector,
+//					snapshotBreakpoint,
+//					restoreBreakpoint,
+//					barVar1_readableChar);
 					
-				fuzzController.Fuzz();
+//				fuzzController.Fuzz();
 			}
 			
 
