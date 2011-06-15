@@ -158,6 +158,7 @@ namespace Fuzzer.TargetConnectors
 		/// </summary>
 		/// <returns></returns>
 		ISymbolTableVariable Dereference();
+		ISymbolTableVariable Dereference (int index);
 	}
 }
 

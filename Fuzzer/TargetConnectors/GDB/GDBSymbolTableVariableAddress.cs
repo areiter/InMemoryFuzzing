@@ -67,28 +67,12 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public ISymbolTableVariable Dereference ()
 		{
-			UInt64? address = Address;
-			
-			if (address == null)
-				return null;
-			else
-			{
-				UInt64? newAddress = null;
-				ManualResetEvent evt = new ManualResetEvent (false);
-				_connector.QueueCommand (new PrintCmd (PrintCmd.Format.Hex, string.Format ("*0x{0:X}", address.Value), 
-				delegate(object value) {
-					if (value is UInt64)
-						newAddress = (UInt64)value;
-					evt.Set ();
-				}, _connector));
-				
-				evt.WaitOne ();
-				
-				if (newAddress == null)
-						return null;
-				
-				return new GDBSymbolTableVariableAddress (_connector, new StaticAddress (newAddress), _size);
-			}
+			return GDBSymbolTableVariable.InternalDereference (_connector, Address, Size);
+		}
+		
+		public ISymbolTableVariable Dereference (int index)
+		{
+			return GDBSymbolTableVariable.InternalDereference (_connector, Address.Value + (UInt64)(index * Size), Size);
 		}
 		#endregion
 

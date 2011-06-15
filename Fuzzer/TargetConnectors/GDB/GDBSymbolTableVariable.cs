@@ -81,48 +81,22 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public ISymbolTableVariable Dereference ()
 		{
-			
-			UInt64? newAddress = null;
-			byte[] buffer =  new byte[Size];
-			UInt64? myAddress = Address;
-			
-			if(myAddress == null)
-				return null;
-			
-			
-		 	UInt64 readSize = _connector.ReadMemory(buffer, myAddress.Value, (UInt64)Size);
-			
-			if(readSize != (UInt64)Size)
-				return null;
-			
-			newAddress = ByteHelper.ByteArrayToUInt64(buffer, 0, Size);
-			if (newAddress == null)
-				return null;
-			
-			return new GDBSymbolTableVariableAddress (_connector, new StaticAddress (newAddress), _size);
+			return InternalDereference (_connector, Address, Size);
 		}
 		
 		public ISymbolTableVariable Dereference (int index)
 		{
-			UInt64? newAddress = null;
-			ManualResetEvent evt = new ManualResetEvent (false);
-			_connector.QueueCommand (new PrintCmd (PrintCmd.Format.Hex, string.Format("{0}[{1}]", Name,index), 
-			delegate(object value) {
-				if (value is UInt64)
-					newAddress = (UInt64)value;
-				evt.Set ();
-			}, _connector));
-			
-			evt.WaitOne ();
-			
-			if (newAddress == null)
+			UInt64? address = Address;
+			if (address == null)
 				return null;
+			else
+				address = address.Value + (UInt64)(index * Size);
 			
-			return new GDBSymbolTableVariableAddress (_connector, new StaticAddress (newAddress), _size);
+			return InternalDereference(_connector, address, Size);
 		}
 		#endregion
 		
-		protected ISymbolTableVariable InternalDereference(UInt64? address, int size)
+		public static ISymbolTableVariable InternalDereference(GDBConnector connector, UInt64? address, int size)
 		{
 			UInt64? newAddress = null;
 			byte[] buffer =  new byte[size];
@@ -131,7 +105,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				return null;
 			
 			
-		 	UInt64 readSize = _connector.ReadMemory(buffer, address.Value, (UInt64)size);
+		 	UInt64 readSize = connector.ReadMemory(buffer, address.Value, (UInt64)size);
 			
 			if(readSize != (UInt64)size)
 				return null;
@@ -140,7 +114,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			if (newAddress == null)
 				return null;
 			
-			return new GDBSymbolTableVariableAddress (_connector, new StaticAddress (newAddress), size);
+			return new GDBSymbolTableVariableAddress (connector, new StaticAddress (newAddress), size);
 
 		}
 }
