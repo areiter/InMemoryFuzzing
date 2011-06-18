@@ -10,6 +10,9 @@ using System.Reflection;
 using Iaik.Utils;
 using Fuzzer.FuzzDescriptions;
 using Fuzzer.DataGenerators;
+using Iaik.Utils.libbfd;
+using System.Runtime.InteropServices;
+using System.IO;
 
 namespace Fuzzer
 {
@@ -18,6 +21,14 @@ namespace Fuzzer
 		
 		public static void Main (string[] args)
 		{
+		
+			using(BfdStream stream = BfdStream.CreateFromCoreFileSelectSection("/home/andi/hacklet/prog0-x64.execution_log", FileAccess.Read, 
+					"elf64-x86-64", "null0"))
+			{
+				
+			}
+			
+
 			SetupLogging();
 			TestApamaLinux();
 		}

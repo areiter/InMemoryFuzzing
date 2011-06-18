@@ -120,5 +120,9 @@
       <Project>{892CAB5C-D501-47B1-82E2-BE8492E7E378}</Project>
       <Name>Utils</Name>
     </ProjectReference>
+    <ProjectReference Include="..\libbfd.net\libbfd.net.csproj">
+      <Project>{8612D69A-C75F-4CEC-955D-1E2A0ECC1BCB}</Project>
+      <Name>libbfd.net</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
