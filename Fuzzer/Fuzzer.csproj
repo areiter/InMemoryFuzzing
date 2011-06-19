@@ -105,6 +105,11 @@
     <Compile Include="TargetConnectors\GDB\AttachCmd.cs" />
     <Compile Include="TargetConnectors\GDB\AttachRH.cs" />
     <Compile Include="TargetConnectors\GDB\GDBSymbolTableVariableAddress.cs" />
+    <Compile Include="TargetConnectors\GDB\CoreDump\GDBCoreDump.cs" />
+    <Compile Include="TargetConnectors\GDB\CoreDump\InstructionDescription.cs" />
+    <Compile Include="TargetConnectors\GDB\MaintPrintRawRegistersCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\MaintPrintRawRegistersRH.cs" />
+    <Compile Include="TargetConnectors\Registers.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -114,6 +119,7 @@
     <Folder Include="IO\ConsoleIO\" />
     <Folder Include="FuzzDescriptions\" />
     <Folder Include="DataGenerators\" />
+    <Folder Include="TargetConnectors\GDB\CoreDump\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">

@@ -30,7 +30,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// <summary>
 		/// Gets called once the command has finished
 		/// </summary>
-		public Action<GDBCommand> CommandFinishedEvent;
+		public event Action<GDBCommand> CommandFinishedEvent;
 		
 		/// <summary>
 		/// Associated Response handler, if response handler is not set, command is sent without processing any response

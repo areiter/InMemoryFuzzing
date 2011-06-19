@@ -124,13 +124,21 @@ namespace Iaik.Utils
 		/// <param name="offset">A <see cref="System.Int32"/></param>
 		/// <param name="length">A <see cref="System.Int32"/></param>
 		/// <returns>A <see cref="UInt64"/></returns>
-		public static UInt64 ByteArrayToUInt64(byte[] data, int offset, int length)
+		public static UInt64 ByteArrayToUInt64 (byte[] data, int offset, int length)
+		{
+			return ByteArrayToUInt64 (data, offset, length, true);
+		}
+		
+		public static UInt64 ByteArrayToUInt64 (byte[] data, int offset, int length, bool useLittleEndian)
 		{
 			UInt64 myNumber = 0;
 			
-			for(int i = offset; i <offset + length; i++)
+			for (int i = offset; i < offset + length; i++)
 			{
-				myNumber +=  ((UInt64)data[i]) << 8*(i-offset);
+				if (useLittleEndian)
+					myNumber += ((UInt64)data[i]) << 8 * (i - offset);
+				else
+					myNumber += ((UInt64)data[i]) << 8 * (length - offset - i - 1);
 			}
 			
 			return myNumber;

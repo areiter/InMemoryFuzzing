@@ -13,6 +13,7 @@ using Fuzzer.DataGenerators;
 using Iaik.Utils.libbfd;
 using System.Runtime.InteropServices;
 using System.IO;
+using Fuzzer.TargetConnectors.GDB.CoreDump;
 
 namespace Fuzzer
 {
@@ -21,13 +22,10 @@ namespace Fuzzer
 		
 		public static void Main (string[] args)
 		{
-		
-			using(BfdStream stream = BfdStream.CreateFromCoreFileSelectSection("/home/andi/hacklet/prog0-x64.execution_log", FileAccess.Read, 
-					"elf64-x86-64", "null0"))
-			{
-				
-			}
 			
+			
+			GDBCoreDump coreDump = new GDBCoreDump("/home/andi/hacklet/prog0-x64.execution_log", null, Registers.CreateFromFile("/home/andi/x86-64.registers"));
+			GDBProcessRecordSection processRecord = coreDump.GetProcessRecordSection();
 
 			SetupLogging();
 			TestApamaLinux();
@@ -67,7 +65,11 @@ namespace Fuzzer
 //					new RandomByteGenerator(5, 1000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
 				
 				connector.DebugContinue ();
-				
+//				Registers r = ((Fuzzer.TargetConnectors.GDB.GDBConnector)connector).GetRegisters();
+//				using(FileStream fSink = new FileStream("/home/andi/x86-64.registers", FileMode.CreateNew, FileAccess.Write))
+//				{
+//					StreamHelper.WriteTypedStreamSerializable(r, fSink);
+//				}
 			 	ISymbolTableVariable argv = main.Parameters[1];
 				ISymbolTableVariable dereferencedArgv = argv.Dereference();
 				

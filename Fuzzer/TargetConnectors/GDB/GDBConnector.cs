@@ -331,21 +331,43 @@ namespace Fuzzer.TargetConnectors.GDB
 			return new GDBSnapshot(this, _lastDebuggerStop);
 		}
 		
-		public UInt64? GetRegisterValue(string register)
+		public UInt64? GetRegisterValue (string register)
 		{
 			UInt64? address = null;
-			ManualResetEvent evt = new ManualResetEvent(false);
-			QueueCommand(new PrintCmd(PrintCmd.Format.Hex, "$" + register,
-			    delegate(object value){
-					if(value is UInt64)
-						address = (UInt64)value;
+			ManualResetEvent evt = new ManualResetEvent (false);
+			QueueCommand (new PrintCmd (PrintCmd.Format.Hex, "$" + register,
+			    delegate(object value) {
+				if (value is UInt64)
+					address = (UInt64)value;
 				
-					evt.Set();
-			    }, this));
+					evt.Set ();
+			}, this));
 			
-			evt.WaitOne();
+			evt.WaitOne ();
 			
 			return address;
+		}
+		
+		public Registers GetRegisters ()
+		{
+			Registers registers = new Registers ();
+			ManualResetEvent evt = new ManualResetEvent (false);
+			
+			MaintPrintRawRegistersCmd printRegistersCmd = new MaintPrintRawRegistersCmd (this,
+			delegate(string name, uint num, uint size)
+			{
+				registers.Add (new Register (num, name, size));
+			});
+			
+			printRegistersCmd.CommandFinishedEvent += delegate(GDBCommand obj) {
+				evt.Set ();
+			};
+			
+			QueueCommand (printRegistersCmd);
+			
+			evt.WaitOne ();
+			return registers;				
+			
 		}
 		
 		public void SetRegisterValue(string name, string value)
