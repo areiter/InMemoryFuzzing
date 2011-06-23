@@ -110,6 +110,14 @@
     <Compile Include="TargetConnectors\GDB\MaintPrintRawRegistersCmd.cs" />
     <Compile Include="TargetConnectors\GDB\MaintPrintRawRegistersRH.cs" />
     <Compile Include="TargetConnectors\Registers.cs" />
+    <Compile Include="RemoteControl\RemoteControlProtocol.cs" />
+    <Compile Include="RemoteControl\RemoteControlConnectionBuilder.cs" />
+    <Compile Include="RemoteControl\RemoteCommand.cs" />
+    <Compile Include="RemoteControl\EchoCommand.cs" />
+    <Compile Include="RemoteControl\RequestPipeCommand.cs" />
+    <Compile Include="RemoteControl\RemoteExecCommand.cs" />
+    <Compile Include="RemoteControl\RemoteProcessesCommand.cs" />
+    <Compile Include="RemoteControl\RemoteProcessInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -120,6 +128,7 @@
     <Folder Include="FuzzDescriptions\" />
     <Folder Include="DataGenerators\" />
     <Folder Include="TargetConnectors\GDB\CoreDump\" />
+    <Folder Include="RemoteControl\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">
