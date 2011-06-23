@@ -140,7 +140,7 @@ static void output_mem_allocation(char* called_function, char* fmt, ...){
   va_start(param_list, fmt);
   
   dprintf(fdmemlog, "%s: args=[", called_function);
-  dprintf(fdmemlog, fmt, param_list);
+  vdprintf(fdmemlog, fmt, param_list);
   dprintf(fdmemlog, "%s", "] bt=[");
 
   /*output_buffer.write_pos = snprintf(output_buffer.buffer, BUFFER_LENGTH, "%s: args=[", called_function);
@@ -199,7 +199,6 @@ void free(void *ptr)
 	if(!real_free) return;
     }
     real_free(ptr);
-
     output_mem_allocation("free", "ptr=%p", ptr);
 
 }
