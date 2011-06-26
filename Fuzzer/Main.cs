@@ -27,30 +27,30 @@ namespace Fuzzer
 		public static void Main (string[] args)
 		{
 			
-			NetworkStream netStream = RemoteControl.RemoteControlConnectionBuilder.Connect ("127.0.0.1", 8899);
-			RemoteControl.RemoteControlProtocol p = new RemoteControl.RemoteControlProtocol ();
-			p.PipeOpened += HandlerPipeOpened;
-			p.PipeClosed += HandlerPipeClosed;
-			p.PipeData += HandlerPipeData;
-			p.RemoteProcessInfo += HandlerRemoteProcessInfo;
-			p.SetConnection (netStream);
+//			NetworkStream netStream = RemoteControl.RemoteControlConnectionBuilder.Connect ("127.0.0.1", 8899);
+//			RemoteControl.RemoteControlProtocol p = new RemoteControl.RemoteControlProtocol ();
+//			p.PipeOpened += HandlerPipeOpened;
+//			p.PipeClosed += HandlerPipeClosed;
+//			p.PipeData += HandlerPipeData;
+//			p.RemoteProcessInfo += HandlerRemoteProcessInfo;
+//			p.SetConnection (netStream);
 			//p.RemoteEcho ("TEST");
 			
-			p.RemoteExec ("ls", "/bin/ls", 
-				new List<string> (new string[] { 
-					"-l", "-a"
-			}), 
-				new List<string> (new string[] {
-					"LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so",
-					"LOG_MEM_PIPE=test_pipe"
-			}));
+//			p.RemoteExec ("ls", "/bin/ls", 
+//				new List<string> (new string[] { 
+//					"-l", "-a"
+//			}), 
+//				new List<string> (new string[] {
+//					"LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so",
+//					"LOG_MEM_PIPE=test_pipe"
+//			}));
+//			
+//			p.RemoteRequestPipe ("test_pipe");
+//			//p.RemoteProcesses ();
+//			Thread.Sleep (-1);
 			
-			p.RemoteRequestPipe ("test_pipe");
-			//p.RemoteProcesses ();
-			Thread.Sleep (-1);
-			
-			GDBCoreDump coreDump = new GDBCoreDump("/home/andi/hacklet/prog0-x64.execution_log", null, Registers.CreateFromFile("/home/andi/x86-64.registers"));
-			GDBProcessRecordSection processRecord = coreDump.GetProcessRecordSection();
+//			GDBCoreDump coreDump = new GDBCoreDump("/home/andi/hacklet/prog0-x64.execution_log", null, Registers.CreateFromFile("/home/andi/x86-64.registers"));
+//			GDBProcessRecordSection processRecord = coreDump.GetProcessRecordSection();
 
 			SetupLogging();
 			TestApamaLinux();
@@ -121,7 +121,7 @@ namespace Fuzzer
 				IFuzzDescription fuzzArgv = new PointerValueFuzzDescription(
 					dereferencedArgv, new RandomByteGenerator(
 				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
-				                                                            
+				IStackFrameInfo stackFrameInfo = connector.GetStackFrameInfo();
 				FuzzController fuzzController = new FuzzController(
 					connector,
 					snapshotBreakpoint,

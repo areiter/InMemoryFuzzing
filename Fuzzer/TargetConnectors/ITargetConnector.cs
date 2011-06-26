@@ -18,6 +18,7 @@
 //    limitations under the License.
 using System;
 using System.Collections.Generic;
+using Fuzzer.TargetConnectors.RegisterTypes;
 
 namespace Fuzzer.TargetConnectors
 {
@@ -43,6 +44,11 @@ namespace Fuzzer.TargetConnectors
 		/// Returns the last stop reason
 		/// </summary>
 		IDebuggerStop LastDebuggerStop{ get; }
+		
+		/// <summary>
+		/// Returns an object which resolves RegisterType->RegisterName
+		/// </summary>
+		IRegisterTypeResolver RegisterTypeResolver { get; }
 		
 		/// <summary>
 		/// Sets up the connector
@@ -121,6 +127,12 @@ namespace Fuzzer.TargetConnectors
 		/// Sets the specified register to the specified value
 		/// </summary>
 		void SetRegisterValue(string name, string value);
+		
+		/// <summary>
+		/// Retrieves informations about the current stack frame
+		/// </summary>
+		/// <returns></returns>
+		IStackFrameInfo GetStackFrameInfo();
 		
 		/// <summary>
 		/// Allocates memory of the given size on the target

@@ -118,6 +118,15 @@
     <Compile Include="RemoteControl\RemoteExecCommand.cs" />
     <Compile Include="RemoteControl\RemoteProcessesCommand.cs" />
     <Compile Include="RemoteControl\RemoteProcessInfo.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoFrameCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoFrameRH.cs" />
+    <Compile Include="TargetConnectors\RegisterTypes\IRegisterTypeResolver.cs" />
+    <Compile Include="TargetConnectors\RegisterTypes\RegisterTypeResolverX86.cs" />
+    <Compile Include="TargetConnectors\RegisterTypes\RegisterTypeResolverX86_64.cs" />
+    <Compile Include="TargetConnectors\GDB\MaintArchitectureCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\MaintArchitectureRH.cs" />
+    <Compile Include="TargetConnectors\IStackFrameInfo.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBStackFrameInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -129,6 +138,7 @@
     <Folder Include="DataGenerators\" />
     <Folder Include="TargetConnectors\GDB\CoreDump\" />
     <Folder Include="RemoteControl\" />
+    <Folder Include="TargetConnectors\RegisterTypes\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">

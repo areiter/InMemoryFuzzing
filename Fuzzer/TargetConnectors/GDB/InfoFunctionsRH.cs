@@ -49,7 +49,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			Regex rMethodNoDebuggingInfo = new Regex(@"0x(?<at>\S*)\s*(?<method>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			bool debuggingInfo = false;
-			string lastFile = "";
+			//string lastFile = "";
 			List<ISymbolTableMethod> resolvedFunctions = new List<ISymbolTableMethod>();
 			List<ISymbolTableMethod> unresolvedfunctions = new List<ISymbolTableMethod>();
 			
@@ -62,7 +62,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				//We got a File header, this means we got debugging information
 				if(mHeaderFile.Success)
 				{
-					lastFile = mHeaderFile.Result("${filename}");
+					//lastFile = mHeaderFile.Result("${filename}");
 					debuggingInfo = true;
 					continue;
 				}
@@ -72,7 +72,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				//We got linker debugging methods
 				if(mNoDebugInfo.Success)
 				{
-					lastFile = "";
+					//lastFile = "";
 					debuggingInfo = false;
 					continue;
 				}

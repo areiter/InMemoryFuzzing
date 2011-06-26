@@ -120,7 +120,6 @@ namespace Fuzzer.RemoteControl
 			
 			while (_buffer.Count > 0)
 			{
-				int index = 0;
 		
 				int? realStart = FindFirstOccurance (0, _prefix);
 				if (realStart == null)

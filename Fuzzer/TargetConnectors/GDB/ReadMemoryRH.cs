@@ -27,7 +27,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		private ReadMemoryDelegate _readMemory;
 		private byte[] _buffer;
-		private UInt64 _size;
+		//private UInt64 _size;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
@@ -61,7 +61,6 @@ namespace Fuzzer.TargetConnectors.GDB
 							if (readBytes >= (UInt64)_buffer.Length)
 								break;
 					
-							byte outVal;
 							if (!v.StartsWith ("0x"))
 								break;
 							
@@ -78,9 +77,8 @@ namespace Fuzzer.TargetConnectors.GDB
 						}
 					}
 				}
-				catch(Exception ex)
+				catch(Exception)
 				{
-					Console.WriteLine("123");
 				}
 			}
 			
@@ -101,7 +99,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		{
 			_readMemory = readMemory;
 			_buffer = buffer;
-			_size = size;
+			//_size = size;
 		}
 	}
 }

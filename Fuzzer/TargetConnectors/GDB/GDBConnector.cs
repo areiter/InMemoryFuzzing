@@ -26,6 +26,7 @@ using Iaik.Utils.CommonAttributes;
 using System.Threading;
 using System.IO;
 using System.Text;
+using Fuzzer.TargetConnectors.RegisterTypes;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
@@ -77,6 +78,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		private ManualResetEvent _gdbStopEventHandler = new ManualResetEvent(false);
 		
+		private IRegisterTypeResolver _registerTypeResolver = null;
+		
 		public GDBConnector()
 		{
 			RegisterPermanentResponseHandler(new BreakpointRH(this, GdbStopped));
@@ -98,6 +101,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		public IDebuggerStop LastDebuggerStop
 		{
 			get { return _lastDebuggerStop;}
+		}
+		
+		public IRegisterTypeResolver RegisterTypeResolver
+		{
+			get { return _registerTypeResolver;}
 		}
 		
 		public override void Setup (IDictionary<string, string> config)
@@ -155,6 +163,27 @@ namespace Fuzzer.TargetConnectors.GDB
 				if (!connected)
 					throw new Exception ("Could not establish connection");
 			}
+			
+			ManualResetEvent evtMaintArchitecture = new ManualResetEvent (false);
+			
+			QueueCommand (new MaintArchitectureCmd (this,
+					delegate(IDictionary<string, string> discoveredValues)
+					{
+				
+				if (discoveredValues.ContainsKey ("bfd_arch_info"))
+				{
+					string archInfo = discoveredValues["bfd_arch_info"];
+
+					if(archInfo.Contains("x86-64"))
+						_registerTypeResolver = new RegisterTypeResolverX86_64();
+					else if(archInfo.Contains("x86") || archInfo.Contains("i386"))
+						_registerTypeResolver = new RegisterTypeResolverX86();
+					
+					evtMaintArchitecture.Set();
+				}
+				
+			}));
+			evtMaintArchitecture.WaitOne ();
 			
 		}
 			                            
@@ -509,6 +538,22 @@ namespace Fuzzer.TargetConnectors.GDB
 				return null;
 			else
 				return new StaticAddress (address, size);
+		}
+		
+		public IStackFrameInfo GetStackFrameInfo ()
+		{
+			ManualResetEvent evt = new ManualResetEvent (false);
+			IStackFrameInfo stackFrameInfo = null;
+			
+			QueueCommand (new InfoFrameCmd (this,
+			delegate(IDictionary<string, IAddressSpecifier> savedRegisterAddresses)
+			{
+				stackFrameInfo = new GDBStackFrameInfo (savedRegisterAddresses);
+				evt.Set ();
+			}));
+			
+			evt.WaitOne ();
+			return stackFrameInfo;
 		}
 
 		/// <summary>

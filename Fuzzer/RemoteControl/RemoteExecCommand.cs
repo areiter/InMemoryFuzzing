@@ -50,7 +50,6 @@ namespace Fuzzer.RemoteControl
 			{
 				List<byte> data = new List<byte> ();
 				
-				byte[] buffer = new byte[1000];
 				data.AddRange (BitConverter.GetBytes ((Int16)Encoding.ASCII.GetByteCount (_name)));
 				data.AddRange (Encoding.ASCII.GetBytes (_name));
 				data.AddRange (BitConverter.GetBytes ((Int16)Encoding.ASCII.GetByteCount (_path)));
