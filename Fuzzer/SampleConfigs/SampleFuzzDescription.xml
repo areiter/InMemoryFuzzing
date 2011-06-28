@@ -11,6 +11,9 @@
 		     	immediate   ... execute program instantly and once on fuzzer launch
 		     	onfuzzstart ... execute program on every fuzz run
 		     	onfuzzstop  ... execute programm after each fuzz run
+		     	
+		     	
+		     Cmd, Arg, Env can contain variables 
 		  -->
 		<Exec trigger="immediate">
 		
