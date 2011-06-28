@@ -1,0 +1,28 @@
+<Fuzz>
+	<!-- Defines settings for the remote control program,
+	     if not specified the remote control program is not used
+ 	  -->
+	<RemoteControl>
+	
+		<!-- Tells the remote control protocol to execute a remote program.
+		     The time of execution is specified by the "trigger" argument
+		     
+		     trigger accepts the following values:
+		     	immediate   ... execute program instantly and once on fuzzer launch
+		     	onfuzzstart ... execute program on every fuzz run
+		     	onfuzzstop  ... execute programm after each fuzz run
+		  -->
+		<Exec trigger="immediate">
+		
+			<!-- Defines the command to execute -->
+			<Cmd>/opt/gdbserver/bin/gdbserver</Cmd>			
+			
+			<!-- Define the arguments to pass to the program (in order) -->
+			<Arg>--remote-debug</Arg>
+			<Arg>--attach</Arg>
+			<Arg>:1234</Arg>
+			<Arg>${remote-pid:gdb_reverse_debugging_test}</Arg>
+			<Env></Env>
+		</Exec>
+	</RemoteControl>
+</Fuzz>

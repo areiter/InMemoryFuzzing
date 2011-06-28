@@ -52,10 +52,12 @@ namespace Iaik.Utils
 			return BitConverter.ToInt32(ReadBytes(4, src), 0);
 		}
 	
-		public static void WriteUInt32(UInt32 value, Stream sink)
+		public static void WriteUInt32 (UInt32 value, Stream sink)
 		{
-			WriteBytes(BitConverter.GetBytes(value), sink);
+			WriteBytes (BitConverter.GetBytes (value), sink);
 		}
+		
+		
 		
 		public static uint ReadUInt32(Stream src)
 		{
@@ -67,9 +69,19 @@ namespace Iaik.Utils
 			WriteBytes(BitConverter.GetBytes(value), sink);
 		}
 		
-		public static Int64 ReadInt64(Stream src)
+		public static Int64 ReadInt64 (Stream src)
 		{
-			return BitConverter.ToInt64(ReadBytes(8, src), 0);
+			return BitConverter.ToInt64 (ReadBytes (8, src), 0);
+		}
+		
+		public static void WriteUInt64 (UInt64 value, Stream sink)
+		{
+			WriteBytes (BitConverter.GetBytes (value), sink);
+		}
+
+		public static UInt64 ReadUInt64 (Stream src)
+		{
+			return BitConverter.ToUInt64 (ReadBytes (8, src), 0);
 		}
 		
 		public static void WriteNullableInt32(Int32? value, Stream sink)

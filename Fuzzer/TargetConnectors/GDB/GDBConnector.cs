@@ -377,6 +377,24 @@ namespace Fuzzer.TargetConnectors.GDB
 			return address;
 		}
 		
+		/// <summary>
+		/// Saves the reverse execution log to the specified file
+		/// </summary>
+		/// <param name="filename"></param>
+		public void SaveExecutionLog (string filename)
+		{
+			ManualResetEvent evt = new ManualResetEvent (false);
+			RecordSaveCmd cmd = new RecordSaveCmd (this, filename);
+			cmd.CommandFinishedEvent += delegate(GDBCommand obj) {
+				evt.Set ();
+			};
+			
+			QueueCommand (cmd);
+			
+			evt.WaitOne ();
+			
+		}
+		
 		public Registers GetRegisters ()
 		{
 			Registers registers = new Registers ();

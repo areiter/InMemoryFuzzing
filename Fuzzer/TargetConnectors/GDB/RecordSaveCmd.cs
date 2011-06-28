@@ -1,4 +1,4 @@
-// IStackFrameInfo.cs
+// RecordSaveCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,21 +17,39 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-using Iaik.Utils.Serialization;
-namespace Fuzzer.TargetConnectors
+namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Contains information about the currently active stack frame
+	/// Saves the reverse execution log to file
 	/// </summary>
-	public interface IStackFrameInfo : ITypedStreamSerializable
+	public class RecordSaveCmd : GDBCommand
 	{
-		/// <summary>
-		/// Gets the address of a stack-saved register,
-		/// Registertypes can be resolved to register names using the connector specific IRegisterTypeResolver
-		/// </summary>
-		/// <param name="registerName">Register names can </param>
-		/// <returns></returns>
-		IAddressSpecifier GetSavedRegisterAddress(string registerName);
+		private string _file;
+		private RecordSaveRH _rh;
+		
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
+		public override string Command 
+		{
+			get { return string.Format ("record save {0}", _file); }
+		}	
+		
+		protected override string LogIdentifier 
+		{
+			get { return "CMD_record save"; }
+		}
+		
+		public override GDBResponseHandler ResponseHandler 
+		{
+			get { return _rh; }
+		}
+		#endregion
+		
+		public RecordSaveCmd (GDBSubProcess gdbProc, string file)
+			: base(gdbProc)
+		{
+			_file = file;
+			_rh = new RecordSaveRH (gdbProc);
+		}
 	}
 }
 

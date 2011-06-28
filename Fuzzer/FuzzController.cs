@@ -20,6 +20,7 @@ using System;
 using Fuzzer.TargetConnectors;
 using Fuzzer.FuzzDescriptions;
 using System.Collections.Generic;
+using Fuzzer.DataLoggers;
 namespace Fuzzer
 {
 	/// <summary>
@@ -31,9 +32,12 @@ namespace Fuzzer
 		protected IBreakpoint _snapshotBreakpoint;
 		protected ISnapshot _snapshot;
 		protected IBreakpoint _restoreBreakpoint;
+		protected IDataLogger _dataLogger;
 		
 		protected Queue<IFuzzDescription> _fuzzDescriptions = new Queue<IFuzzDescription>(); 
 			
+		
+		
 		public ITargetConnector Connector
 		{
 			get { return _connector; }
@@ -46,12 +50,14 @@ namespace Fuzzer
 		/// <param name="connector">connector to use</param>
 		/// <param name="snapshotBreakpoint">Location to create a snapshot</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
-		public FuzzController (ITargetConnector connector, IBreakpoint snapshotBreakpoint, IBreakpoint restoreBreakpoint, params IFuzzDescription[] fuzzDescriptions)
+		public FuzzController (ITargetConnector connector, IBreakpoint snapshotBreakpoint, IBreakpoint restoreBreakpoint, 
+			IDataLogger logger, params IFuzzDescription[] fuzzDescriptions)
 		{
 			_connector = connector;
 			_snapshotBreakpoint = snapshotBreakpoint;
 			_snapshot = null;
 			_restoreBreakpoint = restoreBreakpoint;
+			_dataLogger = logger;
 			
 			InitFuzzDescriptions (fuzzDescriptions);
 		}
@@ -63,49 +69,68 @@ namespace Fuzzer
 		/// <param name="connector">connector to use</param>
 		/// <param name="snapshot">The snapshot to restore once restore Breakpoint is reachead</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
-		public FuzzController (ITargetConnector connector, ISnapshot snapshot, IBreakpoint restoreBreakpoint, params IFuzzDescription[] fuzzDescriptions)
+		public FuzzController (ITargetConnector connector, ISnapshot snapshot, IBreakpoint restoreBreakpoint, 
+			IDataLogger logger, params IFuzzDescription[] fuzzDescriptions)
 		{
 			_connector = connector;
 			_snapshotBreakpoint = null;
 			_snapshot = snapshot;
 			_restoreBreakpoint = restoreBreakpoint;
+			_dataLogger = logger;
 			
 			InitFuzzDescriptions (fuzzDescriptions);
 		}
 		
 		public void Fuzz ()
 		{
+			int loggerPrefix = 0;
+			string morePrefix = DateTime.Now.ToString ("dd.MM.yyyy");
+			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);
+			
 			while (true)
 			{
+				
 				//Is the snapshot already reached and active? Create one if it does not exist
 				if (_snapshot == null && _connector.LastDebuggerStop != null &&
 					_snapshotBreakpoint.Address == _connector.LastDebuggerStop.Address && 
 					_connector.LastDebuggerStop.StopReason == StopReasonEnum.Breakpoint)
 				{
+					_dataLogger.StartingFuzzRun ();
 					_snapshot = _connector.CreateSnapshot ();
 				}
 				
 				//The restore breakpoint is reached.....do the restore
 				if (_snapshot != null && _connector.LastDebuggerStop.StopReason == StopReasonEnum.Breakpoint && _restoreBreakpoint.Address == _connector.LastDebuggerStop.Address)
 				{
-					RestoreAndFuzz ();
+					RestoreAndFuzz (ref loggerPrefix, morePrefix);
 				}
 				else if (_snapshot != null && _connector.LastDebuggerStop.StopReason != StopReasonEnum.Breakpoint)
 				{
 					//TODO: We got an error, do the logging thing
-					RestoreAndFuzz ();
+					RestoreAndFuzz (ref loggerPrefix, morePrefix);
 				}
 				
 				_connector.DebugContinue ();
 			}
 		}
 		
-		private void RestoreAndFuzz ()
+		private void RestoreAndFuzz (ref int loggerPrefix, string morePrefix)
 		{
+			_dataLogger.FinishedFuzzRun ();
 			_snapshot.Restore ();
+
+			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);			
+			_dataLogger.StartingFuzzRun ();
+			
 			IFuzzDescription currentDescription = _fuzzDescriptions.Dequeue ();
 			currentDescription.Run (ref _snapshot);
 			_fuzzDescriptions.Enqueue (currentDescription);
+		}
+		
+		private void IncrementLoggerPrefix (ref int loggerPrefix, string morePrefix)
+		{
+			loggerPrefix++;
+			_dataLogger.Prefix = string.Format ("{0}-{1}", loggerPrefix, morePrefix);
 		}
 		
 		private void InitFuzzDescriptions (IFuzzDescription[] fuzzDescriptions)

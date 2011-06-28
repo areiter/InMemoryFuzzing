@@ -1,4 +1,4 @@
-// IStackFrameInfo.cs
+// RecordSaveRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -17,21 +17,31 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
-using Iaik.Utils.Serialization;
-namespace Fuzzer.TargetConnectors
+namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Contains information about the currently active stack frame
-	/// </summary>
-	public interface IStackFrameInfo : ITypedStreamSerializable
+	public class RecordSaveRH : GDBResponseHandler
 	{
-		/// <summary>
-		/// Gets the address of a stack-saved register,
-		/// Registertypes can be resolved to register names using the connector specific IRegisterTypeResolver
-		/// </summary>
-		/// <param name="registerName">Register names can </param>
-		/// <returns></returns>
-		IAddressSpecifier GetSavedRegisterAddress(string registerName);
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
+		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
+		{
+			if (allowRequestLine)
+				return GDBResponseHandler.HandleResponseEnum.RequestLine;
+			
+			
+			return GDBResponseHandler.HandleResponseEnum.Handled;
+		}
+		
+		
+		public override string LogIdentifier 
+		{
+			get { return "RH_record save";}
+		}
+		
+		#endregion
+		public RecordSaveRH (GDBSubProcess gdbProc)
+			:base(gdbProc)
+		{
+		}
 	}
 }
 

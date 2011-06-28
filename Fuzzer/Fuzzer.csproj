@@ -127,6 +127,15 @@
     <Compile Include="TargetConnectors\GDB\MaintArchitectureRH.cs" />
     <Compile Include="TargetConnectors\IStackFrameInfo.cs" />
     <Compile Include="TargetConnectors\GDB\GDBStackFrameInfo.cs" />
+    <Compile Include="TargetConnectors\GDB\RecordSaveCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\RecordSaveRH.cs" />
+    <Compile Include="DataLoggers\IDataLogger.cs" />
+    <Compile Include="DataLoggers\GDBLogger.cs" />
+    <Compile Include="DataLoggers\LoggerCollection.cs" />
+    <Compile Include="DataLoggers\StackFrameLogger.cs" />
+    <Compile Include="DataLoggers\RemotePipeLogger.cs" />
+    <Compile Include="DataLoggers\DataGeneratorLogger.cs" />
+    <Compile Include="DataGenerators\ReplayDataGenerator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -139,6 +148,8 @@
     <Folder Include="TargetConnectors\GDB\CoreDump\" />
     <Folder Include="RemoteControl\" />
     <Folder Include="TargetConnectors\RegisterTypes\" />
+    <Folder Include="DataLoggers\" />
+    <Folder Include="SampleConfigs\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">
@@ -149,5 +160,8 @@
       <Project>{8612D69A-C75F-4CEC-955D-1E2A0ECC1BCB}</Project>
       <Name>libbfd.net</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SampleConfigs\SampleFuzzDescription.xml" />
   </ItemGroup>
 </Project>

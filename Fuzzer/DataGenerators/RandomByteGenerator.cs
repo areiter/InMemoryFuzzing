@@ -18,6 +18,7 @@
 //    limitations under the License.
 using System;
 using System.IO;
+using Fuzzer.DataLoggers;
 namespace Fuzzer.DataGenerators
 {
 	public class RandomByteGenerator : IDataGenerator
@@ -50,14 +51,17 @@ namespace Fuzzer.DataGenerators
 		private ByteType _byteType;
 		private byte[] _buffer = null;
 		private Random _r = new Random();
+		private DataGeneratorLogger _logger;
 		
-		public RandomByteGenerator (int minLen, int maxLen, ByteType byteType)
+		public RandomByteGenerator (int minLen, int maxLen, ByteType byteType, DataGeneratorLogger logger)
 		{
 			_minLen = minLen;
 			_maxLen = maxLen;
 			_byteType = byteType;
-			if(_minLen == _maxLen)
+			if (_minLen == _maxLen)
 				_buffer = new byte[_minLen];
+			
+			_logger = logger;
 		}
 	
 
@@ -67,6 +71,7 @@ namespace Fuzzer.DataGenerators
 			if (_buffer != null)
 			{
 				GenerateBytes (_buffer);
+				_logger.LogData (_buffer);
 				return _buffer;
 			}
 			else
@@ -74,6 +79,7 @@ namespace Fuzzer.DataGenerators
 				int byteLen = _r.Next (_minLen, _maxLen);
 				byte[] buffer = new byte[byteLen];
 				GenerateBytes (buffer);
+				_logger.LogData (buffer);
 				return buffer;
 			}
 				

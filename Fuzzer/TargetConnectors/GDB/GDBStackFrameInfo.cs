@@ -19,8 +19,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Iaik.Utils.Serialization;
+using Iaik.Utils;
+using System.IO;
 namespace Fuzzer.TargetConnectors.GDB
 {
+	[TypedStreamSerializable("gdb_stack_frame_info")]
 	public class GDBStackFrameInfo : IStackFrameInfo
 	{
 		private IDictionary<string, IAddressSpecifier> _savedRegisters;
@@ -28,6 +32,12 @@ namespace Fuzzer.TargetConnectors.GDB
 		public GDBStackFrameInfo (IDictionary<string, IAddressSpecifier> savedRegisters)
 		{
 			_savedRegisters = savedRegisters;
+		}
+		
+		public GDBStackFrameInfo (Stream src)
+		{
+			_savedRegisters = new Dictionary<string, IAddressSpecifier> ();
+			Read (src);
 		}
 	
 
@@ -40,6 +50,45 @@ namespace Fuzzer.TargetConnectors.GDB
 			return null;
 		}
 		#endregion
-}
+		
+		#region IStreamSerializable implementation
+		public void Write (Stream sink)
+		{
+			StreamHelper.WriteInt32 (_savedRegisters.Count, sink);
+			
+			foreach (KeyValuePair<string, IAddressSpecifier> pair in _savedRegisters)
+			{
+				StreamHelper.WriteString (pair.Key, sink);
+				
+				UInt64? address = pair.Value.ResolveAddress ();
+				if (address == null)
+					StreamHelper.WriteBool (false, sink);
+				else
+				{
+					StreamHelper.WriteBool (true, sink);
+					StreamHelper.WriteUInt64 (address.Value, sink);
+				}	
+			}
+		}
+
+		public void Read (Stream src)
+		{
+			int count = StreamHelper.ReadInt32 (src);
+			
+			for (int i = 0; i < count; i++)
+			{
+				string id = StreamHelper.ReadString (src);
+				
+				bool hasValue = StreamHelper.ReadBool (src);
+				UInt64? address = null;
+				
+				if (hasValue)
+					address = StreamHelper.ReadUInt64 (src);
+				
+				_savedRegisters.Add (id, new StaticAddress (address));
+			}
+		}
+		#endregion
+	}
 }
 

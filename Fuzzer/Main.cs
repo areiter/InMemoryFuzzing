@@ -18,6 +18,8 @@ using System.Net.Sockets;
 using Fuzzer.RemoteControl;
 using System.Threading;
 using System.Text;
+using Fuzzer.TargetConnectors.GDB;
+using Fuzzer.DataLoggers;
 
 namespace Fuzzer
 {
@@ -118,14 +120,22 @@ namespace Fuzzer
 			 	ISymbolTableVariable argv = main.Parameters[1];
 				ISymbolTableVariable dereferencedArgv = argv.Dereference();
 				
+				DataGeneratorLogger datagenLogger = new DataGeneratorLogger("/home/andi/log");
 				IFuzzDescription fuzzArgv = new PointerValueFuzzDescription(
 					dereferencedArgv, new RandomByteGenerator(
-				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
+				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated, datagenLogger));
 				IStackFrameInfo stackFrameInfo = connector.GetStackFrameInfo();
+				
+				
 				FuzzController fuzzController = new FuzzController(
 					connector,
 					snapshotBreakpoint,
 					restoreBreakpoint,
+					new LoggerCollection(
+						new GDBLogger((GDBConnector)connector, "/home/andi/log"),
+						new StackFrameLogger(connector, "/home/andi/log"),
+						datagenLogger
+					),
 					fuzzArgv);
 					
 				fuzzController.Fuzz();
