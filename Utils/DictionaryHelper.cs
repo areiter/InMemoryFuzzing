@@ -82,5 +82,17 @@ namespace Iaik.Utils
 		
 			return paramDict[name];
 		}
+		
+		public static T GetEnum<T>(string name, IDictionary<string, string> paramDict, T defaultVal)
+		{
+			try
+			{
+				return (T)Enum.Parse(typeof(T), GetString(name, paramDict, defaultVal.ToString()));
+			}
+			catch(Exception)
+			{
+				return defaultVal;
+			}
+		}
 	}
 }

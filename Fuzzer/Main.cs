@@ -123,7 +123,7 @@ namespace Fuzzer
 				DataGeneratorLogger datagenLogger = new DataGeneratorLogger("/home/andi/log");
 				IFuzzDescription fuzzArgv = new PointerValueFuzzDescription(
 					dereferencedArgv, new RandomByteGenerator(
-				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated, datagenLogger));
+				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
 				IStackFrameInfo stackFrameInfo = connector.GetStackFrameInfo();
 				
 				

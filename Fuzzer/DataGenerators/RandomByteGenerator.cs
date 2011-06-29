@@ -19,6 +19,8 @@
 using System;
 using System.IO;
 using Fuzzer.DataLoggers;
+using System.Collections.Generic;
+using Iaik.Utils;
 namespace Fuzzer.DataGenerators
 {
 	public class RandomByteGenerator : IDataGenerator
@@ -53,25 +55,54 @@ namespace Fuzzer.DataGenerators
 		private Random _r = new Random();
 		private DataGeneratorLogger _logger;
 		
-		public RandomByteGenerator (int minLen, int maxLen, ByteType byteType, DataGeneratorLogger logger)
+		public RandomByteGenerator (int minLen, int maxLen, ByteType byteType)
+		{
+			Init(minLen, maxLen, byteType);
+			
+		}
+		
+		/// <summary>
+		/// Call the setup method to initialize the generator
+		/// </summary>
+		public RandomByteGenerator()
+		{
+			
+		}
+	
+		private void Init(int minLen, int maxLen, ByteType byteType)
 		{
 			_minLen = minLen;
 			_maxLen = maxLen;
 			_byteType = byteType;
 			if (_minLen == _maxLen)
 				_buffer = new byte[_minLen];
-			
-			_logger = logger;
 		}
-	
 
 		#region IDataGenerator implementation
+		public void Setup(IDictionary<string, string> config)
+		{
+			Init(
+			     DictionaryHelper.GetInt("minlen", config, 1),
+			     DictionaryHelper.GetInt("maxlen", config, 100),
+			     DictionaryHelper.GetEnum<ByteType>("type", config, ByteType.PrintableASCIINullTerminated)
+			     );
+			     
+		}
+		
+		public void SetLogger(DataGeneratorLogger logger)
+		{
+			_logger = logger;
+		}
+		
 		public byte[] GenerateData ()
 		{
 			if (_buffer != null)
 			{
 				GenerateBytes (_buffer);
-				_logger.LogData (_buffer);
+				
+				if(_logger != null)
+					_logger.LogData (_buffer);
+				
 				return _buffer;
 			}
 			else
@@ -79,7 +110,10 @@ namespace Fuzzer.DataGenerators
 				int byteLen = _r.Next (_minLen, _maxLen);
 				byte[] buffer = new byte[byteLen];
 				GenerateBytes (buffer);
-				_logger.LogData (buffer);
+				
+				if(_logger != null)
+					_logger.LogData (buffer);
+				
 				return buffer;
 			}
 				

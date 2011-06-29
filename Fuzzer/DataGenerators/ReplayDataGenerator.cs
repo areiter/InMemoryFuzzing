@@ -21,6 +21,7 @@ using System.IO;
 using Iaik.Utils.IO;
 using Fuzzer.DataLoggers;
 using Iaik.Utils;
+using System.Collections.Generic;
 
 namespace Fuzzer.DataGenerators
 {
@@ -48,8 +49,20 @@ namespace Fuzzer.DataGenerators
 			_path = path;
 		}
 	
+		public ReplayDataGenerator ()
+		{
+		}
 
 		#region IDataGenerator implementation
+		public void Setup(IDictionary<string, string> config)
+		{
+			_path = DictionaryHelper.GetString("path", config, "./");	
+		}
+		
+		public void SetLogger(DataGeneratorLogger logger)
+		{
+		}
+		
 		public byte[] GenerateData ()
 		{
 			if (_logStream == null)

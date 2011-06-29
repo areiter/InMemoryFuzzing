@@ -73,7 +73,7 @@
 		<!-- Describes a location (memory location or method which can be resolved using the debugging symbols, for different
 		     location specifiers see below) where the fuzzer hooks in and changes the specified memory locations or variables
 		     
-		     Valid location specifiers are:
+		     Valid region specifiers are:
 		     	method:<method_name> ... Resolves to the start (after the prolog) of the specified function
 		     	methodret:<method_name> ... Resolves to the "end" of the specified method. A break is set to the instruction right after the method call
 		     	address:0x12345678   ... Resolves to the specified address
@@ -81,11 +81,22 @@
 		     	                                This specifier is only availabe if debugging symbols and source code
 		     	                                is available, and the symbol table implementation supports it.
 		  -->
-		<FuzzStart>method:main</FuzzStart>
+		<RegionStart>method:main</RegionStart>
 		
-		<!-- Describes a location were the Fuzzer stops and restores the state as it was at FuzzStart.
+		<!-- Describes a location were the Fuzzer stops and restores the state as it was at RegionStart.
 		     For different location specifiers see FuzzStart
 		  -->
-		<FuzzEnd>methodret:main</FuzzEnd>
+		<RegionEnd>methodret:main</RegionEnd>
+		
+		
+		<!-- Defines a single location (variable or memory location) to fuzz, and its data generator.c
+		     Multiple FuzzLocation tags can be specified
+		  -->
+		<FuzzLocation>
+		    <!-- 
+		      -->
+			<DataRegion></DataRegion>
+		</FuzzLocation>
+		
 	</FuzzDescription>
 </Fuzz>

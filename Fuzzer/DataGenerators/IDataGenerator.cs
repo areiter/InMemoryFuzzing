@@ -17,6 +17,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using Fuzzer.DataLoggers;
+using System.Collections.Generic;
 namespace Fuzzer.DataGenerators
 {
 	/// <summary>
@@ -34,6 +36,20 @@ namespace Fuzzer.DataGenerators
 		/// </remarks>
 		/// <returns></returns>
 		byte[] GenerateData();
+		
+		/// <summary>
+		/// Sets the logger for the generated data to replay the generated data
+		/// in another session
+		/// </summary>
+		/// <param name="logger"></param>
+		void SetLogger(DataGeneratorLogger logger);
+		
+		/// <summary>
+		/// Sets up the data generator. There may also be a ctor which makes this
+		/// call obsolete. See implementation for configuration values
+		/// </summary>
+		/// <param name="config"></param>
+		void Setup(IDictionary<string, string> config);
 	}
 }
 
