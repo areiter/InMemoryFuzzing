@@ -3,7 +3,12 @@
 	     if not specified the remote control program is not used
  	  -->
 	<RemoteControl>
-	
+		<!-- Specifies the host to connect to -->
+		<Host>localhost</Host>
+		
+		<!-- Specifies the port to connect at -->
+		<Port>6688</Port>
+		
 		<!-- Tells the remote control protocol to execute a remote program.
 		     The time of execution is specified by the "trigger" argument
 		     
@@ -13,7 +18,11 @@
 		     	onfuzzstop  ... execute programm after each fuzz run
 		     	
 		     	
-		     Cmd, Arg, Env can contain variables 
+		     Cmd, Arg, Env can contain variables. Variables are always encapsulated in "${...}".
+		     
+		     Current valid variables are:		     
+		     remote-pid:<name> ... Retrieves the process id of the process identified by <name> from the remote system
+		                           If multiple processes are matching <name> the first match is taken
 		  -->
 		<Exec trigger="immediate">
 		
@@ -25,7 +34,36 @@
 			<Arg>--attach</Arg>
 			<Arg>:1234</Arg>
 			<Arg>${remote-pid:gdb_reverse_debugging_test}</Arg>
-			<Env></Env>
+			<Env>LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so</Env>
+			<Env>LOG_MEM_PIPE=log_mem</Env>
 		</Exec>
 	</RemoteControl>
+	
+	<!-- Defines settings for connecting to the target stub. This has nothing to do with the RemoteControl,
+	     the remote control is only a helper for managing the remote stub. The remote stub e.g. is a gdb server 
+	     running on the target platform.
+	  -->
+	<TargetConnection>
+		<!-- Specifies the connector to use. This can be a short and readable class identifier attribute name like "general/gdb",
+			 but can also be a fully qualified classname (also from external assemblies)
+		  -->
+		<Connector>general/gdb</Connector>
+		
+		<!-- Define some connector specific configuration values. This values are passed to the connector
+		     using the "Setup" method
+		  -->
+		<Config key="gdb_log">stream:stderr</Config>
+		<Config key="target">extended-remote localhost:1234</Config>
+		
+		<!--
+		<Config key="target">run-local</Config>
+		-->
+		
+		<!--
+		<Config key="target">attach_local</Config>
+		<Config key="target-options">12345</Config>
+		-->
+		
+		<Config key="file">/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test</Config>
+	</TargetConnection>
 </Fuzz>
