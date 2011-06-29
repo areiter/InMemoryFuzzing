@@ -13,7 +13,7 @@
 		     The time of execution is specified by the "trigger" argument
 		     
 		     trigger accepts the following values:
-		     	immediate   ... execute program instantly and once on fuzzer launch
+		     	immediate   ... execute program once on fuzzer launch
 		     	onfuzzstart ... execute program on every fuzz run
 		     	onfuzzstop  ... execute programm after each fuzz run
 		     	
@@ -66,4 +66,26 @@
 		
 		<Config key="file">/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test</Config>
 	</TargetConnection>
+	
+	<!-- Describes a single fuzz process, can contain multiple memory locations to fuzz
+	  -->
+	<FuzzDescription>
+		<!-- Describes a location (memory location or method which can be resolved using the debugging symbols, for different
+		     location specifiers see below) where the fuzzer hooks in and changes the specified memory locations or variables
+		     
+		     Valid location specifiers are:
+		     	method:<method_name> ... Resolves to the start (after the prolog) of the specified function
+		     	methodret:<method_name> ... Resolves to the "end" of the specified method. A break is set to the instruction right after the method call
+		     	address:0x12345678   ... Resolves to the specified address
+		     	source:<filename>:<linenum> ... Resolves to the first instruction of the specified source code line.
+		     	                                This specifier is only availabe if debugging symbols and source code
+		     	                                is available, and the symbol table implementation supports it.
+		  -->
+		<FuzzStart>method:main</FuzzStart>
+		
+		<!-- Describes a location were the Fuzzer stops and restores the state as it was at FuzzStart.
+		     For different location specifiers see FuzzStart
+		  -->
+		<FuzzEnd>methodret:main</FuzzEnd>
+	</FuzzDescription>
 </Fuzz>
