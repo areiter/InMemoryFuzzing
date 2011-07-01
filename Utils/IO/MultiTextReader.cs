@@ -38,7 +38,6 @@ namespace Iaik.Utils.IO
 		private List<Thread> _threads = new List<Thread>();
 		private volatile bool _disposed = false;
 		
-		private int _val = 0;
 		
 		public MultiTextReader (params TextReader[] readers)
 		{
@@ -57,8 +56,6 @@ namespace Iaik.Utils.IO
 		
 		private void ReadThread(object oReader)
 		{
-			int id = _val++;
-			
 			TextReader reader = oReader as TextReader;
 			
 			char[] buffer = new char[4096];

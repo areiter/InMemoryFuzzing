@@ -38,6 +38,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>log4net.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="DataLoggers\RemotePipeLogger.cs" />
     <Compile Include="DataLoggers\DataGeneratorLogger.cs" />
     <Compile Include="DataGenerators\ReplayDataGenerator.cs" />
+    <Compile Include="XmlFactory\XmlFuzzFactory.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -150,6 +152,7 @@
     <Folder Include="TargetConnectors\RegisterTypes\" />
     <Folder Include="DataLoggers\" />
     <Folder Include="SampleConfigs\" />
+    <Folder Include="XmlFactory\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">

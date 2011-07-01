@@ -86,9 +86,6 @@
     <Compile Include="Hash\HashEnumDataProvider.cs" />
     <Compile Include="Hash\ProtectedPasswordStorage.cs" />
     <Compile Include="Hash\HashSecureStringDataProvider.cs" />
-    <Compile Include="SwapUtils\IReplacementAlgorithm.cs" />
-    <Compile Include="SwapUtils\Aging.cs" />
-    <Compile Include="SwapUtils\SwapManager.cs" />
     <Compile Include="Locking\LockContext.cs" />
     <Compile Include="Locking\LockProvider.cs" />
     <Compile Include="Hash\HMACProvider.cs" />
@@ -99,6 +96,7 @@
     <Compile Include="ConsoleUtils.cs" />
     <Compile Include="IO\OneTimeStream.cs" />
     <Compile Include="IO\MultiTextReader.cs" />
+    <Compile Include="XmlHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
