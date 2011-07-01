@@ -24,6 +24,11 @@ namespace Fuzzer.FuzzDescriptions
 	/// Associates variables (or memory regions) with datagenerators
 	/// there may also be multiple variables that depend on a single fuzz description
 	/// </summary>
+	/// <remarks>
+	/// For config-file-support of the implemented fuzz description, they are supposed to
+	/// provide a ctor with the vollowing arguments: 
+	///        (ISymbolTableVariable fuzzTarget, IDataGenerator dataGenerator)
+	/// </remarks>
 	public interface IFuzzDescription
 	{
 		/// <summary>

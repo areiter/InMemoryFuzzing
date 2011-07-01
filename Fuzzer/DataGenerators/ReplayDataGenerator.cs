@@ -22,6 +22,7 @@ using Iaik.Utils.IO;
 using Fuzzer.DataLoggers;
 using Iaik.Utils;
 using System.Collections.Generic;
+using Iaik.Utils.CommonAttributes;
 
 namespace Fuzzer.DataGenerators
 {
@@ -38,6 +39,7 @@ namespace Fuzzer.DataGenerators
 	/// They are read in the same order than they where assigned in the first run, 
 	/// so it is up to the user that each variable receive the correct data stream
 	/// </remarks>
+	[ClassIdentifier("datagen/replay")]
 	public class ReplayDataGenerator : IDataGenerator, IDataLogger
 	{
 		private Stream _logStream = null;

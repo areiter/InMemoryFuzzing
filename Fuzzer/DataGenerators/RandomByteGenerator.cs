@@ -21,8 +21,10 @@ using System.IO;
 using Fuzzer.DataLoggers;
 using System.Collections.Generic;
 using Iaik.Utils;
+using Iaik.Utils.CommonAttributes;
 namespace Fuzzer.DataGenerators
 {
+	[ClassIdentifier("datagen/random_bytes")]
 	public class RandomByteGenerator : IDataGenerator
 	{
 		public enum ByteType
