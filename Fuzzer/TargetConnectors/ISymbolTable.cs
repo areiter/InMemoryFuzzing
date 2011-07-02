@@ -47,6 +47,20 @@ namespace Fuzzer.TargetConnectors
 		ISymbolTableMethod FindMethod(string methodName);
 		
 		/// <summary>
+		/// Resolves the specified file and line to an address.
+		/// 
+		/// throws NotSupportedException if the underlying symbol table
+		/// does not support source->address resolution
+		/// 
+		/// throws ArgumentException if the address can not be resolved because of some
+		/// other reason
+		/// </summary>
+		/// <param name="file"></param>
+		/// <param name="line"></param>
+		/// <returns></returns>
+		IAddressSpecifier SourceToAddress(string file, int line);
+		
+		/// <summary>
 		/// Resolves the specified symbol to an address.
 		/// It resolves to the address where the first 
 		/// instruction of the method is located (BEFORE THE PROLOG of a method if one exists)

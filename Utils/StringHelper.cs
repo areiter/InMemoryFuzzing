@@ -18,6 +18,7 @@
 
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Iaik.Utils
 {
@@ -45,6 +46,22 @@ namespace Iaik.Utils
 			}
 			
 			return destination.ToString ();
+		}
+		
+		/// <summary>
+		/// Splits the specified string by the specified delimiter into key[delimiter]value
+		/// </summary>
+		/// <param name="s"></param>
+		/// <param name="delimiter"></param>
+		/// <returns></returns>
+		public static KeyValuePair<string, string>? SplitToKeyValue(string s, string delimiter)
+		{
+			string[] splitted = s.Split(new string[]{delimiter}, 2, StringSplitOptions.RemoveEmptyEntries);
+			
+			if(splitted.Length != 2)
+				return null;
+			
+			return new KeyValuePair<string, string>(splitted[0], splitted[1]);
 		}
 	}
 }

@@ -103,6 +103,11 @@ namespace Fuzzer.TargetConnectors.GDB
 			get { return _lastDebuggerStop;}
 		}
 		
+		public ISymbolTable SymbolTable
+		{
+			get{ return this; }
+		}
+		
 		public IRegisterTypeResolver RegisterTypeResolver
 		{
 			get { return _registerTypeResolver;}
@@ -445,6 +450,24 @@ namespace Fuzzer.TargetConnectors.GDB
 			
 			return null;
 		}
+		
+		public IAddressSpecifier SourceToAddress(string file, int line)
+		{
+			IAddressSpecifier address = null;
+			ManualResetEvent evt = new ManualResetEvent(false);
+			
+			QueueCommand(new SetBreakpointNameCmd( new SimpleSymbol(file + ":" + line.ToString()),
+			       delegate(int breakpointNum, UInt64 breakpointAddress)
+			       {
+					  address = new StaticAddress(breakpointAddress);
+						
+				      QueueCommand(new DeleteBreakpointCmd(breakpointNum, this));
+					  evt.Set();
+				   }, this));
+			evt.WaitOne();
+			return address;
+		}
+		
 		
 		public IAddressSpecifier ResolveSymbol(ISymbol symbol)
 		{

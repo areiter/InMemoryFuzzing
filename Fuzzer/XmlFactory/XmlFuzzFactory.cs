@@ -205,6 +205,18 @@ namespace Fuzzer.XmlFactory
 			connector.Connect();
 			_connector = connector;
 		}
+		
+		/// <summary>
+		/// Reads a single FuzzDescription Tag and generates 
+		/// a FuzzDescriptionInfo object
+		/// </summary>
+		/// <param name="rootNode">
+		/// A <see cref="XmlElement"/>
+		/// </param>
+		private FuzzDescriptionInfo ReadFuzzDescription(XmlElement rootNode)
+		{
+			
+		}
 
 		/// <summary>
 		/// Called after an exec call has been sent to the remote target
