@@ -39,6 +39,12 @@ namespace Fuzzer.TargetConnectors
 		/// Gets the connection state
 		/// </summary>
 		bool Connected{ get; }
+	
+		/// <summary>
+		/// Returns the symbol table implementation for this
+		/// connector
+		/// </summary>
+		ISymbolTable SymbolTable{ get; }
 		
 		/// <summary>
 		/// Returns the last stop reason

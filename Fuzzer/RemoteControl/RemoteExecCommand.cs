@@ -28,6 +28,28 @@ namespace Fuzzer.RemoteControl
 		private IList<string> _args;
 		private IList<string> _envp;
 		
+		
+		public string Name
+		{
+			get{ return _name; }
+		}
+		
+		public string Path
+		{
+			get{ return _path;}
+		}
+		
+		public IList<string> Args
+		{
+			get{ return _args; }
+		}
+		
+		public IList<string> EnvP
+		{
+			get{ return _envp;}
+		}
+			
+		
 		public RemoteExecCommand (string name, string path, IList<string> args, IList<string> envp)
 		{
 			_name = name;

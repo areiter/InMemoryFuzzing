@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Text;
 namespace Fuzzer.RemoteControl
 {
-	public class RemoteControlProtocol
+	public class RemoteControlProtocol : IDisposable
 	{
 		public delegate void HandlerCallbackDelegate(string receiver, byte[] data);
 		public delegate void PipeOpenedDelegate(int pipeId, string pipeName);
@@ -360,6 +360,18 @@ namespace Fuzzer.RemoteControl
 			if (ExecStatus != null)
 				ExecStatus (name, pid, status);
 		}
-	}
+	
+
+		#region IDisposable implementation
+		public void Dispose ()
+		{
+			if(_conn != null)
+			{
+				_conn.Close();
+				_conn = null;
+			}
+		}
+		#endregion
+}
 }
 

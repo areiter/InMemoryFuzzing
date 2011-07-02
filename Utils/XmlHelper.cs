@@ -139,6 +139,20 @@ namespace Iaik.Utils
             return null;
         }
 
+        public static string[] ReadStringArray(XmlElement rootElement, string name)
+        {
+            List<string> list = new List<string>();
+
+            foreach (XmlElement el in rootElement.SelectNodes(name))
+            {
+                if (el != null)
+					list.Add(el.InnerText);					         
+            }
+
+            return list.ToArray();
+        }
+
+		
         public static void WriteString(XmlElement rootElement, string name, string value)
         {
             XmlElement element = (XmlElement)rootElement.SelectSingleNode(name);
@@ -150,6 +164,22 @@ namespace Iaik.Utils
 
         }
 
+        public static void WriteStringArray(XmlElement rootElement, string name, string[] array)
+        {
+            XmlNodeList nl = rootElement.SelectNodes(name);
+            foreach (XmlElement el in nl)
+            {
+                rootElement.RemoveChild(el);
+            }
+
+            foreach (string s in array)
+            {
+                XmlElement element = (XmlElement)rootElement.AppendChild(rootElement.OwnerDocument.CreateElement(name));
+                element.InnerText = s;
+            }
+        }
+
+		
         public static double? ReadDouble(XmlElement rootElement, string name)
         {
             XmlElement element = (XmlElement)rootElement.SelectSingleNode(name);

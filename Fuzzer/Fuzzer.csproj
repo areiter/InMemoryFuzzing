@@ -138,6 +138,7 @@
     <Compile Include="DataLoggers\DataGeneratorLogger.cs" />
     <Compile Include="DataGenerators\ReplayDataGenerator.cs" />
     <Compile Include="XmlFactory\XmlFuzzFactory.cs" />
+    <Compile Include="XmlFactory\RemoteExecutionInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
