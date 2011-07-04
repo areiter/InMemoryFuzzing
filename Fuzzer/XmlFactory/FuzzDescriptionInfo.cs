@@ -30,6 +30,37 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		private ITargetConnector _connector;
 		
+		/// <summary>
+		/// Address to start the fuzzing process
+		/// </summary>
+		private IAddressSpecifier _regionStart;
+		
+		public IAddressSpecifier RegionStart
+		{
+			get { return _regionStart;}
+		}
+		
+		
+		/// <summary>
+		/// Address to restore the program state as it was at regionstart
+		/// </summary>
+		private IAddressSpecifier _regionEnd;
+		
+		public IAddressSpecifier RegionEnd
+		{
+			get { return _regionEnd; }
+		}
+		
+		/// <summary>
+		/// Contains all fuzz locations for this single region
+		/// </summary>
+		private List<FuzzLocationInfo> _fuzzLocations = new List<FuzzLocationInfo>();
+		
+		public IEnumerable<FuzzLocationInfo> FuzzLocations
+		{
+			get { return _fuzzLocations; }
+		}
+			
 		public FuzzDescriptionInfo (ITargetConnector connector)
 		{
 			_connector = connector;
@@ -50,44 +81,72 @@ namespace Fuzzer.XmlFactory
 		/// If the specifier has an invalid format a FuzzParseException is thrown
 		/// </remarks>
 		/// <param name="regionSpecifier"></param>
-		public void SetFuzzRegionStart(string regionSpecifier)
+		public void SetFuzzRegionStart (string regionSpecifier)
 		{
-			KeyValuePair<string, string>? regionSpecifierPair = StringHelper.SplitToKeyValue(regionSpecifier, ":");
-			if(regionSpecifierPair == null)
-				throw new FuzzParseException("RegionStart contains invalid formatted region specifier '{0}'", regionSpecifier);
+			_regionStart = ParseRegionAddress (regionSpecifier, false);
+		}
+		
+		/// <summary>
+		/// Sets the end of the region to fuzz
+		/// </summary>
+		/// <remarks>
+		/// For details see SetFuzzRegionStart
+		/// </remarks>
+		/// <param name="regionSpecifier"></param>
+		public void SetFuzzRegionEnd (string regionSpecifier)
+		{
+			_regionEnd = ParseRegionAddress (regionSpecifier, true);
+		}
+		
+		public void AddFuzzLocation (FuzzLocationInfo fuzzLocation)
+		{
+			_fuzzLocations.Add (fuzzLocation);
+		}
+		
+		private IAddressSpecifier ParseRegionAddress (string regionSpecifier, bool allowMethodRet)
+		{
+			KeyValuePair<string, string>? regionSpecifierPair = StringHelper.SplitToKeyValue (regionSpecifier, "|");
+			if (regionSpecifierPair == null)
+				throw new FuzzParseException ("RegionStart contains invalid formatted region specifier '{0}'", regionSpecifier);
 			
 			IAddressSpecifier breakAddress = null;
 			
-			switch(regionSpecifierPair.Value.Key)
-			{
+			switch (regionSpecifierPair.Value.Key) {
 			case "method":
-				AssertSymbolTable();
-				ISymbolTableMethod method = _connector.SymbolTable.FindMethod(regionSpecifierPair.Value.Value);
-				if(method == null)
-					throw new FuzzParseException("Could not find method with name '{0}', have you realy attached debugging symbols?", regionSpecifierPair.Value.Value);
-
+				AssertSymbolTable ();
+				ISymbolTableMethod method = _connector.SymbolTable.FindMethod (regionSpecifierPair.Value.Value);
+				if (method == null)
+					throw new FuzzParseException ("Could not find method with name '{0}', have you realy attached debugging symbols?", regionSpecifierPair.Value.Value);
+				
 				breakAddress = method.BreakpointAddressSpecifier;
 				break;
-				
+			
 			case "methodret":
-				throw new FuzzParseException("Specifier 'methodret' is only allowed for RegionEnd");
-				
+				if(!allowMethodRet)
+					throw new FuzzParseException ("Specifier 'methodret' is not allowed");
+				else
+					throw new NotImplementedException();
+			
 			case "address":
 				UInt64 address;
-				if(regionSpecifierPair.Value.Value.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) &&
-				   UInt64.TryParse(regionSpecifierPair.Value.Value.Substring(2), NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out address))
-					breakAddress = new StaticAddress(address);
+				if (regionSpecifierPair.Value.Value.StartsWith ("0x", StringComparison.InvariantCultureIgnoreCase) && UInt64.TryParse (regionSpecifierPair.Value.Value.Substring (2), NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out address))
+					breakAddress = new StaticAddress (address);
 				else
-					throw new FuzzParseException("Cannot parse address in format '{0}' use '0x12345678'", regionSpecifierPair.Value.Value);
+					throw new FuzzParseException ("Cannot parse address in format '{0}' use '0x12345678'", regionSpecifierPair.Value.Value);
 				break;
-				
+			
 			case "source":
-				AssertSymbolTable();
-				
-				
+				AssertSymbolTable ();
+				breakAddress = _connector.SymbolTable.SourceToAddress (regionSpecifierPair.Value.Value);
+				if (breakAddress == null)
+					throw new FuzzParseException ("Specified source '{0}' is invalid", regionSpecifierPair.Value.Value);
+				break;
+			
 			default:
-				throw new FuzzParseException("Specifier '{0}' is invalid", regionSpecifierPair.Value.Key);
+				throw new FuzzParseException ("Specifier '{0}' is invalid", regionSpecifierPair.Value.Key);
 			}
+			
+			return breakAddress;
 		}
 		
 		private void AssertSymbolTable()

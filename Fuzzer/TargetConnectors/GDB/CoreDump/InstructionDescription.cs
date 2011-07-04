@@ -18,6 +18,8 @@
 //    limitations under the License.
 using System;
 using System.Collections.Generic;
+using System.Text;
+using Iaik.Utils;
 namespace Fuzzer.TargetConnectors.GDB.CoreDump
 {
 	/// <summary>
@@ -69,6 +71,30 @@ namespace Fuzzer.TargetConnectors.GDB.CoreDump
 		
 		public InstructionDescription ()
 		{
+		}
+		
+		public string PrettyPrint (Registers registers)
+		{
+			StringBuilder str = new StringBuilder ();
+			
+			str.AppendFormat ("#{0} insn, signal {1}\n", InstructionCount, Signal);
+			str.Append ("{\n");
+			str.AppendFormat ("  Register changes:\n");
+			
+			foreach (RegisterChange regChange in RegisterChanges) {
+				str.AppendFormat ("    ${0} (#{1}): 0x{2:X} ({3})\n", registers.FindRegisterByNum (regChange.Regnum).Name, regChange.Regnum, 
+					ByteHelper.ByteArrayToUInt64 (regChange.Value, 0, (int)registers.FindRegisterByNum (regChange.Regnum).Size), 
+					ByteHelper.ByteArrayToHexString (regChange.Value));
+			}
+			
+			str.AppendFormat ("  Memory changes:\n");
+			foreach (MemoryChange memchange in MemoryChanges) {
+				str.AppendFormat ("    0x{0:X}: {1}\n", memchange.Address, ByteHelper.ByteArrayToHexString (memchange.Value));
+			}
+			str.Append ("}\n");
+			
+			
+			return str.ToString ();
 		}
 	}
 	

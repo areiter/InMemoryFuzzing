@@ -162,22 +162,24 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// <summary>
 		/// Checks if gdb is ready and sends the next command
 		/// </summary>
-		private void ProcessQueue()
+		private void ProcessQueue ()
 		{
-			lock(_commands)
+			lock (_commands)
 			{
-				if(_commands.Count == 0 || _gdbReadyForInput == false)
+				
+				if (_commands.Count == 0 || _gdbReadyForInput == false)
 					return;
 				
 				_gdbReadyForInput = false;
-				WriteLine(_commands.Peek().Command);
-				_currentCommand = _commands.Dequeue();
+				WriteLine (_commands.Peek ().Command);
+				_currentCommand = _commands.Dequeue ();
 				
 				//If no response handler is specified, we don't need the command anymore
-				if(_currentCommand.ResponseHandler == null)
+				if (_currentCommand.ResponseHandler == null)
 				{
-					_currentCommand.CommandFinished();
+					_currentCommand.CommandFinished ();
 					_currentCommand = null;
+
 				}
 			}
 		}
@@ -215,41 +217,48 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#region Handle incoming messages
-		private void ReadThread(object data)
+		private void ReadThread (object data)
 		{
-			StringBuilder currentLine = new StringBuilder();
-			List<string> currentLines = new List<string>();
-			while(Running)
+			StringBuilder currentLine = new StringBuilder ();
+			List<string> currentLines = new List<string> ();
+			try
 			{
-				char read = ReadChar();
-				GdbLog(read);
-				
-				if(read == '\n' || read == '\r')
+				while (Running)
 				{
-					if(currentLine.ToString().Trim().Equals(string.Empty))
-						continue;
+					char read = ReadChar ();
+					GdbLog (read);
+				
+				if (read == '\n' || read == '\r')
+				{
+						if (currentLine.ToString ().Trim ().Equals (string.Empty))
+							continue;
 					
-					currentLines.Add(currentLine.ToString());
-					currentLine.Remove(0, currentLine.Length);
+					currentLines.Add (currentLine.ToString ());
+						currentLine.Remove (0, currentLine.Length);
 					
-					ReceivedNewLine(currentLines);
-				}
+					ReceivedNewLine (currentLines);
+					}
 				else
-					currentLine.Append(read);
+						currentLine.Append (read);
 				
-				lock(_commands)
+				lock (_commands)
 				{
-					if(currentLine.ToString().Trim().Equals("(gdb)"))
+						if (currentLine.ToString ().Trim ().Equals ("(gdb)"))
 					{
-						currentLine.Remove(0, currentLine.Length);
-						_gdbReadyForInput = true;
+							currentLine.Remove (0, currentLine.Length);
+							_gdbReadyForInput = true;
 						
 						//Call ReceivedNewLine for response handlers that wait for the (gdb) prompt
-						ReceivedNewLine(currentLines);
+							ReceivedNewLine (currentLines);
 						
-						ProcessQueue();
+						ProcessQueue ();
+						}
 					}
 				}
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine(e);
 			}
 		}
 		
@@ -258,26 +267,28 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// There may be direct responses to commands or async responses
 		/// </summary>
 		/// <param name="lines"></param>
-		private void ReceivedNewLine(List<string> lines)
+		private void ReceivedNewLine (List<string> lines)
 		{
-			lock(_commands)
+			lock (_commands)
 			{
-				if(_currentCommand != null && _currentCommand.ResponseHandler == null)
+				if (_currentCommand != null && _currentCommand.ResponseHandler == null)
 					_currentCommand = null;
 				
-				if(_currentCommand != null && _currentCommand.ResponseHandler != null)
+				if (_currentCommand != null && _currentCommand.ResponseHandler != null)
 				{
 					try
 					{
+
 						GDBResponseHandler.HandleResponseEnum responseEnum = (GDBResponseHandler.HandleResponseEnum)
-						    _currentCommand.ResponseHandler.HandleResponse(this, lines.ToArray(), !_gdbReadyForInput);
+						    _currentCommand.ResponseHandler.HandleResponse (this, lines.ToArray (), !_gdbReadyForInput);
 	
-						if(responseEnum == GDBResponseHandler.HandleResponseEnum.NotHandled)
+						if (responseEnum == GDBResponseHandler.HandleResponseEnum.NotHandled)
 						{
 							//TODO: Forward to permanent handlers
 						}
-						else if(responseEnum == GDBResponseHandler.HandleResponseEnum.Handled)
+						else if (responseEnum == GDBResponseHandler.HandleResponseEnum.Handled)
 						{
+							
 							//Last command and response processed
 							_currentCommand.CommandFinished();
 							_currentCommand = null;

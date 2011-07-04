@@ -1,4 +1,4 @@
-// DeleteBreakpointCmd.cs
+ // DeleteBreakpointCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -26,16 +26,19 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		private int _breakpointNum;
 		
+		private GDBResponseHandler _rh;
+		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
 		{
-			get { return null; }
+			get { return _rh; }
 		}
 		
 		
 		public override string Command 
 		{
-			get { return string.Format("delete breakpoints {0}",_breakpointNum);} 
+
+			get { return string.Format ("delete {0}",_breakpointNum);} 
 		}
 		
 		
@@ -44,6 +47,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			get { return "CMD_delete breakpoints"; }
 		}
 		
+	
 		#endregion
 		
 		/// <summary>
@@ -51,9 +55,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		/// </summary>
 		/// <param name="num">Number of the breakpoint to delete</param>
 		public DeleteBreakpointCmd (int num, GDBSubProcess gdbProc)
-			:base(gdbProc)
+			: base(gdbProc)
 		{
 			_breakpointNum = num;
+			_rh = new DeleteBreakpointRH (gdbProc);
 		}
 	}
 }

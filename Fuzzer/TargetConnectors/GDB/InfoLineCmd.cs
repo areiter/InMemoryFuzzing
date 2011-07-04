@@ -1,4 +1,4 @@
-// RecordSaveCmd.cs
+// InfoLineCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -19,23 +19,28 @@
 using System;
 namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Saves the reverse execution log to file
-	/// </summary>
-	public class RecordSaveCmd : GDBCommand
+	public class InfoLineCmd : GDBCommand
 	{
-		private string _file;
-		private RecordSaveRH _rh;
+		private string _lineArg;
+		private InfoLineRH _rh;
+		
+		public InfoLineCmd (GDBSubProcess gdbProc, string lineArg, InfoLineRH.AddressResolvedCB cb)
+			: base(gdbProc)
+		{
+			_lineArg = lineArg;
+			
+			_rh = new InfoLineRH (gdbProc,lineArg, cb);
+		}
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override string Command 
 		{
-			get { return string.Format ("record save_local {0}", _file); }
-		}	
+			get { return "info line " + _lineArg.Replace(",", ":"); }
+		}
 		
 		protected override string LogIdentifier 
 		{
-			get { return "CMD_record save"; }
+			get { return "CMD_info_line"; }
 		}
 		
 		public override GDBResponseHandler ResponseHandler 
@@ -43,13 +48,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			get { return _rh; }
 		}
 		#endregion
-		
-		public RecordSaveCmd (GDBSubProcess gdbProc, string file)
-			: base(gdbProc)
-		{
-			_file = file;
-			_rh = new RecordSaveRH (gdbProc);
-		}
+
 	}
 }
 

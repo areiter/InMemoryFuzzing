@@ -29,6 +29,9 @@ namespace Fuzzer.TargetConnectors.GDB
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
+			if (allowRequestLine)
+				return GDBResponseHandler.HandleResponseEnum.RequestLine;
+			
 			Regex r;
 			//if(_format == PrintCmd.Format.Hex)
 			//	r = new Regex(@"[\s*\S*]*=\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);

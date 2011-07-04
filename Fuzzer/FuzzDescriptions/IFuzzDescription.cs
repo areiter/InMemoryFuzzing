@@ -18,6 +18,7 @@
 //    limitations under the License.
 using System;
 using Fuzzer.TargetConnectors;
+using Fuzzer.DataGenerators;
 namespace Fuzzer.FuzzDescriptions
 {
 	/// <summary>
@@ -37,6 +38,10 @@ namespace Fuzzer.FuzzDescriptions
 		/// </summary>
 		/// <param name="fuzzController">The associated FuzzController</param>
 		void Init(FuzzController fuzzController);
+		
+		void SetFuzzTarget(ISymbolTableVariable fuzzTarget);
+		
+		void SetDataGenerator(IDataGenerator dataGenerator);
 		
 		/// <summary>
 		/// Insert the modified values here

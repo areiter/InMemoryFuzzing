@@ -7,7 +7,7 @@
 		<Host>localhost</Host>
 		
 		<!-- Specifies the port to connect at -->
-		<Port>6688</Port>
+		<Port>8899</Port>
 		
 		<!-- Tells the remote control protocol to execute a remote program.
 		     The time of execution is specified by the "trigger" argument
@@ -18,24 +18,25 @@
 		     	onfuzzstop  ... execute programm after each fuzz run
 		     	
 		     	
-		     Cmd, Arg, Env can contain variables. Variables are always encapsulated in "${...}".
+		     Cmd, Arg, Env can contain variables. Variables are always encapsulated in "{[...]}".
 		     
 		     Current valid variables are:		     
-		     remote-pid:<name> ... Retrieves the process id of the process identified by <name> from the remote system
+		     remote-pid|<name> ... Retrieves the process id of the process identified by <name> from the remote system
 		                           If multiple processes are matching <name> the first match is taken
 		  -->
 		<Exec trigger="immediate">
 		
 			<!-- Defines the command to execute -->
-			<Cmd>/opt/gdbserver/bin/gdbserver</Cmd>			
-			
-			<!-- Define the arguments to pass to the program (in order) -->
-			<Arg>--remote-debug</Arg>
-			<Arg>--attach</Arg>
+			<Cmd>/opt/gdbserver-7.2/bin/gdbserver</Cmd>				
+
+      		<!--<Arg>remote-debug</Arg>-->
 			<Arg>:1234</Arg>
-			<Arg>${remote-pid:gdb_reverse_debugging_test}</Arg>
-			<Env>LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so</Env>
+			<Arg>/home/andi/hacklet/prog0-x64</Arg>
+			<!--<Env>LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so</Env>
 			<Env>LOG_MEM_PIPE=log_mem</Env>
+			-->
+			
+			
 		</Exec>
 	</RemoteControl>
 	
@@ -49,6 +50,7 @@
 		  -->
 		<Connector>general/gdb</Connector>
 		
+		<Config key="gdb_exec">/opt/gdb/bin/gdb</Config>
 		<!-- Define some connector specific configuration values. This values are passed to the connector
 		     using the "Setup" method
 		  -->
@@ -64,7 +66,7 @@
 		<Config key="target-options">12345</Config>
 		-->
 		
-		<Config key="file">/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test</Config>
+		<Config key="file">/home/andi/hacklet/prog0-x64</Config>
 	</TargetConnection>
 	
 	<!-- Describes a single fuzz process, can contain multiple memory locations to fuzz
@@ -74,19 +76,19 @@
 		     location specifiers see below) where the fuzzer hooks in and changes the specified memory locations or variables
 		     
 		     Valid region specifiers are:
-		     	method:<method_name> ... Resolves to the start (after the prolog) of the specified function
-		     	methodret:<method_name> ... Resolves to the "end" of the specified method. A break is set to the instruction right after the method call
-		     	address:0x12345678   ... Resolves to the specified address
-		     	source:<filename>:<linenum> ... Resolves to the first instruction of the specified source code line.
+		     	method|<method_name> ... Resolves to the start (after the prolog) of the specified function
+		     	methodret|<method_name> ... Resolves to the "end" of the specified method. A break is set to the instruction right after the method call
+		     	address|0x12345678   ... Resolves to the specified address
+		     	source|<filename>,<linenum> ... Resolves to the first instruction of the specified source code line.
 		     	                                This specifier is only availabe if debugging symbols and source code
 		     	                                is available, and the symbol table implementation supports it.
 		  -->
-		<RegionStart>method:foo</RegionStart>
+		<RegionStart>source|prog0.c,25</RegionStart>
 		
 		<!-- Describes a location were the Fuzzer stops and restores the state as it was at RegionStart.
 		     For different location specifiers see FuzzStart
 		  -->
-		<RegionEnd>methodret:foo</RegionEnd>
+		<RegionEnd>address|0x4007af</RegionEnd>
 		
 		
 		<!-- Defines a single location (variable or memory location) to fuzz, and its data generator.
@@ -105,10 +107,10 @@
 		    	 calc: identifier=>any valid math expression
 		    	 
 		    	 a math expression can be 1234+6789, 
-		    	   ${0xDEADBEEF}+1234 to specify hex values, or
-		    	   ${reg:rbp}+24 (or any other valid register on the target machine) to reference to registers
+		    	   {[0xDEADBEEF]}+1234 to specify hex values, or
+		    	   {[reg:rbp]}+24 (or any other valid register on the target machine) to reference to registers
 		      -->
-			<DataRegion>variable:bar</DataRegion>
+			<DataRegion>variable|myArg</DataRegion>
 			
 			<!-- Tells the fuzzer how to fuzz the specified data region.
 			     Currently valid values are: 
@@ -122,7 +124,7 @@
 			            the correct size of the data region using the data generator, or other data
 			            on the stack may get overwritten
 			  -->
-			<DataType>fuzzerdescription/pointer_value</DataType>
+			<DataType>fuzzdescription/pointer_value</DataType>
 			<!-- Specifies the data generator to use.
 				 Currently valid datagenerators are:
 				 	'datagen/random_bytes' 
@@ -140,7 +142,7 @@
 			<DataGenArg name="minlen">1</DataGenArg>
 			
 			<!-- Maximum length of generated data -->
-			<DataGenArg name="maxlen">100</DataGenArg>
+			<DataGenArg name="maxlen">10000</DataGenArg>
 			
 			<!--
 			     Type of generated data
@@ -165,7 +167,7 @@
 	<!-- Specifies the loggers to use -->
 	<Logger>
 		<!-- Specifies the log destination (usually a local path) to use
-		     Use ${DATETIME} to include the current date and time (in fixed format) 
+		     Use {[DATETIME]} to include the current date and time (in fixed format) 
 		     in the log path
 		  --> 
 		<Destination>/home/andi/log</Destination>

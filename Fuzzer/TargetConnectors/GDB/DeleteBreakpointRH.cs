@@ -1,4 +1,4 @@
-// RecordSaveCmd.cs
+// DeleteBreakpointRH.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -19,36 +19,24 @@
 using System;
 namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Saves the reverse execution log to file
-	/// </summary>
-	public class RecordSaveCmd : GDBCommand
+	public class DeleteBreakpointRH : GDBResponseHandler
 	{
-		private string _file;
-		private RecordSaveRH _rh;
-		
-		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
-		public override string Command 
+		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
+		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
-			get { return string.Format ("record save_local {0}", _file); }
-		}	
-		
-		protected override string LogIdentifier 
-		{
-			get { return "CMD_record save"; }
+			return GDBResponseHandler.HandleResponseEnum.Handled;
 		}
 		
-		public override GDBResponseHandler ResponseHandler 
+		
+		public override string LogIdentifier 
 		{
-			get { return _rh; }
+			get {return "RH_delete <id>";}
 		}
+		
 		#endregion
-		
-		public RecordSaveCmd (GDBSubProcess gdbProc, string file)
-			: base(gdbProc)
+		public DeleteBreakpointRH (GDBSubProcess subProc)
+			:base(subProc)
 		{
-			_file = file;
-			_rh = new RecordSaveRH (gdbProc);
 		}
 	}
 }

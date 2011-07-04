@@ -25,6 +25,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Fuzzer.TargetConnectors;
 using Iaik.Utils.CommonFactories;
+using Fuzzer.DataGenerators;
+using Fuzzer.FuzzDescriptions;
+using Fuzzer.DataLoggers;
 namespace Fuzzer.XmlFactory
 {
 	/// <summary>
@@ -82,6 +85,15 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		private RemoteExecutionInfo _currentRemoteExecInfo = null;
 		
+		/// <summary>
+		/// contains all defined fuzz descriptions
+		/// </summary>
+		private List<FuzzDescriptionInfo> _fuzzDescriptions = new List<FuzzDescriptionInfo>();
+		
+		/// <summary>
+		/// Contains all defined loggers
+		/// </summary>
+		private List<IDataLogger> _loggers = new List<IDataLogger>();
 		
 		public XmlFuzzFactory (string path)
 		{
@@ -96,10 +108,33 @@ namespace Fuzzer.XmlFactory
 		/// <summary>
 		/// Initializes the fuzzing environment
 		/// </summary>
-		public void Init()
+		public void Init ()
 		{
-			InitRemote();
-			InitTargetConnection();
+			InitRemote ();
+			InitTargetConnection ();
+			InitFuzzDescription ();
+			InitLoggers ();
+		}
+		
+		public FuzzController[] CreateFuzzController ()
+		{
+			List<FuzzController> fuzzControllers = new List<FuzzController> ();
+			foreach (FuzzDescriptionInfo info in _fuzzDescriptions)
+			{
+				List<IFuzzDescription> fuzzDescriptions = new List<IFuzzDescription> ();
+				foreach (FuzzLocationInfo desc in info.FuzzLocations)
+					fuzzDescriptions.Add (desc.FuzzDescription);
+			
+				IBreakpoint snapshot = _connector.SetSoftwareBreakpoint (info.RegionStart.ResolveAddress ().Value, 0, "snapshot");
+				IBreakpoint restore = _connector.SetSoftwareBreakpoint (info.RegionEnd.ResolveAddress ().Value, 0, "restore");
+				
+				fuzzControllers.Add (new FuzzController (_connector, snapshot, restore,
+					new LoggerCollection (_loggers.ToArray ()), fuzzDescriptions.ToArray ()));
+			
+			}
+			
+			return fuzzControllers.ToArray ();
+			
 		}
 		
 		/// <summary>
@@ -157,16 +192,16 @@ namespace Fuzzer.XmlFactory
 		/// Execute all programs that are registered for the specified trigger
 		/// </summary>
 		/// <param name="toExec"></param>
-		private void RemoteExec(ExecutionTriggerEnum toExec)
+		private void RemoteExec (ExecutionTriggerEnum toExec)
 		{
-			if(_triggeredExecutions.ContainsKey(toExec))
+			if (_triggeredExecutions.ContainsKey (toExec))
 			{
-				foreach(RemoteExecCommand cmdExec in _triggeredExecutions[toExec])
+				foreach (RemoteExecCommand cmdExec in _triggeredExecutions[toExec])
 				{
 					_currentRemoteExecInfo = 
-						new RemoteExecutionInfo(cmdExec);
+						new RemoteExecutionInfo (cmdExec);
 		
-					_remoteControlProtocol.SendCommand(cmdExec);
+					_currentRemoteExecInfo.SendCommand (_remoteControlProtocol);
 					
 					if(!_currentRemoteExecInfo.SyncEvent.WaitOne(5000))
 						throw new ArgumentException(
@@ -207,15 +242,114 @@ namespace Fuzzer.XmlFactory
 		}
 		
 		/// <summary>
+		/// Reads all fuzzDescriptions
+		/// TODO: currently only the first fuzz description is read
+		/// </summary>
+		private void InitFuzzDescription ()
+		{
+			XmlElement fuzzDescriptionRoot = (XmlElement)_doc.DocumentElement.SelectSingleNode ("FuzzDescription");
+			
+			if (fuzzDescriptionRoot == null)
+				throw new ArgumentException ("Could not find 'fuzzDescriptionRoot' node");
+			
+			_fuzzDescriptions.Add (ReadFuzzDescription (fuzzDescriptionRoot));
+		}
+		
+		/// <summary>
+		/// Initializes all defined loggers
+		/// </summary>
+		private void InitLoggers ()
+		{
+			XmlElement destinationNode = (XmlElement)_doc.DocumentElement.SelectSingleNode("Logger/Destination");
+			if(destinationNode == null)
+				throw new FuzzParseException("Could not find logger destination node");
+			
+			string destination = destinationNode.InnerText;
+			
+			foreach(XmlElement useLoggerNode in _doc.DocumentElement.SelectNodes("Logger/UseLogger"))
+			{
+				switch(useLoggerNode.GetAttribute("name"))
+				{
+				case "datagenlogger":
+				{
+					DataGeneratorLogger datagenLogger = new DataGeneratorLogger(destination);
+					foreach(var fuzzDescInfo in _fuzzDescriptions)
+					{
+						foreach(var fuzzLocationInfo in fuzzDescInfo.FuzzLocations)
+							fuzzLocationInfo.DataGenerator.SetLogger(datagenLogger);
+					}
+					_loggers.Add(datagenLogger);
+					break;
+				}
+				case "connectorlogger":
+				{
+					_loggers.Add(_connector.CreateLogger(destination));
+					break;
+				}
+				case "stackframelogger":
+				{
+					_loggers.Add(new StackFrameLogger(_connector, destination));
+					break;
+				}
+				case "remotepipelogger":
+				{
+					if(_remoteControlProtocol != null)
+					{
+						string[] pipeNames = XmlHelper.ReadStringArray(useLoggerNode, "PipeName");
+						_loggers.Add(new RemotePipeLogger(_remoteControlProtocol, destination, pipeNames));
+					}
+					break;
+				}
+					
+				}
+			}
+		}
+		
+		/// <summary>
 		/// Reads a single FuzzDescription Tag and generates 
 		/// a FuzzDescriptionInfo object
 		/// </summary>
 		/// <param name="rootNode">
 		/// A <see cref="XmlElement"/>
 		/// </param>
-		private FuzzDescriptionInfo ReadFuzzDescription(XmlElement rootNode)
+		private FuzzDescriptionInfo ReadFuzzDescription (XmlElement rootNode)
 		{
+			FuzzDescriptionInfo fuzzDescription = new FuzzDescriptionInfo (_connector);
+			fuzzDescription.SetFuzzRegionStart (XmlHelper.ReadString (rootNode, "RegionStart"));
+			fuzzDescription.SetFuzzRegionEnd (XmlHelper.ReadString (rootNode, "RegionEnd"));
+		
+			foreach (XmlElement fuzzLocationNode in rootNode.SelectNodes ("FuzzLocation"))
+				fuzzDescription.AddFuzzLocation (ReadFuzzLocation (fuzzLocationNode));
 			
+			return fuzzDescription;
+		}
+		
+		/// <summary>
+		/// Reads a single FuzzLocation with its datagenerator and data type
+		/// </summary>
+		/// <param name="rootNode"></param>
+		/// <returns></returns>
+		private FuzzLocationInfo ReadFuzzLocation (XmlElement rootNode)
+		{
+			FuzzLocationInfo fuzzLocationInfo = new FuzzLocationInfo (_connector);
+			fuzzLocationInfo.SetDataRegion (XmlHelper.ReadString (rootNode, "DataRegion"));
+			
+			IDataGenerator dataGen = GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<IDataGenerator> (
+				XmlHelper.ReadString (rootNode, "DataGenerator"));
+			IDictionary<string, string> arguments = new Dictionary<string, string> ();
+			foreach (XmlElement datagenArgNode in rootNode.SelectNodes ("DataGenArg"))
+				arguments.Add (datagenArgNode.GetAttribute ("name"), datagenArgNode.InnerText);
+			dataGen.Setup (arguments);
+			
+			fuzzLocationInfo.DataGenerator = dataGen;
+			
+			IFuzzDescription fuzzDescription = GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<IFuzzDescription> (
+				XmlHelper.ReadString (rootNode, "DataType"));
+			fuzzDescription.SetDataGenerator (dataGen);
+			fuzzDescription.SetFuzzTarget (fuzzLocationInfo.DataRegion);
+			fuzzLocationInfo.FuzzDescription = fuzzDescription;
+			
+			return fuzzLocationInfo;
 		}
 
 		/// <summary>

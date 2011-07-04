@@ -19,6 +19,8 @@
 using System;
 using Fuzzer.RemoteControl;
 using System.Threading;
+using Iaik.Utils;
+using System.Collections.Generic;
 namespace Fuzzer.XmlFactory
 {
 	/// <summary>
@@ -89,6 +91,65 @@ namespace Fuzzer.XmlFactory
 		public RemoteExecutionInfo (RemoteExecCommand cmd)
 		{
 			_cmd = cmd;
+		}
+		
+		public void SendCommand (RemoteControlProtocol r)
+		{
+			RemoteProcessInfo[] processes = null;
+			ManualResetEvent evt = new ManualResetEvent (false);
+			
+			r.RemoteProcessInfo += delegate(RemoteProcessInfo[] lProcesses) {
+				processes = lProcesses;
+				evt.Set ();
+			};
+			
+			
+			
+			SimpleFormatter f = new SimpleFormatter ();
+			f.OnGetParameter += delegate(string parameterName) {
+				KeyValuePair<string, string>? keyP = StringHelper.SplitToKeyValue (parameterName, "|");
+				if (keyP == null)
+					throw new ArgumentException ("Invalid variable speciication");
+				
+				switch (keyP.Value.Key)
+				{
+				case "remote-pid":
+					if (processes == null)
+					{
+						r.RemoteProcesses ();
+						evt.WaitOne ();
+					}
+					RemoteProcessInfo procInfo = FindProcess (processes, keyP.Value.Value);
+					if (procInfo == null)
+						throw new ArgumentException (string.Format ("Could not find process '{0}'", keyP.Value.Value));
+					return procInfo.Pid.ToString ();
+				
+				default:
+					throw new NotSupportedException ("The specified variable is not supported");
+				}
+			};
+			
+			string newCmd = f.Format (_cmd.Path);
+			List<string> newArgs = new List<string> ();
+			foreach (string arg in _cmd.Args)
+				newArgs.Add (f.Format (arg));
+			
+			List<string> newEnv = new List<string> ();
+			foreach (String env in _cmd.EnvP)
+				newEnv.Add (f.Format (env));
+			
+			r.SendCommand (new RemoteExecCommand (_cmd.Name, newCmd, newArgs, newEnv));
+		}
+		
+		private RemoteProcessInfo FindProcess (RemoteProcessInfo[] processes, string searchString)
+		{
+			foreach (RemoteProcessInfo procInfo in processes)
+			{
+				if (procInfo.Command.Contains (searchString))
+					return procInfo;
+			}
+			
+			return null;
 		}
 	}
 }

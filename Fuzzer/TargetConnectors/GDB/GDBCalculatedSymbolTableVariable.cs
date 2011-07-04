@@ -1,4 +1,4 @@
-// RecordSaveCmd.cs
+// GDBCalculatedSymbolTableVariable.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -19,37 +19,35 @@
 using System;
 namespace Fuzzer.TargetConnectors.GDB
 {
-	/// <summary>
-	/// Saves the reverse execution log to file
-	/// </summary>
-	public class RecordSaveCmd : GDBCommand
+	public class GDBCalculatedSymbolTableVariable : CalculatedSymbolTableVariable
 	{
-		private string _file;
-		private RecordSaveRH _rh;
 		
-		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
-		public override string Command 
+		public GDBCalculatedSymbolTableVariable (GDBConnector connector, string expression, int size)
+			: base(connector, expression, size)
 		{
-			get { return string.Format ("record save_local {0}", _file); }
-		}	
-		
-		protected override string LogIdentifier 
-		{
-			get { return "CMD_record save"; }
+
 		}
 		
-		public override GDBResponseHandler ResponseHandler 
+		#region implemented abstract members of Fuzzer.TargetConnectors.CalculatedSymbolTableVariable
+		public override ISymbolTableVariable Dereference ()
 		{
-			get { return _rh; }
+			return GDBSymbolTableVariable.InternalDereference ((GDBConnector)_connector, Address, Size);
 		}
+
+
+		public override ISymbolTableVariable Dereference (int index)
+		{
+			UInt64? address = Address;
+			if (address == null)
+				return null;
+			else
+				address = address.Value + (UInt64)(index * Size);
+			
+			return GDBSymbolTableVariable.InternalDereference ((GDBConnector)_connector, address, Size);
+		}
+		
 		#endregion
 		
-		public RecordSaveCmd (GDBSubProcess gdbProc, string file)
-			: base(gdbProc)
-		{
-			_file = file;
-			_rh = new RecordSaveRH (gdbProc);
-		}
 	}
 }
 

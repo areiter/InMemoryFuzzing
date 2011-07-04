@@ -104,7 +104,7 @@ namespace Fuzzer.TargetConnectors.GDB.CoreDump
 		/// </summary>
 		private List<InstructionDescription> _recordedInstructions = null;
 		
-		public GDBProcessRecordSection (BfdStream stream, Registers registers)
+		public GDBProcessRecordSection (Stream stream, Registers registers)
 		{
 			_registers = registers;
 			Read (stream);

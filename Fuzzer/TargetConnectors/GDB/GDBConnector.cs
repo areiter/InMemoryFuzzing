@@ -27,6 +27,7 @@ using System.Threading;
 using System.IO;
 using System.Text;
 using Fuzzer.TargetConnectors.RegisterTypes;
+using Fuzzer.DataLoggers;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
@@ -245,21 +246,25 @@ namespace Fuzzer.TargetConnectors.GDB
 
 		public IBreakpoint SetSoftwareBreakpoint (ulong address, ulong size, string identifier)
 		{
-			int breakpointNum = 0;
-			ManualResetEvent evt = new ManualResetEvent(false);
+			int? breakpointNum = 0;
+			ManualResetEvent evt = new ManualResetEvent (false);
 			
 			
-			QueueCommand(new SetBreakpointCmd(address,
-			    delegate(int num, UInt64 breakpointAddress){
-					breakpointNum = num;
-					evt.Set();
+			QueueCommand (new SetBreakpointCmd (address,
+			    delegate(int? num, UInt64 breakpointAddress) {
+				breakpointNum = num;
+				evt.Set ();
 			}, this));
 			
-			evt.WaitOne();
-			GDBBreakpoint breakpoint = new GDBBreakpoint(this, breakpointNum, address, identifier, 
+			evt.WaitOne ();
+			
+			if (breakpointNum == null)
+				return null;
+			
+			GDBBreakpoint breakpoint = new GDBBreakpoint(this, breakpointNum.Value, address, identifier, 
 			      BreakpointRemoveFromList );
 			
-			_breakpoints.Add(breakpointNum, breakpoint);
+			_breakpoints.Add(breakpointNum.Value, breakpoint);
 			
 			return breakpoint;
 		}
@@ -451,23 +456,35 @@ namespace Fuzzer.TargetConnectors.GDB
 			return null;
 		}
 		
-		public IAddressSpecifier SourceToAddress(string file, int line)
+		public IAddressSpecifier SourceToAddress (string lineArg)
 		{
 			IAddressSpecifier address = null;
-			ManualResetEvent evt = new ManualResetEvent(false);
+			ManualResetEvent evt = new ManualResetEvent (false);
 			
-			QueueCommand(new SetBreakpointNameCmd( new SimpleSymbol(file + ":" + line.ToString()),
-			       delegate(int breakpointNum, UInt64 breakpointAddress)
-			       {
-					  address = new StaticAddress(breakpointAddress);
-						
-				      QueueCommand(new DeleteBreakpointCmd(breakpointNum, this));
-					  evt.Set();
-				   }, this));
+			QueueCommand (new InfoLineCmd (this, lineArg,
+			delegate(string localLineArg, IAddressSpecifier localAddress)
+			{
+				address = localAddress;
+				evt.Set ();
+			}));
 			evt.WaitOne();
 			return address;
 		}
 		
+		public ISymbolTableVariable CreateVariable (string name, int size)
+		{
+			return new GDBSymbolTableVariable (this, name, size);
+		}
+		
+		public ISymbolTableVariable CreateVariable (IAddressSpecifier address, int size)
+		{
+			return new GDBSymbolTableVariableAddress (this, address, size);
+		}
+		
+		public ISymbolTableVariable CreateCalculatedVariable (string expression, int size)
+		{
+			return new GDBCalculatedSymbolTableVariable (this, expression, size);
+		}
 		
 		public IAddressSpecifier ResolveSymbol(ISymbol symbol)
 		{
@@ -491,11 +508,14 @@ namespace Fuzzer.TargetConnectors.GDB
 			ManualResetEvent evt = new ManualResetEvent(false);
 			
 			QueueCommand(new SetBreakpointNameCmd(symbol,
-			       delegate(int breakpointNum, UInt64 breakpointAddress)
+			       delegate(int? breakpointNum, UInt64 breakpointAddress)
 			       {
-					  address = new StaticAddress(breakpointAddress);
+					  if(breakpointNum != null)
+				      {
+					    address = new StaticAddress(breakpointAddress);
 						
-				      QueueCommand(new DeleteBreakpointCmd(breakpointNum, this));
+				        QueueCommand(new DeleteBreakpointCmd(breakpointNum.Value, this));
+				      }
 					  evt.Set();
 				   }, this));
 			evt.WaitOne();
@@ -647,6 +667,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		public bool Connected 
 		{
 			get { return Running; }
+		}
+		
+		public IDataLogger CreateLogger (string destination)
+		{
+			return new GDBLogger (this, destination);
 		}
 		#endregion	
 

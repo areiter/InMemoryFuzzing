@@ -21,6 +21,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <Externalconsole>true</Externalconsole>
+    <Commandlineparameters>--xmlinput=/home/andi/Documents/Uni/master-thesis/src/Fuzzer/SampleConfigs/SampleFuzzDescription.xml</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
@@ -39,6 +40,10 @@
       <HintPath>log4net.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="Ciloci.Flee, Version=0.9.26.0, Culture=neutral, PublicKeyToken=c8526a021ef298ed">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Ciloci.Flee.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -140,6 +145,12 @@
     <Compile Include="XmlFactory\XmlFuzzFactory.cs" />
     <Compile Include="XmlFactory\RemoteExecutionInfo.cs" />
     <Compile Include="XmlFactory\FuzzDescriptionInfo.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoLineCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\InfoLineRH.cs" />
+    <Compile Include="XmlFactory\FuzzLocationInfo.cs" />
+    <Compile Include="TargetConnectors\CalculatedSymbolTableVariable.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBCalculatedSymbolTableVariable.cs" />
+    <Compile Include="TargetConnectors\GDB\DeleteBreakpointRH.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

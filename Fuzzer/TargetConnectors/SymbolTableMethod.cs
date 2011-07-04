@@ -56,8 +56,9 @@ namespace Fuzzer.TargetConnectors
 			set{ _parameters = value;}
 		}
 		
-		public void Resolve()
+		public void Resolve ()
 		{
+			Console.WriteLine ("Resolving: {0}", Symbol);
 			_address = _symbolTable.ResolveSymbol(this);
 			_breakpointAddress = _symbolTable.ResolveSymbolToBreakpointAddress(this);
 		}

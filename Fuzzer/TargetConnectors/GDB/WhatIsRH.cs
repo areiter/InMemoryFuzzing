@@ -75,7 +75,8 @@ namespace Fuzzer.TargetConnectors.GDB
 				return GDBResponseHandler.HandleResponseEnum.Handled;
 			}
 			
-			return GDBResponseHandler.HandleResponseEnum.NotHandled;
+			_cb (_symbol, "", null);
+			return GDBResponseHandler.HandleResponseEnum.Handled;
 		}
 		
 		#endregion

@@ -58,7 +58,7 @@ namespace Fuzzer.TargetConnectors
 		/// <param name="file"></param>
 		/// <param name="line"></param>
 		/// <returns></returns>
-		IAddressSpecifier SourceToAddress(string file, int line);
+		IAddressSpecifier SourceToAddress(string lineArg);
 		
 		/// <summary>
 		/// Resolves the specified symbol to an address.
@@ -97,6 +97,31 @@ namespace Fuzzer.TargetConnectors
 		/// <param name="method">A <see cref="ISymbolTableMethod"/></param>
 		/// <returns>A <see cref="ISymbolTableVariable[]"/></returns>
 		ISymbolTableVariable[] GetParametersForMethod(ISymbolTableMethod method);
+		
+		/// <summary>
+		/// Creates a (Connector-specific) ISymbolTableVariable for the given variable-name.
+		/// This can also be a local variable, which is not valid all the time, care yourself
+		/// if it is possible to access the variable or not
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		ISymbolTableVariable CreateVariable(string name, int size);
+		
+		/// <summary>
+		/// Creates a (Connector-specific) ISymbolTableVariable for the given address.
+		/// </summary>
+		/// <param name="address"></param>
+		/// <returns></returns>
+		ISymbolTableVariable CreateVariable (IAddressSpecifier address, int size);
+		
+		/// <summary>
+		/// Creates a calculated symbol table variable
+		/// </summary>
+		/// <param name="expression"></param>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		ISymbolTableVariable CreateCalculatedVariable (string expression, int size);
+		
 	}
 	
 	/// <summary>
@@ -139,8 +164,7 @@ namespace Fuzzer.TargetConnectors
 		ISymbolTableVariable[] Parameters{ get; }
 		
 		/// <summary>
-		/// Resolves the symbol to an address, call with caution, it depends on the symbol table implementation
-		/// if it is allowed to call this method
+		/// Resolves the symbol to an address, call with caution.
 		/// </summary>
 		void Resolve();
 		

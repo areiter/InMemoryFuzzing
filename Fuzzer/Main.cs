@@ -20,132 +20,141 @@ using System.Threading;
 using System.Text;
 using Fuzzer.TargetConnectors.GDB;
 using Fuzzer.DataLoggers;
+using Fuzzer.XmlFactory;
 
 namespace Fuzzer
 {
 	class MainClass
 	{
+		private static FuzzController[] _fuzzControllers = null;
+		
 		
 		public static void Main (string[] args)
 		{
-			
-//			NetworkStream netStream = RemoteControl.RemoteControlConnectionBuilder.Connect ("127.0.0.1", 8899);
-//			RemoteControl.RemoteControlProtocol p = new RemoteControl.RemoteControlProtocol ();
-//			p.PipeOpened += HandlerPipeOpened;
-//			p.PipeClosed += HandlerPipeClosed;
-//			p.PipeData += HandlerPipeData;
-//			p.RemoteProcessInfo += HandlerRemoteProcessInfo;
-//			p.SetConnection (netStream);
-			//p.RemoteEcho ("TEST");
-			
-//			p.RemoteExec ("ls", "/bin/ls", 
-//				new List<string> (new string[] { 
-//					"-l", "-a"
-//			}), 
-//				new List<string> (new string[] {
-//					"LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so",
-//					"LOG_MEM_PIPE=test_pipe"
-//			}));
+//			Registers registers;
+//			using(FileStream registerStream = File.OpenRead("/home/andi/Documents/Uni/master-thesis/src/test_data/x86-64.registers"))
+//				registers = StreamHelper.ReadTypedStreamSerializable<Registers>(registerStream);
 //			
-//			p.RemoteRequestPipe ("test_pipe");
-//			//p.RemoteProcesses ();
-//			Thread.Sleep (-1);
+//			GDBProcessRecordSection processRecord;
+//			using (FileStream recordStream = File.OpenRead ("/home/andi/Documents/Uni/master-thesis/src/test_data/gdb_record"))
+//				processRecord = new GDBProcessRecordSection(recordStream, registers);
+//			
+//			foreach(InstructionDescription insn in processRecord)
+//			{
+//				Console.WriteLine(insn.PrettyPrint(registers));
+//			}
+//			//GDBCoreDumpSection s = new GDBProcessRecordSection(
+//			AppDomain.CurrentDomain.UnhandledException += HandleAppDomainCurrentDomainUnhandledException;
 			
-//			GDBCoreDump coreDump = new GDBCoreDump("/home/andi/hacklet/prog0-x64.execution_log", null, Registers.CreateFromFile("/home/andi/x86-64.registers"));
-//			GDBProcessRecordSection processRecord = coreDump.GetProcessRecordSection();
-
-			SetupLogging();
-			TestApamaLinux();
-		}
-
-		static void HandlerRemoteProcessInfo (RemoteProcessInfo[] processes)
-		{
-			Console.WriteLine ("aiaiai");
-		}
-
-		static void HandlerPipeData (int pipeId, string pipeName, Byte[] data, int index, int offset)
-		{
-			Console.WriteLine ("PIPEDATA [{0}-{1}]: {2}", pipeId, pipeName, Encoding.ASCII.GetString (data, index, offset));
-		}
-
-		static void HandlerPipeClosed (int pipeId, string pipeName)
-		{
-			Console.WriteLine ("Pipe '{0}' closed", pipeName);
-		}
-
-		static void HandlerPipeOpened (int pipeId, string pipeName)
-		{
-			Console.WriteLine ("Pipe '{0}' opened", pipeName);
-		}
-		
-		private static void TestApamaLinux()
-		{	
-			IDictionary<string, string> config = new Dictionary<string, string>();
-			config.Add("gdb_exec", "/opt/gdb-7.2/bin/gdb");
-			config.Add("gdb_log", "stream:stderr");
+			SetupLogging ();
 			
-			//config.Add("target", "extended-remote :1234");
-			
-			config.Add("target", "run_local");
-			
-			//config.Add("target", "attach_local");
-			//config.Add("target-options", "14577");
-			
-			//config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
-			config.Add("file", "/home/andi/hacklet/prog0-x64");
-			
-			using(ITargetConnector connector = 
-				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
+			if (args == null || args.Length == 0)
+				OutputHelp (null);
+			else
 			{
-				ISymbolTable symbolTable = (ISymbolTable)connector;
-				
-				connector.Setup(config);
-				connector.Connect();
-				
-				ISymbolTableMethod main = symbolTable.FindMethod("main");
-				IBreakpoint snapshotBreakpoint = connector.SetSoftwareBreakpoint(main, 0, "break_snapshot");
-				IBreakpoint restoreBreakpoint = connector.SetSoftwareBreakpoint (0x4007b5, 0, "break_restore");
-				
-//				IFuzzDescription barVar1_Description = new SingleValueFuzzDescription(bar.Parameters[0], 
-//					new RandomByteGenerator( 4, 4, RandomByteGenerator.ByteType.All));		
-//				IFuzzDescription barVar1_readableChar = new PointerValueFuzzDescription(bar.Parameters[0],
-//					new RandomByteGenerator(5, 1000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
-				
-				connector.DebugContinue ();
-//				Registers r = ((Fuzzer.TargetConnectors.GDB.GDBConnector)connector).GetRegisters();
-//				using(FileStream fSink = new FileStream("/home/andi/x86-64.registers", FileMode.CreateNew, FileAccess.Write))
-//				{
-//					StreamHelper.WriteTypedStreamSerializable(r, fSink);
-//				}
-			 	ISymbolTableVariable argv = main.Parameters[1];
-				ISymbolTableVariable dereferencedArgv = argv.Dereference();
-				
-				DataGeneratorLogger datagenLogger = new DataGeneratorLogger("/home/andi/log");
-				IFuzzDescription fuzzArgv = new PointerValueFuzzDescription(
-					dereferencedArgv, new RandomByteGenerator(
-				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
-				IStackFrameInfo stackFrameInfo = connector.GetStackFrameInfo();
-				
-				
-				FuzzController fuzzController = new FuzzController(
-					connector,
-					snapshotBreakpoint,
-					restoreBreakpoint,
-					new LoggerCollection(
-						new GDBLogger((GDBConnector)connector, "/home/andi/log"),
-						new StackFrameLogger(connector, "/home/andi/log"),
-						datagenLogger
-					),
-					fuzzArgv);
-					
-				fuzzController.Fuzz();
+				CommandLineHandler cmdLineHandler = new CommandLineHandler ();
+				cmdLineHandler.RegisterCallback ("xmlinput", ParseXmlInput);
+				cmdLineHandler.RegisterCallback ("help", OutputHelp);
+				cmdLineHandler.Parse (args);
 			}
 			
-
-			
-			Console.ReadLine();
-			
+			if (_fuzzControllers != null)
+			{
+				foreach (FuzzController fc in _fuzzControllers)
+					fc.Fuzz ();
+			}
 		}
+
+				
+		private static void ParseXmlInput (CommandLineHandler.CommandOption cmdOption)
+		{
+			if (cmdOption.Arguments.Length == 0)
+				OutputHelp (null);
+			else
+			{
+				Console.WriteLine ("Using XmlFuzzFactory, parsing '{0}'", cmdOption.Arguments[0]);
+				XmlFuzzFactory factory = new XmlFuzzFactory (cmdOption.Arguments[0]);
+				factory.Init ();
+				_fuzzControllers = factory.CreateFuzzController ();
+			}
+		}
+
+		private static void OutputHelp (CommandLineHandler.CommandOption cmdOption)
+		{
+			Console.WriteLine ("Use --xmlinput=[path to input file]");
+			Console.WriteLine ();
+			
+			Environment.Exit (0);
+		}
+		
+//		private static void TestApamaLinux()
+//		{	
+//			IDictionary<string, string> config = new Dictionary<string, string>();
+//			config.Add("gdb_exec", "/opt/gdb-7.2/bin/gdb");
+//			config.Add("gdb_log", "stream:stderr");
+//			
+//			//config.Add("target", "extended-remote :1234");
+//			
+//			config.Add("target", "run_local");
+//			
+//			//config.Add("target", "attach_local");
+//			//config.Add("target-options", "14577");
+//			
+//			//config.Add("file", "/home/andi/Documents/Uni/master-thesis/src/test_sources/gdb_reverse_debugging_test/gdb_reverse_debugging_test");
+//			config.Add("file", "/home/andi/hacklet/prog0-x64");
+//			
+//			using(ITargetConnector connector = 
+//				GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>("general/gdb"))
+//			{
+//				ISymbolTable symbolTable = (ISymbolTable)connector;
+//				
+//				connector.Setup(config);
+//				connector.Connect();
+//				
+//				ISymbolTableMethod main = symbolTable.FindMethod("main");
+//				IBreakpoint snapshotBreakpoint = connector.SetSoftwareBreakpoint(main, 0, "break_snapshot");
+//				IBreakpoint restoreBreakpoint = connector.SetSoftwareBreakpoint (0x4007b5, 0, "break_restore");
+//				
+////				IFuzzDescription barVar1_Description = new SingleValueFuzzDescription(bar.Parameters[0], 
+////					new RandomByteGenerator( 4, 4, RandomByteGenerator.ByteType.All));		
+////				IFuzzDescription barVar1_readableChar = new PointerValueFuzzDescription(bar.Parameters[0],
+////					new RandomByteGenerator(5, 1000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
+//				
+//				connector.DebugContinue ();
+////				Registers r = ((Fuzzer.TargetConnectors.GDB.GDBConnector)connector).GetRegisters();
+////				using(FileStream fSink = new FileStream("/home/andi/x86-64.registers", FileMode.CreateNew, FileAccess.Write))
+////				{
+////					StreamHelper.WriteTypedStreamSerializable(r, fSink);
+////				}
+//			 	ISymbolTableVariable argv = main.Parameters[1];
+//				ISymbolTableVariable dereferencedArgv = argv.Dereference();
+//				
+//				DataGeneratorLogger datagenLogger = new DataGeneratorLogger("/home/andi/log");
+////				IFuzzDescription fuzzArgv = new PointerValueFuzzDescription(
+////					dereferencedArgv, new RandomByteGenerator(
+////				                          100, 10000, RandomByteGenerator.ByteType.PrintableASCIINullTerminated));
+////				IStackFrameInfo stackFrameInfo = connector.GetStackFrameInfo();
+//				
+////				
+////				FuzzController fuzzController = new FuzzController(
+////					connector,
+////					snapshotBreakpoint,
+////					restoreBreakpoint,
+////					new LoggerCollection(
+////						new GDBLogger((GDBConnector)connector, "/home/andi/log"),
+////						new StackFrameLogger(connector, "/home/andi/log"),
+////						datagenLogger
+////					),
+////					fuzzArgv);
+////					
+////				fuzzController.Fuzz();
+//			}
+//			
+//
+//			
+//			Console.ReadLine();
+//			
+//		}
 		
 		
 		/// <summary>

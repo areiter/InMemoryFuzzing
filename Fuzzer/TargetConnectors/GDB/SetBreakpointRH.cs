@@ -23,7 +23,7 @@ namespace Fuzzer.TargetConnectors.GDB
 {
 	public class SetBreakpointRH : GDBResponseHandler
 	{
-		public delegate void SetBreakpointDelegate(int breakpointNum, UInt64 breakpointAddress);
+		public delegate void SetBreakpointDelegate(int? breakpointNum, UInt64 breakpointAddress);
 		
 		private SetBreakpointDelegate _cb;
 		
@@ -36,33 +36,37 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess connector, string[] responseLines, bool allowRequestLine)
 		{
-			Regex rWithFile = new Regex(@"Breakpoint\s*(?<num>\d+)\s*at\s*0x(?<at>\S*):[\s*\S*]*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Regex rWithoutFile = new Regex(@"Breakpoint\s*(?<num>\d+)\s*at\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			if (allowRequestLine)
+				return GDBResponseHandler.HandleResponseEnum.RequestLine;
+			
+			Regex rWithFile = new Regex (@"Breakpoint\s*(?<num>\d+)\s*at\s*0x(?<at>\S*):[\s*\S*]*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex rWithoutFile = new Regex (@"Breakpoint\s*(?<num>\d+)\s*at\s*0x(?<at>\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			
 			
-			foreach(string line in responseLines)
+			foreach (string line in responseLines)
 			{
-				Console.WriteLine("r: {0}", line);
 			
-				Match m = rWithFile.Match(line);
+				Match m = rWithFile.Match (line);
 				
-				if(m.Success)
+				if (m.Success)
 				{
-					_cb(int.Parse(m.Result("${num}")), UInt64.Parse(m.Result("${at}"), NumberStyles.HexNumber));
+					_cb (int.Parse (m.Result ("${num}")), UInt64.Parse (m.Result ("${at}"), NumberStyles.HexNumber));
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
 				
-				m = rWithoutFile.Match(line);
+				m = rWithoutFile.Match (line);
 				
-				if(m.Success)
+				if (m.Success)
 				{
-					_cb(int.Parse(m.Result("${num}")), UInt64.Parse(m.Result("${at}"), NumberStyles.HexNumber));
+					_cb (int.Parse (m.Result ("${num}")), UInt64.Parse (m.Result ("${at}"), NumberStyles.HexNumber));
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
-				
+			
 			}
 			
-			return GDBResponseHandler.HandleResponseEnum.NotHandled;
+			//Undefined response
+			_cb (null, 0);
+			return GDBResponseHandler.HandleResponseEnum.Handled;
 		}
 		
 		#endregion

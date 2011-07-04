@@ -48,10 +48,8 @@ namespace Fuzzer.FuzzDescriptions
 		/// </summary>
 		private byte[] _currentFuzzData = null;
 		
-		public SingleValueFuzzDescription (ISymbolTableVariable fuzzTarget, IDataGenerator dataGenerator)
-		{
-			_fuzzTarget = fuzzTarget;
-			_dataGenerator = dataGenerator;
+		public SingleValueFuzzDescription ()
+		{			
 		}
 	
 
@@ -59,6 +57,16 @@ namespace Fuzzer.FuzzDescriptions
 		public void Init (FuzzController fuzzController)
 		{
 			_fuzzController = fuzzController;
+		}
+
+		public void SetFuzzTarget (ISymbolTableVariable fuzzTarget)
+		{
+			_fuzzTarget = fuzzTarget;
+		}
+
+		public void SetDataGenerator (IDataGenerator dataGenerator)
+		{
+			_dataGenerator = dataGenerator;
 		}
 
 		public void Run (ref ISnapshot snapshot)

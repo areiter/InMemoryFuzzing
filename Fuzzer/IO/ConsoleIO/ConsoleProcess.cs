@@ -107,11 +107,12 @@ namespace Fuzzer.IO.ConsoleIO
 		/// Reads the next character from the stdout of the target process
 		/// </summary>
 		/// <returns></returns>
-		protected virtual char ReadChar()
+		protected virtual char ReadChar ()
 		{
-			AssertProcess();
+			AssertProcess ();
 			
-			return (char)Output.Read();
+			
+			return (char)Output.Read ();
 		}
 		
 		/// <summary>

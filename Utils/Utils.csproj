@@ -97,6 +97,7 @@
     <Compile Include="IO\OneTimeStream.cs" />
     <Compile Include="IO\MultiTextReader.cs" />
     <Compile Include="XmlHelper.cs" />
+    <Compile Include="SimpleFormatter.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

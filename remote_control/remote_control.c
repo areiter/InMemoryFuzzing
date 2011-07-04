@@ -151,7 +151,7 @@ void handler_echo(const byte* data, int16_t data_length){
  **/
 void
 handler_proc(const byte* data, int16_t data_length){
-  PROCTAB* proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
+  PROCTAB* proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS | PROC_FILLCOM);
     
   byte output_buffer[9000];
 
@@ -164,13 +164,18 @@ handler_proc(const byte* data, int16_t data_length){
   memset(&proc_info, 0, sizeof(proc_info));
   while (readproc(proc, &proc_info) != NULL) 
   { 
+    if(proc_info.cmdline == NULL)
+      continue;
+
     write_int16_t(&output_buffer[current_buffer_offset], 2);
     current_buffer_offset += sizeof(int16_t);
 
-    int cmd_len = strlen(proc_info.cmd);
+    int cmd_len = strlen(proc_info.cmdline[0]);
     byte* local_buffer = malloc(5+cmd_len);
-    snprintf(local_buffer, 5+cmd_len, "cmd=%s", proc_info.cmd);
+    snprintf(local_buffer, 5+cmd_len, "cmd=%s", proc_info.cmdline[0]);
     local_buffer[4+cmd_len] = '\0';
+
+    //printf("%d %s %s\n", cmd_len, proc_info.cmdline[0], local_buffer);
     
     write_string(&output_buffer[current_buffer_offset], 9000 - current_buffer_offset, local_buffer, 4+cmd_len); 
     free(local_buffer);
@@ -256,22 +261,20 @@ handler_exec(const byte* data, int16_t data_length){
   pid_t pid;
   int spawn_result = posix_spawn(&pid, program_path, NULL, NULL, spawn_argv, spawn_envp);
 
-  byte* status_response = malloc(sizeof(int16_t) + program_name_length + 1 + 2* sizeof(int32_t));
+  byte* status_response = malloc(sizeof(int16_t) + program_name_length  + 2* sizeof(int32_t));
   if(spawn_result != 0)
   {
-    write_string(status_response, sizeof(int16_t) + program_name_length + 1 + 2* sizeof(int32_t), program_name, program_name_length);
-    status_response[program_name_length] = '\0';
-    write_int32_t(&status_response[program_name_length + 1 + sizeof(int16_t)], 0);
-    write_int32_t(&status_response[program_name_length + 1 + sizeof(int16_t) + sizeof(int32_t)], spawn_result);
-    send_packet("REXS", status_response, sizeof(int16_t) + program_name_length + 1 + 2* sizeof(int32_t));
+    write_string(status_response, sizeof(int16_t) + program_name_length  + 2* sizeof(int32_t), program_name, program_name_length);
+    write_int32_t(&status_response[program_name_length  + sizeof(int16_t)], 0);
+    write_int32_t(&status_response[program_name_length  + sizeof(int16_t) + sizeof(int32_t)], spawn_result);
+    send_packet("REXS", status_response, sizeof(int16_t) + program_name_length + 2* sizeof(int32_t));
   }
   else
   {
-    write_string(status_response, sizeof(int16_t) + program_name_length + 1 + 2* sizeof(int32_t), program_name, program_name_length);
-    status_response[program_name_length] = '\0';
-    write_int32_t(&status_response[program_name_length + 1 + sizeof(int16_t)], pid);
-    write_int32_t(&status_response[program_name_length + 1 + sizeof(int16_t) + sizeof(int32_t)], spawn_result);
-    send_packet("REXS", status_response, sizeof(int16_t) + program_name_length + 1 + 2* sizeof(int32_t));
+    write_string(status_response, sizeof(int16_t) + program_name_length  + 2* sizeof(int32_t), program_name, program_name_length);
+    write_int32_t(&status_response[program_name_length  + sizeof(int16_t)], pid);
+    write_int32_t(&status_response[program_name_length  + sizeof(int16_t) + sizeof(int32_t)], spawn_result);
+    send_packet("REXS", status_response, sizeof(int16_t) + program_name_length + 2* sizeof(int32_t));
   }
 
 handler_exec_exit:

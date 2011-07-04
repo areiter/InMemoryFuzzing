@@ -54,14 +54,37 @@ namespace Iaik.Utils
 		/// <param name="s"></param>
 		/// <param name="delimiter"></param>
 		/// <returns></returns>
-		public static KeyValuePair<string, string>? SplitToKeyValue(string s, string delimiter)
+		public static KeyValuePair<string, string>? SplitToKeyValue (string s, string delimiter)
 		{
-			string[] splitted = s.Split(new string[]{delimiter}, 2, StringSplitOptions.RemoveEmptyEntries);
+			string[] splitted = s.Split (new string[] { delimiter }, 2, StringSplitOptions.RemoveEmptyEntries);
 			
-			if(splitted.Length != 2)
+			if (splitted.Length != 2)
 				return null;
 			
-			return new KeyValuePair<string, string>(splitted[0], splitted[1]);
+			return new KeyValuePair<string, string> (splitted[0], splitted[1]);
 		}
+		
+		public delegate string VariableDetectedCB(string name);
+		
+		
+		/// <summary>
+		/// Looks for {[..]} constructions in the specified expression,
+		/// and calls the callback for each of them replacing its occurance with the
+		/// return value of the callback
+		/// </summary>
+		/// <param name="expression"></param>
+		/// <param name="cb"></param>
+		/// <returns></returns>
+		public static string ReplaceVariables (string expression, VariableDetectedCB cb)
+		{
+			SimpleFormatter f = new SimpleFormatter ();
+			f.OnGetParameter += delegate(string parameterName) {
+				return cb (parameterName);
+			};
+			
+			
+			return f.Format (expression);
+		}
+
 	}
 }
