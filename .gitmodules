@@ -1,0 +1,3 @@
+[submodule "gdb"]
+	path = gdb
+	url = gitosis@server1.wiffzack.com:uni/master-thesis/gdb
