@@ -167,7 +167,7 @@ namespace Fuzzer.TargetConnectors
 		/// <summary>
 		/// A Breakpoint has been hit
 		/// </summary>
-		Breakpoint,
+		Breakpoint = 0,
 		
 		/// <summary>
 		/// The program exited

@@ -33,7 +33,8 @@ namespace Fuzzer
 		protected ISnapshot _snapshot;
 		protected IBreakpoint _restoreBreakpoint;
 		protected IDataLogger _dataLogger;
-		
+		protected ErrorLog _errorLog = null;
+		protected string _logDestination;
 		protected Queue<IFuzzDescription> _fuzzDescriptions = new Queue<IFuzzDescription>(); 
 			
 		
@@ -50,7 +51,7 @@ namespace Fuzzer
 		/// <param name="connector">connector to use</param>
 		/// <param name="snapshotBreakpoint">Location to create a snapshot</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
-		public FuzzController (ITargetConnector connector, IBreakpoint snapshotBreakpoint, IBreakpoint restoreBreakpoint, 
+		public FuzzController (ITargetConnector connector, IBreakpoint snapshotBreakpoint, IBreakpoint restoreBreakpoint, string logDestination,
 			IDataLogger logger, params IFuzzDescription[] fuzzDescriptions)
 		{
 			_connector = connector;
@@ -58,6 +59,7 @@ namespace Fuzzer
 			_snapshot = null;
 			_restoreBreakpoint = restoreBreakpoint;
 			_dataLogger = logger;
+			_logDestination = logDestination;
 			
 			InitFuzzDescriptions (fuzzDescriptions);
 		}
@@ -69,7 +71,7 @@ namespace Fuzzer
 		/// <param name="connector">connector to use</param>
 		/// <param name="snapshot">The snapshot to restore once restore Breakpoint is reachead</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
-		public FuzzController (ITargetConnector connector, ISnapshot snapshot, IBreakpoint restoreBreakpoint, 
+		public FuzzController (ITargetConnector connector, ISnapshot snapshot, IBreakpoint restoreBreakpoint, string logDestination,
 			IDataLogger logger, params IFuzzDescription[] fuzzDescriptions)
 		{
 			_connector = connector;
@@ -77,7 +79,9 @@ namespace Fuzzer
 			_snapshot = snapshot;
 			_restoreBreakpoint = restoreBreakpoint;
 			_dataLogger = logger;
+			_logDestination = logDestination;
 			
+			_errorLog = new ErrorLog (_logDestination);
 			InitFuzzDescriptions (fuzzDescriptions);
 		}
 		
@@ -106,7 +110,8 @@ namespace Fuzzer
 				}
 				else if (_snapshot != null && _connector.LastDebuggerStop.StopReason != StopReasonEnum.Breakpoint)
 				{
-					//TODO: We got an error, do the logging thing
+					_errorLog.LogDebuggerStop (_connector.LastDebuggerStop);
+
 					RestoreAndFuzz (ref loggerPrefix, morePrefix);
 				}
 				

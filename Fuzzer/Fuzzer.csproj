@@ -151,6 +151,7 @@
     <Compile Include="TargetConnectors\CalculatedSymbolTableVariable.cs" />
     <Compile Include="TargetConnectors\GDB\GDBCalculatedSymbolTableVariable.cs" />
     <Compile Include="TargetConnectors\GDB\DeleteBreakpointRH.cs" />
+    <Compile Include="DataLoggers\ErrorLog.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -166,6 +167,7 @@
     <Folder Include="DataLoggers\" />
     <Folder Include="SampleConfigs\" />
     <Folder Include="XmlFactory\" />
+    <Folder Include="Analyzers\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">

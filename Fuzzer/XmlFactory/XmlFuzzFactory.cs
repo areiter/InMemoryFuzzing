@@ -95,6 +95,11 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		private List<IDataLogger> _loggers = new List<IDataLogger>();
 		
+		/// <summary>
+		/// Destination for log operations
+		/// </summary>
+		private string _logDestination = null;
+		
 		public XmlFuzzFactory (string path)
 		{
 			if (File.Exists (path) == false)
@@ -128,7 +133,7 @@ namespace Fuzzer.XmlFactory
 				IBreakpoint snapshot = _connector.SetSoftwareBreakpoint (info.RegionStart.ResolveAddress ().Value, 0, "snapshot");
 				IBreakpoint restore = _connector.SetSoftwareBreakpoint (info.RegionEnd.ResolveAddress ().Value, 0, "restore");
 				
-				fuzzControllers.Add (new FuzzController (_connector, snapshot, restore,
+				fuzzControllers.Add (new FuzzController (_connector, snapshot, restore, _logDestination,
 					new LoggerCollection (_loggers.ToArray ()), fuzzDescriptions.ToArray ()));
 			
 			}
@@ -264,7 +269,7 @@ namespace Fuzzer.XmlFactory
 			if(destinationNode == null)
 				throw new FuzzParseException("Could not find logger destination node");
 			
-			string destination = destinationNode.InnerText;
+			_logDestination = destinationNode.InnerText;
 			
 			foreach(XmlElement useLoggerNode in _doc.DocumentElement.SelectNodes("Logger/UseLogger"))
 			{
@@ -272,7 +277,7 @@ namespace Fuzzer.XmlFactory
 				{
 				case "datagenlogger":
 				{
-					DataGeneratorLogger datagenLogger = new DataGeneratorLogger(destination);
+					DataGeneratorLogger datagenLogger = new DataGeneratorLogger(_logDestination);
 					foreach(var fuzzDescInfo in _fuzzDescriptions)
 					{
 						foreach(var fuzzLocationInfo in fuzzDescInfo.FuzzLocations)
@@ -283,12 +288,12 @@ namespace Fuzzer.XmlFactory
 				}
 				case "connectorlogger":
 				{
-					_loggers.Add(_connector.CreateLogger(destination));
+					_loggers.Add(_connector.CreateLogger(_logDestination));
 					break;
 				}
 				case "stackframelogger":
 				{
-					_loggers.Add(new StackFrameLogger(_connector, destination));
+					_loggers.Add(new StackFrameLogger(_connector, _logDestination));
 					break;
 				}
 				case "remotepipelogger":
@@ -296,7 +301,7 @@ namespace Fuzzer.XmlFactory
 					if(_remoteControlProtocol != null)
 					{
 						string[] pipeNames = XmlHelper.ReadStringArray(useLoggerNode, "PipeName");
-						_loggers.Add(new RemotePipeLogger(_remoteControlProtocol, destination, pipeNames));
+						_loggers.Add(new RemotePipeLogger(_remoteControlProtocol, _logDestination, pipeNames));
 					}
 					break;
 				}
