@@ -44,6 +44,9 @@ namespace Fuzzer.DataLoggers
 			_logPipeNames = new List<string> (logPipeNames);
 			_path = path;
 			p.PipeData += HandlerPipeData;
+			
+			foreach (string pipeName in logPipeNames)
+				p.RemoteRequestPipe (pipeName);
 		}
 
 		private void HandlerPipeData (int pipeId, string pipeName, Byte[] data, int index, int offset)
@@ -86,24 +89,13 @@ namespace Fuzzer.DataLoggers
 		/// <returns></returns>
 		private string BuildLogFile ()
 		{
-			string filename = "";
+			string filename = "";		
 			
-			StringBuilder concatPipes = new StringBuilder ();
-			foreach (string pipeName in _logPipeNames)
-			{
-				if (concatPipes.Length > 0)
-					concatPipes.Append ("_");
-				concatPipes.Append (pipeName);
-			}
-			
-			string sConcatPipes = "";
-			if (concatPipes.Length > 0)
-				sConcatPipes = "." + concatPipes.ToString ();
 			
 			if (_prefix != null && _prefix != String.Empty)
-				filename = _prefix + sConcatPipes + ".pipes";
+				filename = _prefix + ".pipes";
 			else
-				filename = "current" + sConcatPipes + ".pipes";
+				filename = "current"  + ".pipes";
 			
 			return Path.Combine (_path, filename);
 			

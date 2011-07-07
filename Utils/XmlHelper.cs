@@ -79,18 +79,44 @@ namespace Iaik.Utils
             return null;
         }
 
-        public static void WriteInt(XmlElement rootElement, string name, int? value)
+        public static void WriteInt (XmlElement rootElement, string name, int? value)
         {
-            XmlElement element = (XmlElement)rootElement.SelectSingleNode(name);
+        	XmlElement element = (XmlElement)rootElement.SelectSingleNode (name);
 
             if (element == null)
-                element = (XmlElement)rootElement.AppendChild(rootElement.OwnerDocument.CreateElement(name));
+        		element = (XmlElement)rootElement.AppendChild (rootElement.OwnerDocument.CreateElement (name));
 
             if (value == null)
-                element.InnerText = "";
-            else
-                element.InnerText = value.Value.ToString();
+        		element.InnerText = "";
+        	else
+        		element.InnerText = value.Value.ToString ();
         }
+		
+		public static void WriteInt64 (XmlElement rootElement, string name, Int64? value)
+		{
+			XmlElement element = (XmlElement)rootElement.SelectSingleNode (name);
+			
+			if (element == null)
+				element = (XmlElement)rootElement.AppendChild (rootElement.OwnerDocument.CreateElement (name));
+			
+			if (value == null)
+				element.InnerText = "";
+			else
+				element.InnerText = value.Value.ToString ();
+		}
+		
+		public static void WriteUInt64 (XmlElement rootElement, string name, UInt64? value)
+		{
+			XmlElement element = (XmlElement)rootElement.SelectSingleNode (name);
+			
+			if (element == null)
+				element = (XmlElement)rootElement.AppendChild (rootElement.OwnerDocument.CreateElement (name));
+			
+			if (value == null)
+				element.InnerText = "";
+			else
+				element.InnerText = value.Value.ToString ();
+		}
 
         public static int[] ReadIntArray(XmlElement rootElement, string name)
         {

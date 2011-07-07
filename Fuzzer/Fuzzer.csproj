@@ -152,6 +152,12 @@
     <Compile Include="TargetConnectors\GDB\GDBCalculatedSymbolTableVariable.cs" />
     <Compile Include="TargetConnectors\GDB\DeleteBreakpointRH.cs" />
     <Compile Include="DataLoggers\ErrorLog.cs" />
+    <Compile Include="Analyzers\IDataAnalyzer.cs" />
+    <Compile Include="Analyzers\ProgramErrorAnalyzer.cs" />
+    <Compile Include="Analyzers\BaseDataAnalyzer.cs" />
+    <Compile Include="Analyzers\AnalyzeController.cs" />
+    <Compile Include="Analyzers\SavedRegisterAnalyzer.cs" />
+    <Compile Include="Analyzers\SimpleHeapOverflowAnalyzer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

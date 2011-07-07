@@ -24,19 +24,18 @@
 		     remote-pid|<name> ... Retrieves the process id of the process identified by <name> from the remote system
 		                           If multiple processes are matching <name> the first match is taken
 		  -->
+		<Exec trigger="immediate">			
+			<Cmd>/home/andi/hacklet/prog0-x64</Cmd>
+			<!--<Env>LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so</Env>
+			<Env>LOG_MEM_PIPE=log_mem</Env>-->
+		</Exec>
 		<Exec trigger="immediate">
 		
 			<!-- Defines the command to execute -->
 			<Cmd>/opt/gdbserver-7.2/bin/gdbserver</Cmd>				
 
-      		<!--<Arg>remote-debug</Arg>-->
 			<Arg>:1234</Arg>
-			<Arg>/home/andi/hacklet/prog0-x64</Arg>
-			<!--<Env>LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so</Env>
-			<Env>LOG_MEM_PIPE=log_mem</Env>
-			-->
-			
-			
+			<Arg>/home/andi/hacklet/prog0-x64</Arg>	
 		</Exec>
 	</RemoteControl>
 	
@@ -88,7 +87,7 @@
 		<!-- Describes a location were the Fuzzer stops and restores the state as it was at RegionStart.
 		     For different location specifiers see FuzzStart
 		  -->
-		<RegionEnd>address|0x4007af</RegionEnd>
+		<RegionEnd>address|0x400810</RegionEnd>
 		
 		
 		<!-- Defines a single location (variable or memory location) to fuzz, and its data generator.
@@ -188,10 +187,9 @@
 		<!-- Uses the remote control protocol to listen to the specified pipe names and
 		     dumps all received data to the specified path
 		  -->
-		<UseLogger name="remotepipelogger">
-			<PipeName>logmem_pipe</PipeName>
-			<PipeName>another_pipe</PipeName>
-		</UseLogger>
+		<!--<UseLogger name="remotepipelogger">
+			<PipeName>log_mem</PipeName>
+		</UseLogger>-->
 	</Logger>
 	
 </Fuzz>

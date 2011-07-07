@@ -42,6 +42,11 @@ namespace Fuzzer.TargetConnectors.GDB
 	
 
 		#region IStackFrameInfo implementation
+		public IEnumerable<string> SavedRegisters
+		{
+			get {return _savedRegisters.Keys;}
+		}
+		
 		public IAddressSpecifier GetSavedRegisterAddress (string registerName)
 		{
 			if (_savedRegisters.ContainsKey (registerName))

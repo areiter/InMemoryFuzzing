@@ -135,7 +135,7 @@ namespace Fuzzer
 		private void IncrementLoggerPrefix (ref int loggerPrefix, string morePrefix)
 		{
 			loggerPrefix++;
-			_dataLogger.Prefix = string.Format ("{0}-{1}", loggerPrefix, morePrefix);
+			_dataLogger.Prefix = string.Format ("{0}", loggerPrefix, morePrefix);
 		}
 		
 		private void InitFuzzDescriptions (IFuzzDescription[] fuzzDescriptions)

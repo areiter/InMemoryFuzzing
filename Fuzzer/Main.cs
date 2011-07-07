@@ -21,6 +21,8 @@ using System.Text;
 using Fuzzer.TargetConnectors.GDB;
 using Fuzzer.DataLoggers;
 using Fuzzer.XmlFactory;
+using Fuzzer.Analyzers;
+using Fuzzer.TargetConnectors.RegisterTypes;
 
 namespace Fuzzer
 {
@@ -31,22 +33,26 @@ namespace Fuzzer
 		
 		public static void Main (string[] args)
 		{
-//			Registers registers;
-//			using(FileStream registerStream = File.OpenRead("/home/andi/Documents/Uni/master-thesis/src/test_data/x86-64.registers"))
-//				registers = StreamHelper.ReadTypedStreamSerializable<Registers>(registerStream);
-//			
-//			GDBProcessRecordSection processRecord;
-//			using (FileStream recordStream = File.OpenRead ("/home/andi/Documents/Uni/master-thesis/src/test_data/gdb_record"))
-//				processRecord = new GDBProcessRecordSection(recordStream, registers);
-//			
-//			foreach(InstructionDescription insn in processRecord)
-//			{
-//				Console.WriteLine(insn.PrettyPrint(registers));
-//			}
-//			//GDBCoreDumpSection s = new GDBProcessRecordSection(
-//			AppDomain.CurrentDomain.UnhandledException += HandleAppDomainCurrentDomainUnhandledException;
+			//			Registers registers;
+			//			using(FileStream registerStream = File.OpenRead("/home/andi/Documents/Uni/master-thesis/src/test_data/x86-64.registers"))
+			//				registers = StreamHelper.ReadTypedStreamSerializable<Registers>(registerStream);
+			//			
+			//			GDBProcessRecordSection processRecord;
+			//			using (FileStream recordStream = File.OpenRead ("/home/andi/Documents/Uni/master-thesis/src/test_data/gdb_record"))
+			//				processRecord = new GDBProcessRecordSection(recordStream, registers);
+			//			
+			//			foreach(InstructionDescription insn in processRecord)
+			//			{
+			//				Console.WriteLine(insn.PrettyPrint(registers));
+			//			}
+			//			//GDBCoreDumpSection s = new GDBProcessRecordSection(
+			//			AppDomain.CurrentDomain.UnhandledException += HandleAppDomainCurrentDomainUnhandledException;
 			
 			SetupLogging ();
+			
+			Analyze ("/home/andi/log");
+			return;
+			
 			
 			if (args == null || args.Length == 0)
 				OutputHelp (null);
@@ -65,7 +71,20 @@ namespace Fuzzer
 			}
 		}
 
-				
+		private static void Analyze (string destination)
+		{
+			Registers r;
+			using(FileStream fs = File.OpenRead("/home/andi/Documents/Uni/master-thesis/src/test_data/x86-64.registers"))
+				r = StreamHelper.ReadTypedStreamSerializable<Registers>(fs);
+			
+			AnalyzeController ctrl = new AnalyzeController ();
+			ctrl.Setup(destination, r, new RegisterTypeResolverX86_64(), 
+				new ProgramErrorAnalyzer(),
+				new SavedRegisterAnalyzer());
+			ctrl.Analyze();
+		}
+		
+		
 		private static void ParseXmlInput (CommandLineHandler.CommandOption cmdOption)
 		{
 			if (cmdOption.Arguments.Length == 0)
@@ -164,7 +183,7 @@ namespace Fuzzer
 		{
 			log4net.Appender.ConsoleAppender appender = new log4net.Appender.ConsoleAppender();	
 			appender.Name = "ConsoleAppender";
-			appender.Layout = new log4net.Layout.PatternLayout("[%date{dd.MM.yyyy HH:mm:ss,fff}]-%-5level-%t-[%c]: %message%newline");
+			appender.Layout = new log4net.Layout.PatternLayout("[%date{dd.MM.yyyy HH:mm:ss,fff}]-%-5level-[%c]: %message%newline");
 			log4net.Config.BasicConfigurator.Configure(appender);
 		
 			
