@@ -91,7 +91,11 @@ namespace Fuzzer.Analyzers
 				
 				if (savedRegisterAddress != null)
 				{
-					if (savedRegisterAddress.Value < address + (UInt64)size)
+					UInt64 regSize = ctrl.TargetRegisters.FindRegisterByName(savedRegisterName).Size;
+					
+					if((savedRegisterAddress.Value + regSize > address) &&
+					   (savedRegisterAddress.Value + regSize < address + (UInt64)size ||
+					   (savedRegisterAddress.Value  < address + (UInt64)size && savedRegisterAddress.Value + regSize >= address + (UInt64)size)))
 						LogSavedRegister (savedRegisterName, savedRegisterAddress.Value, address, size, insn, ctrl);
 				}
 			}
