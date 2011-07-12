@@ -181,11 +181,24 @@ namespace Fuzzer
 		/// </summary>
 		private static void SetupLogging()
 		{
+			log4net.Appender.FileAppender fileAppender = new log4net.Appender.FileAppender();
+			fileAppender.Name = "FileAppender";
+			//fileAppender.Writer = new StreamWriter("/home/andi/fuzzer.log");
+			fileAppender.ImmediateFlush = true;
+			fileAppender.Layout = new log4net.Layout.PatternLayout("[%date{dd.MM.yyyy HH:mm:ss,fff}]-%-5level-[%c]: %message%newline");
+			fileAppender.File = "/home/andi/fuzzer.log";
+			fileAppender.ActivateOptions();
+			
 			log4net.Appender.ConsoleAppender appender = new log4net.Appender.ConsoleAppender();	
 			appender.Name = "ConsoleAppender";
 			appender.Layout = new log4net.Layout.PatternLayout("[%date{dd.MM.yyyy HH:mm:ss,fff}]-%-5level-[%c]: %message%newline");
-			log4net.Config.BasicConfigurator.Configure(appender);
+			
 		
+			log4net.Appender.ForwardingAppender forwarder = new log4net.Appender.ForwardingAppender();
+			forwarder.AddAppender(fileAppender);
+			forwarder.AddAppender(appender);
+
+			log4net.Config.BasicConfigurator.Configure(forwarder);
 			
 			//_logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 		}
