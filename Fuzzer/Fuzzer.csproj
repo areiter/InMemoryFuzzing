@@ -187,5 +187,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="SampleConfigs\SampleFuzzDescription.xml" />
+    <None Include="SampleConfigs\config_paths.xml" />
   </ItemGroup>
 </Project>

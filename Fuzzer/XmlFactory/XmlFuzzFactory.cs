@@ -65,6 +65,11 @@ namespace Fuzzer.XmlFactory
 		private XmlDocument _doc;
 		
 		/// <summary>
+		/// Directory where the config file is located
+		/// </summary>
+		private string _configDir;
+		
+		/// <summary>
 		/// Connection to the target system for remote controlling
 		/// </summary>
 		private RemoteControlProtocol _remoteControlProtocol = null;
@@ -100,11 +105,22 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		private string _logDestination = null;
 		
+		/// <summary>
+		/// Contains all values included in the configuration file
+		/// </summary>
+		private IDictionary<string, string> _values = new Dictionary<string, string>();
+		
+		/// <summary>
+		/// string formatter which contains all defined values
+		/// </summary>
+		private SimpleFormatter _formatter = null;
+		
 		public XmlFuzzFactory (string path)
 		{
 			if (File.Exists (path) == false)
 				throw new FileNotFoundException (string.Format ("The specified xml description file '{0}' does not exist", path));
-			
+		
+			_configDir = Path.GetDirectoryName(path);
 			
 			_doc = new XmlDocument ();
 			_doc.Load (path);			
@@ -115,6 +131,7 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		public void Init ()
 		{
+			ParseIncludes();
 			InitRemote ();
 			InitTargetConnection ();
 			InitFuzzDescription ();
@@ -141,6 +158,54 @@ namespace Fuzzer.XmlFactory
 			return fuzzControllers.ToArray ();
 			
 		}
+
+		private void ParseIncludes()
+		{
+			_formatter = new SimpleFormatter();
+			
+			//First resolve all includes
+			foreach(XmlElement includeNode in _doc.DocumentElement.SelectNodes("Include"))
+			{
+				string fullPath;
+				if(Path.IsPathRooted(includeNode.InnerText))
+					fullPath = includeNode.InnerText;
+				else
+					fullPath = Path.Combine(_configDir, includeNode.InnerText);
+				
+				if(File.Exists(fullPath) == false)
+					throw new FileNotFoundException(string.Format(
+						"Could not find include file '{0}'", fullPath));
+				else
+				{
+					XmlDocument includeDoc = new XmlDocument();
+					
+					try
+					{
+						includeDoc.Load(fullPath);
+						
+						foreach(XmlElement valueNode in includeDoc.DocumentElement.SelectNodes("Value"))
+						{
+							string name = valueNode.GetAttribute("name");
+							string value = valueNode.InnerText;
+				
+							if(_values.ContainsKey(name))
+								_values[name] = value;
+							else
+								_values.Add(name, value);
+							
+							_formatter.DefineTextMacro(name, value);
+					
+						}
+					}
+					catch(Exception ex)
+					{
+						throw new ArgumentException(string.Format(
+							"Could not load include file '{0}' (Exception: {1})", fullPath, ex));
+					}
+				}
+			}
+
+		}
 		
 		/// <summary>
 		/// Initializes the remote control and extracts the commands to execute 
@@ -148,6 +213,9 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		private void InitRemote()
 		{
+			
+			
+			
 			if(_remoteControlProtocol != null)
 			{
 				_remoteControlProtocol.Dispose();
@@ -163,7 +231,8 @@ namespace Fuzzer.XmlFactory
 			{
 				_remoteControlProtocol = new RemoteControlProtocol();
 				_remoteControlProtocol.SetConnection(RemoteControlConnectionBuilder.Connect(
-					  XmlHelper.ReadString(remoteControlNode, "Host"), XmlHelper.ReadInt(remoteControlNode, "Port", 0)));
+					  _formatter.Format(XmlHelper.ReadString(remoteControlNode, "Host")),
+					  int.Parse(_formatter.Format(XmlHelper.ReadString(remoteControlNode, "Port")))));
 				
 				_remoteControlProtocol.ExecStatus += Handle_remoteControlProtocolExecStatus;
 			
@@ -174,13 +243,19 @@ namespace Fuzzer.XmlFactory
 						(ExecutionTriggerEnum)Enum.Parse(typeof(ExecutionTriggerEnum), execNode.GetAttribute("trigger"), true);
 					
 					
-					string cmd = XmlHelper.ReadString(execNode, "Cmd");
+					string cmd = _formatter.Format(XmlHelper.ReadString(execNode, "Cmd"));
 					
 					if(cmd == null)
 						throw new ArgumentException("Exec node without cmd");
 					
 					List<string> arguments = new List<string>(XmlHelper.ReadStringArray(execNode, "Arg"));
 					List<string> environment = new List<string>(XmlHelper.ReadStringArray(execNode, "Env"));
+					
+					for(int i = 0; i<arguments.Count; i++)
+						arguments[i] = _formatter.Format(arguments[i]);
+					
+					for(int i = 0; i<environment.Count; i++)
+						environment[i] = _formatter.Format(environment[i]);
 					
 					if(_triggeredExecutions.ContainsKey(execTrigger) == false)
 						_triggeredExecutions[execTrigger] = new List<RemoteExecCommand>();
@@ -230,7 +305,7 @@ namespace Fuzzer.XmlFactory
 			if(connectorRoot == null)
 				throw new ArgumentException("Could not find 'TargetConnection' node");
 			
-			string connectorIdentifier = XmlHelper.ReadString(connectorRoot, "Connector");
+			string connectorIdentifier = _formatter.Format(XmlHelper.ReadString(connectorRoot, "Connector"));
 			ITargetConnector connector = GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<ITargetConnector>(connectorIdentifier);
 			
 			if(connector == null)
@@ -239,7 +314,7 @@ namespace Fuzzer.XmlFactory
 			IDictionary<string, string > configuration = new Dictionary<string, string>();
 			
 			foreach(XmlElement configNode in connectorRoot.SelectNodes("Config"))
-				configuration.Add(configNode.GetAttribute("key"), configNode.InnerXml);
+				configuration.Add(configNode.GetAttribute("key"), _formatter.Format(configNode.InnerXml));
 			
 			connector.Setup(configuration);
 			connector.Connect();
@@ -269,7 +344,7 @@ namespace Fuzzer.XmlFactory
 			if(destinationNode == null)
 				throw new FuzzParseException("Could not find logger destination node");
 			
-			_logDestination = destinationNode.InnerText;
+			_logDestination = _formatter.Format(destinationNode.InnerText);
 			
 			foreach(XmlElement useLoggerNode in _doc.DocumentElement.SelectNodes("Logger/UseLogger"))
 			{
@@ -320,6 +395,7 @@ namespace Fuzzer.XmlFactory
 		private FuzzDescriptionInfo ReadFuzzDescription (XmlElement rootNode)
 		{
 			FuzzDescriptionInfo fuzzDescription = new FuzzDescriptionInfo (_connector);
+
 			fuzzDescription.SetFuzzRegionStart (XmlHelper.ReadString (rootNode, "RegionStart"));
 			fuzzDescription.SetFuzzRegionEnd (XmlHelper.ReadString (rootNode, "RegionEnd"));
 		
