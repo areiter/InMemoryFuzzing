@@ -1,6 +1,7 @@
 <Options>
-	<Value name="gdbserver_exec">/opt/gdbserver-7.2/bin/gdbserver</Value>
+	<Value name="gdbserver_exec">/opt/gdb/bin/gdbserver</Value>
 	<Value name="gdb_exec">/opt/gdb/bin/gdb</Value>
-	<Value name="hacklet_path">/home/andi/Downloads/hacklets</Value>	
-	<Value name="log_path">/home/andi/log</Value>
+	<Value name="hacklet_path">/home/andi/hacklet/</Value>	
+	<Value name="log_path">/home/andi/log/</Value>
+	<Value name="test_data_root">/home/andi/Repos/master-thesis/src/test_data/</Value>
 </Options>

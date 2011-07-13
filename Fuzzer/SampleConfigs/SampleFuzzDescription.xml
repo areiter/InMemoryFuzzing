@@ -32,11 +32,12 @@
 		     remote-pid|<name> ... Retrieves the process id of the process identified by <name> from the remote system
 		                           If multiple processes are matching <name> the first match is taken
 		  -->
-		<Exec trigger="immediate">			
+		<!--<Exec trigger="immediate">			
 			<Cmd>{[hacklet_path]}/prog0-x64</Cmd>
-			<!--<Env>LD_PRELOAD=/home/andi/Documents/Uni/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so</Env>
-			<Env>LOG_MEM_PIPE=log_mem</Env>-->
-		</Exec>
+			<Arg>dummy</Arg>
+			<Env>LD_PRELOAD=/home/andi/Repos/master-thesis/src/log_memory_allocations/liblog_memory_allocations.so</Env>
+			<Env>LOG_MEM_PIPE=log_mem</Env>
+		</Exec>-->
 		<Exec trigger="immediate">
 		
 			<!-- Defines the command to execute -->
@@ -44,6 +45,7 @@
 
 			<Arg>:1234</Arg>
 			<Arg>{[hacklet_path]}/prog0-x64</Arg>	
+			<Arg>dummy</Arg>
 		</Exec>
 	</RemoteControl>
 	
@@ -90,12 +92,12 @@
 		     	                                This specifier is only availabe if debugging symbols and source code
 		     	                                is available, and the symbol table implementation supports it.
 		  -->
-		<RegionStart>source|prog0.c,27</RegionStart>
+		<RegionStart>source|prog0.c,26</RegionStart>
 		
 		<!-- Describes a location were the Fuzzer stops and restores the state as it was at RegionStart.
 		     For different location specifiers see FuzzStart
 		  -->
-		<RegionEnd>address|0x400792</RegionEnd>
+		<RegionEnd>address|0x4007e9</RegionEnd>
 		
 		
 		<!-- Defines a single location (variable or memory location) to fuzz, and its data generator.
@@ -146,7 +148,7 @@
 			  -->
 			  
 			<!-- Minimum length of generated data -->
-			<DataGenArg name="minlen">1</DataGenArg>
+			<DataGenArg name="minlen">8000</DataGenArg>
 			
 			<!-- Maximum length of generated data -->
 			<DataGenArg name="maxlen">10000</DataGenArg>

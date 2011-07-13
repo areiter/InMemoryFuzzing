@@ -117,13 +117,16 @@ namespace Fuzzer.XmlFactory
 		
 		public XmlFuzzFactory (string path)
 		{
-			if (File.Exists (path) == false)
+			FileInfo configFile = new FileInfo(path);
+			
+			if (!configFile.Exists)
 				throw new FileNotFoundException (string.Format ("The specified xml description file '{0}' does not exist", path));
 		
-			_configDir = Path.GetDirectoryName(path);
+			
+			_configDir = configFile.DirectoryName;
 			
 			_doc = new XmlDocument ();
-			_doc.Load (path);			
+			_doc.Load (configFile.FullName);	
 		}
 		
 		/// <summary>
@@ -131,7 +134,8 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		public void Init ()
 		{
-			ParseIncludes();
+			_formatter = new SimpleFormatter();
+			XmlFactoryHelpers.ParseValueIncludes(_doc.DocumentElement, _configDir, _formatter, _values);
 			InitRemote ();
 			InitTargetConnection ();
 			InitFuzzDescription ();
@@ -159,53 +163,7 @@ namespace Fuzzer.XmlFactory
 			
 		}
 
-		private void ParseIncludes()
-		{
-			_formatter = new SimpleFormatter();
-			
-			//First resolve all includes
-			foreach(XmlElement includeNode in _doc.DocumentElement.SelectNodes("Include"))
-			{
-				string fullPath;
-				if(Path.IsPathRooted(includeNode.InnerText))
-					fullPath = includeNode.InnerText;
-				else
-					fullPath = Path.Combine(_configDir, includeNode.InnerText);
-				
-				if(File.Exists(fullPath) == false)
-					throw new FileNotFoundException(string.Format(
-						"Could not find include file '{0}'", fullPath));
-				else
-				{
-					XmlDocument includeDoc = new XmlDocument();
-					
-					try
-					{
-						includeDoc.Load(fullPath);
-						
-						foreach(XmlElement valueNode in includeDoc.DocumentElement.SelectNodes("Value"))
-						{
-							string name = valueNode.GetAttribute("name");
-							string value = valueNode.InnerText;
-				
-							if(_values.ContainsKey(name))
-								_values[name] = value;
-							else
-								_values.Add(name, value);
-							
-							_formatter.DefineTextMacro(name, value);
-					
-						}
-					}
-					catch(Exception ex)
-					{
-						throw new ArgumentException(string.Format(
-							"Could not load include file '{0}' (Exception: {1})", fullPath, ex));
-					}
-				}
-			}
-
-		}
+		
 		
 		/// <summary>
 		/// Initializes the remote control and extracts the commands to execute 

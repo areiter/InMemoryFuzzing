@@ -28,62 +28,65 @@ namespace Fuzzer
 {
 	class MainClass
 	{
-		private static FuzzController[] _fuzzControllers = null;
+		public enum ProgramMode
+		{
+			Analyze,
+			Fuzz
+		}
 		
+		private static ProgramMode? _programMode = null;
+		private static FuzzController[] _fuzzControllers = null;
+		private static AnalyzeController _analyzeController = null;
 		
 		public static void Main (string[] args)
 		{
-			//			Registers registers;
-			//			using(FileStream registerStream = File.OpenRead("/home/andi/Documents/Uni/master-thesis/src/test_data/x86-64.registers"))
-			//				registers = StreamHelper.ReadTypedStreamSerializable<Registers>(registerStream);
-			//			
-			//			GDBProcessRecordSection processRecord;
-			//			using (FileStream recordStream = File.OpenRead ("/home/andi/Documents/Uni/master-thesis/src/test_data/gdb_record"))
-			//				processRecord = new GDBProcessRecordSection(recordStream, registers);
-			//			
-			//			foreach(InstructionDescription insn in processRecord)
-			//			{
-			//				Console.WriteLine(insn.PrettyPrint(registers));
-			//			}
-			//			//GDBCoreDumpSection s = new GDBProcessRecordSection(
-			//			AppDomain.CurrentDomain.UnhandledException += HandleAppDomainCurrentDomainUnhandledException;
-			
 			SetupLogging ();
-			
-			Analyze ("/home/andi/log");
-			return;
-			
+		
 			
 			if (args == null || args.Length == 0)
 				OutputHelp (null);
 			else
 			{
 				CommandLineHandler cmdLineHandler = new CommandLineHandler ();
+				cmdLineHandler.RegisterCallback ("fuzz", SetFuzzingMode );
+				cmdLineHandler.RegisterCallback ("analyze", SetAnalyzationMode );
 				cmdLineHandler.RegisterCallback ("xmlinput", ParseXmlInput);
 				cmdLineHandler.RegisterCallback ("help", OutputHelp);
 				cmdLineHandler.Parse (args);
 			}
 			
-			if (_fuzzControllers != null)
+			if(_programMode == null)
+			{
+				OutputHelp(null);
+				return;
+			}
+				
+			if (_programMode.Value == MainClass.ProgramMode.Fuzz && 
+			    _fuzzControllers != null)
 			{
 				foreach (FuzzController fc in _fuzzControllers)
 					fc.Fuzz ();
 			}
-		}
-
-		private static void Analyze (string destination)
-		{
-			Registers r;
-			using(FileStream fs = File.OpenRead("/home/andi/Documents/Uni/master-thesis/src/test_data/x86-64.registers"))
-				r = StreamHelper.ReadTypedStreamSerializable<Registers>(fs);
+			else if(_programMode.Value == MainClass.ProgramMode.Analyze &&
+			        _analyzeController != null)
+				_analyzeController.Analyze();
+			else
+			{
+				Console.WriteLine("Could not find a configuration \n\n");
+				OutputHelp(null);
+			}
 			
-			AnalyzeController ctrl = new AnalyzeController ();
-			ctrl.Setup(destination, r, new RegisterTypeResolverX86_64(), 
-				new ProgramErrorAnalyzer(),
-				new SavedRegisterAnalyzer());
-			ctrl.Analyze();
+		}
+	
+		private static void SetFuzzingMode (CommandLineHandler.CommandOption cmdOption)
+		{
+			_programMode = ProgramMode.Fuzz;
 		}
 		
+		private static void SetAnalyzationMode (CommandLineHandler.CommandOption cmdOption)
+		{
+			_programMode = ProgramMode.Analyze;
+		}
 		
 		private static void ParseXmlInput (CommandLineHandler.CommandOption cmdOption)
 		{
@@ -91,16 +94,33 @@ namespace Fuzzer
 				OutputHelp (null);
 			else
 			{
-				Console.WriteLine ("Using XmlFuzzFactory, parsing '{0}'", cmdOption.Arguments[0]);
-				XmlFuzzFactory factory = new XmlFuzzFactory (cmdOption.Arguments[0]);
-				factory.Init ();
-				_fuzzControllers = factory.CreateFuzzController ();
+				if(_programMode == null)
+				{
+					Console.WriteLine("Missing program mode (fuzz|analyze). Program mode always needs to be the first argument\n\n");
+					OutputHelp(null);
+				}
+				else if(_programMode.Value == MainClass.ProgramMode.Fuzz)
+				{
+					Console.WriteLine ("Using XmlFuzzFactory, parsing '{0}'", cmdOption.Arguments[0]);
+					XmlFuzzFactory factory = new XmlFuzzFactory (cmdOption.Arguments[0]);
+					factory.Init ();
+					_fuzzControllers = factory.CreateFuzzController ();
+				}
+				else if(_programMode.Value == MainClass.ProgramMode.Analyze)
+				{
+					Console.WriteLine("Using XmlAnalyzeFactory, parsing '{0}'", cmdOption.Arguments[0]);
+					XmlAnalyzeFactory factory = new XmlAnalyzeFactory(cmdOption.Arguments[0]);
+					factory.Init();
+					_analyzeController = factory.CreateAnalyzeController();
+				}
+				else
+					throw new NotImplementedException(string.Format("The specified program mode '{0}' it not implemented yet", _programMode.Value));
 			}
 		}
 
 		private static void OutputHelp (CommandLineHandler.CommandOption cmdOption)
 		{
-			Console.WriteLine ("Use --xmlinput=[path to input file]");
+			Console.WriteLine ("Use {--fuzz|--analyze} --xmlinput=[path to input file]");
 			Console.WriteLine ();
 			
 			Environment.Exit (0);

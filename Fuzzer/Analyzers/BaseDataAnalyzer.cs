@@ -20,6 +20,7 @@ using System;
 using System.Xml;
 using System.IO;
 using log4net;
+using System.Collections.Generic;
 namespace Fuzzer.Analyzers
 {
 	public abstract class BaseDataAnalyzer : IDataAnalyzer
@@ -50,6 +51,10 @@ namespace Fuzzer.Analyzers
 		}
 		
 		public abstract string LogIdentifier{ get; }
+		
+		public void Init(IDictionary<string, string> configValues)
+		{
+		}
 		
 		public void Setup (XmlElement errorlogRoot)
 		{

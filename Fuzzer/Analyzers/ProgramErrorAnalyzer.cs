@@ -21,6 +21,7 @@ using System.IO;
 using Fuzzer.TargetConnectors;
 using Iaik.Utils;
 using System.Xml;
+using Iaik.Utils.CommonAttributes;
 namespace Fuzzer.Analyzers
 {
 	/// <summary>
@@ -33,6 +34,7 @@ namespace Fuzzer.Analyzers
 	/// <remarks>
 	/// <para>Uses the files: *.errorlog</para>
 	/// </remarks>
+	[ClassIdentifier("analyzers/program_error")]
 	public class ProgramErrorAnalyzer : BaseDataAnalyzer
 	{
 		public override string LogIdentifier 

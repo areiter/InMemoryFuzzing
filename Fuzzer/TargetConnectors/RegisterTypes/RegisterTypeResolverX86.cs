@@ -17,8 +17,10 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using Iaik.Utils.CommonAttributes;
 namespace Fuzzer.TargetConnectors.RegisterTypes
 {
+	[ClassIdentifier("registertypes/x86")]
 	public class RegisterTypeResolverX86 : IRegisterTypeResolver
 	{
 		public RegisterTypeResolverX86 ()

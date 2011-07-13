@@ -20,8 +20,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <Externalconsole>true</Externalconsole>
-    <Commandlineparameters>--xmlinput=/home/andi/Documents/Uni/master-thesis/src/Fuzzer/SampleConfigs/SampleFuzzDescription.xml</Commandlineparameters>
+    <Commandlineparameters>--analyze --xmlinput=/home/andi/Repos/master-thesis/src/Fuzzer/SampleConfigs/SampleAnalyzeDescription.xml</Commandlineparameters>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
@@ -158,6 +158,8 @@
     <Compile Include="Analyzers\AnalyzeController.cs" />
     <Compile Include="Analyzers\SavedRegisterAnalyzer.cs" />
     <Compile Include="Analyzers\SimpleHeapOverflowAnalyzer.cs" />
+    <Compile Include="XmlFactory\XmlAnalyzeFactory.cs" />
+    <Compile Include="XmlFactory\XmlFactoryHelpers.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -188,5 +190,6 @@
   <ItemGroup>
     <None Include="SampleConfigs\SampleFuzzDescription.xml" />
     <None Include="SampleConfigs\config_paths.xml" />
+    <None Include="SampleConfigs\SampleAnalyzeDescription.xml" />
   </ItemGroup>
 </Project>

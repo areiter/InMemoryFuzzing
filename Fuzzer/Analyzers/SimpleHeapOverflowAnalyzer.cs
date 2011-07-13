@@ -17,6 +17,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 using System;
+using Iaik.Utils.CommonAttributes;
 namespace Fuzzer.Analyzers
 {
 	/// <summary>
@@ -32,6 +33,7 @@ namespace Fuzzer.Analyzers
 	/// If a program allocates 2 times 300 bytes and writes to the 301 byte of the first allocation, the error
 	/// may not be detected if the memory chunks are allocated without a gap.
 	/// </remarks>
+	[ClassIdentifier("analyzers/simple_heap_overflow")]
 	public class SimpleHeapOverflowAnalyzer : BaseDataAnalyzer
 	{
 		public SimpleHeapOverflowAnalyzer ()
@@ -47,7 +49,7 @@ namespace Fuzzer.Analyzers
 
 		public override void Analyze (AnalyzeController ctrl)
 		{
-			
+			//GenerateFile(		
 		}
 		
 		#endregion

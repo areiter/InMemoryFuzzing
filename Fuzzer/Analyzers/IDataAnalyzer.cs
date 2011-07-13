@@ -18,6 +18,7 @@
 //    limitations under the License.
 using System;
 using System.Xml;
+using System.Collections.Generic;
 namespace Fuzzer.Analyzers
 {
 	
@@ -36,6 +37,13 @@ namespace Fuzzer.Analyzers
 		/// Basepath to read the data from
 		/// </summary>
 		string Path {get; set;}
+		
+		/// <summary>
+		/// Gets called on instantiation
+		/// </summary>
+		/// <param name="configValues"></param>
+		void Init(IDictionary<string, string> configValues);
+		
 		/// <summary>
 		/// Setsup the data analyzer
 		/// </summary>

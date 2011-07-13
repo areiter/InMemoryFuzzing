@@ -23,6 +23,8 @@ using Fuzzer.TargetConnectors;
 using Fuzzer.TargetConnectors.GDB.CoreDump;
 using System.Xml;
 using Fuzzer.TargetConnectors.RegisterTypes;
+using Iaik.Utils.CommonAttributes;
+
 namespace Fuzzer.Analyzers
 {
 	/// <summary>
@@ -31,6 +33,7 @@ namespace Fuzzer.Analyzers
 	/// <remarks>
 	/// <para>Uses the files: *.stackframeinfo</para>
 	/// </remarks>
+	[ClassIdentifier("analyzers/saved_registers")]
 	public class SavedRegisterAnalyzer : BaseDataAnalyzer
 	{
 		public SavedRegisterAnalyzer ()
@@ -59,12 +62,17 @@ namespace Fuzzer.Analyzers
 			using (FileStream src = fileStackFrameInfo.OpenRead ())
 				stackFrameInfo = StreamHelper.ReadTypedStreamSerializable<IStackFrameInfo> (src);
 
+			foreach(String reg in stackFrameInfo.SavedRegisters)
+				_log.DebugFormat("Saved Register '{0} at 0x{1:X})'", reg, stackFrameInfo.GetSavedRegisterAddress(reg).ResolveAddress());
+			
 			foreach (InstructionDescription insn in ctrl.ExecutedInstructions)
 			{
 				foreach (MemoryChange memChange in insn.MemoryChanges)
+				{
 					SavedRegistersInRange (stackFrameInfo, memChange.Address, memChange.Value.Length, insn, ctrl);
+				}
 			}
-		
+					
 		}
 		
 		private UInt64? FindProgramCounter (InstructionDescription insn, IRegisterTypeResolver registerTypeResolver, Registers regs)

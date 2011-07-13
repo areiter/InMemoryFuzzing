@@ -29,6 +29,7 @@ namespace Fuzzer.Analyzers
 	public class AnalyzeController
 	{
 		private string _destination = null;
+		private string _errorlog = null;
 		private IDataAnalyzer[] _analyzers = null;
 		private XmlDocument _doc = null;
 		private int _highestPrefix = 0;
@@ -66,8 +67,9 @@ namespace Fuzzer.Analyzers
 			get { return _executedInstructions; }
 		}
 		
-		public void Setup (string destination, Registers targetRegisters, IRegisterTypeResolver registerTypeResolver, params IDataAnalyzer[] analyzers)
+		public void Setup (string errorlog, string destination, Registers targetRegisters, IRegisterTypeResolver registerTypeResolver, params IDataAnalyzer[] analyzers)
 		{
+			_errorlog = errorlog;
 			_destination = destination;
 			_analyzers = analyzers;
 			_targetRegisters = targetRegisters;
@@ -123,10 +125,11 @@ namespace Fuzzer.Analyzers
 				});
 			
 				if (prefix % 10 == 0)
-					_doc.Save (Path.Combine (_destination, "errorlog.xml"));
+					_doc.Save (_errorlog);
 			}
 			
-			_doc.Save (Path.Combine (_destination, "errorlog.xml"));
+			
+			_doc.Save (_errorlog);
 		}
 		
 		private bool ReadExecutionLog (string prefix)

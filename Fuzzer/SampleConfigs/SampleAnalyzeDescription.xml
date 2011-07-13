@@ -1,0 +1,43 @@
+<!-- Describes the analyze process of the generated fuzz-log-files
+	
+	 Keep in mind that the data analyzers depend on differen data loggers, so
+	 the analyzation process depends on the fuzzing process. 
+	 Depending on the activated dataloggers during the fuzzing process the results
+	 will vary in high ranges.
+  -->
+<Analyze>
+	<Include>config_paths.xml</Include>
+
+	<!-- Specifies an IRegisterTypeResolver (target architecture dependend) 
+		 for the data to analyze.
+		 This can be one of the built in:
+		 	registertypes/x86
+		 	registertypes/x86_64
+		 	
+		 but can also be a fuly qualified classname pointing to an external assembly
+	  -->
+	<RegisterTypeResolver name="registertypes/x86_64" />
+	
+	<!-- Specifies the register file for the target platform. 
+	     This file contains all registers names, numbers and sizes of the target architecture
+	     Use one of the supplied files or create your own by saving an Registers object to disk.
+	  -->
+	<RegisterFile>{[test_data_root]}x86-64.registers</RegisterFile>
+	
+	<!-- Path that contains the log files from the fuzzing process
+	  -->
+	<FuzzLogPath>/home/andi/log</FuzzLogPath>
+	
+	<!-- Output xml file that contains the result of the analyzation process
+	  -->
+	<ErrorLog>/home/andi/log/errorlog.xml</ErrorLog>
+	
+	<!-- Adds analyzers to the analyzation process
+		
+		 Parameters can be passed to the init method by adding 
+		 <Param name="paramname">value</Param> tags to the AddAnalyzer tag
+	  -->
+	<AddAnalyzer name="analyzers/program_error" />
+	<AddAnalyzer name="analyzers/saved_registers" />
+	<AddAnalyzer name="analyzers/simple_heap_overflow" />
+</Analyze>
