@@ -42,7 +42,6 @@
 		
 			<!-- Defines the command to execute -->
 			<Cmd>{[gdbserver_exec]}</Cmd>				
-
 			<Arg>:1234</Arg>
 			<Arg>{[hacklet_path]}/prog0-x64</Arg>	
 			<Arg>dummy</Arg>
@@ -92,12 +91,12 @@
 		     	                                This specifier is only availabe if debugging symbols and source code
 		     	                                is available, and the symbol table implementation supports it.
 		  -->
-		<RegionStart>source|prog0.c,26</RegionStart>
+		<RegionStart>source|prog0.c,25</RegionStart>
 		
 		<!-- Describes a location were the Fuzzer stops and restores the state as it was at RegionStart.
 		     For different location specifiers see FuzzStart
 		  -->
-		<RegionEnd>address|0x4007e9</RegionEnd>
+		<RegionEnd>address|0x400810</RegionEnd>
 		
 		
 		<!-- Defines a single location (variable or memory location) to fuzz, and its data generator.

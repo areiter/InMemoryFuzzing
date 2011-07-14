@@ -14,4 +14,4 @@ DEADJOE
 remote_control/remote_control
 log_memory_allocations/liblog_memory_allocations.so
 log_memory_allocations/log_memory_allocations_client
-
+test_sources/log_*

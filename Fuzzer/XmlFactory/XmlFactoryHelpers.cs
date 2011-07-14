@@ -34,42 +34,49 @@ namespace Fuzzer.XmlFactory
 		/// <param name="configDir"></param>
 		/// <param name="formatter"></param>
 		/// <param name="values"></param>
-		public static void ParseValueIncludes(XmlElement rootElement, string configDir, 
-			                           SimpleFormatter formatter, IDictionary<string, string> values )
+		public static void ParseValueIncludes (XmlElement rootElement, string configDir, 
+			                           SimpleFormatter formatter, IDictionary<string, string> values)
 		{
 			
 			//First resolve all includes
-			foreach(XmlElement includeNode in rootElement.SelectNodes("Include"))
+			foreach (XmlElement includeNode in rootElement.SelectNodes ("Include"))
 			{
-				string fullPath;
-				if(Path.IsPathRooted(includeNode.InnerText))
-					fullPath = includeNode.InnerText;
-				else
-					fullPath = Path.Combine(configDir, includeNode.InnerText);
+				string fullPath = GenerateFilename (configDir, includeNode.InnerText, formatter);
 				
-				if(File.Exists(fullPath) == false)
-					throw new FileNotFoundException(string.Format(
+				if (File.Exists (fullPath) == false)
+					throw new FileNotFoundException (string.Format (
 						"Could not find include file '{0}'", fullPath));
 				else
 				{
-					XmlDocument includeDoc = new XmlDocument();
+					XmlDocument includeDoc = new XmlDocument ();
 					
 					try
 					{
-						includeDoc.Load(fullPath);
+						includeDoc.Load (fullPath);
 						
-						foreach(XmlElement valueNode in includeDoc.DocumentElement.SelectNodes("Value"))
+						foreach (XmlElement valueNode in includeDoc.DocumentElement.SelectNodes ("Value"))
 						{
-							string name = valueNode.GetAttribute("name");
+							string name = valueNode.GetAttribute ("name");
 							string value = valueNode.InnerText;
 				
-							if(values.ContainsKey(name))
+							if (values.ContainsKey (name))
 								values[name] = value;
 							else
-								values.Add(name, value);
+								values.Add (name, value);
 							
-							formatter.DefineTextMacro(name, value);
-							Console.WriteLine("Added {0}={1}", name, value);
+							formatter.DefineTextMacro (name, value);
+						}
+						
+						foreach (XmlElement pathNode in includeDoc.DocumentElement.SelectNodes ("Path")) {
+							string name = pathNode.GetAttribute ("name");
+							string value = GenerateFilename (configDir, pathNode.InnerText, formatter);
+							
+							if (values.ContainsKey (name))
+								values[name] = value;
+							else
+								values.Add (name, value);
+							
+							formatter.DefineTextMacro (name, value);
 						}
 					}
 					catch(Exception ex)
@@ -82,24 +89,35 @@ namespace Fuzzer.XmlFactory
 
 		}
 		
-		public static T CreateInstance<T>(XmlElement rootElement, string nameArg, string paramElementName) where T: class
+		public static T CreateInstance<T> (XmlElement rootElement, string nameArg, string paramElementName) where T : class
 		{
-			string classIdentifier = rootElement.GetAttribute(nameArg);
+			string classIdentifier = rootElement.GetAttribute (nameArg);
 			
-			IDictionary<string, string> values = new Dictionary<string, string>();
+			IDictionary<string, string> values = new Dictionary<string, string> ();
 			
-			foreach(XmlElement paramNode in rootElement.SelectNodes(paramElementName))
+			foreach (XmlElement paramNode in rootElement.SelectNodes (paramElementName))
 			{
-				string paramName = paramNode.GetAttribute(nameArg);				
-				values.Add(paramName, paramNode.InnerText);
+				string paramName = paramNode.GetAttribute (nameArg);
+				values.Add (paramName, paramNode.InnerText);
 			}
 			
-			if(values.Count > 0)
-				return (T)GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<T>(
+			if (values.Count > 0)
+				return (T)GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<T> (
 					classIdentifier, values);
 			else
-				return (T)GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<T>(classIdentifier);
-				                                      
+				return (T)GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<T> (classIdentifier);
+		
+		}
+		
+		
+		public static string GenerateFilename (string configDir, string file, SimpleFormatter formatter)
+		{
+			file = formatter.Format (file);
+			
+			if (Path.IsPathRooted (file))
+				return file;
+			else
+				return Path.Combine (configDir, file);
 		}
 	}
 }

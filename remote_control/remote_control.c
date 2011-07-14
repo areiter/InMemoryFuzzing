@@ -27,7 +27,7 @@
 */
 
 
-//#define DEBUG_REQUEST_PIPE
+#define DEBUG_REQUEST_PIPE
 
 #include <sys/socket.h>
 #include <netinet/in.h>

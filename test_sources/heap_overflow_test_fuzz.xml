@@ -1,0 +1,51 @@
+<Fuzz>
+  <Include>config_paths.xml</Include>
+  <RemoteControl>
+    <Host>localhost</Host>
+    <Port>8899</Port>
+    
+    <Exec trigger="immediate">
+      <Cmd>{[gdbserver_exec]}</Cmd>		
+      <Arg>--wrapper</Arg>
+      <Arg>env</Arg>
+      <Arg>LD_PRELOAD={[lib_logmem]}</Arg>
+      <Arg>LOG_MEM_PIPE=logmem_pipe</Arg>-->
+      <Arg>--</Arg>
+      <Arg>:1234</Arg>
+      <Arg>{[test_source_root]}heap_overflow_test</Arg>
+    </Exec>
+  </RemoteControl>
+
+  <TargetConnection>
+    <Connector>general/gdb</Connector>
+    <Config key="gdb_exec">{[gdb_exec]}</Config>
+    <Config key="gdb_log">stream:stderr</Config>
+    <Config key="target">extended-remote localhost:1234</Config>
+
+    <Config key="file">{[test_source_root]}heap_overflow_test</Config>
+  </TargetConnection>
+
+  <FuzzDescription>
+    <RegionStart>source|heap_overflow_test.c,11</RegionStart>
+    <RegionEnd>source|heap_overflow_test.c,16</RegionEnd>
+
+    <FuzzLocation>
+      <DataRegion>variable|some_num</DataRegion>
+      <DataType>fuzzdescription/single_value</DataType>
+      <DataGenerator>datagen/random_bytes</DataGenerator>
+      <DataGenArg name="minlen">4</DataGenArg>
+      <DataGenArg name="maxlen">4</DataGenArg>
+      <DataGenArg name="type">All</DataGenArg>
+    </FuzzLocation>
+  </FuzzDescription>
+
+  <Logger>
+    <Destination>{[log_root]}log_heap_overflow_test/</Destination>
+    <UseLogger name="datagenlogger" />
+    <UseLogger name="connectorlogger" />
+    <UseLogger name="stackframelogger" />
+    <UseLogger name="remotepipelogger">
+      <PipeName>logmem_pipe</PipeName>
+    </UseLogger>
+  </Logger>
+</Fuzz>

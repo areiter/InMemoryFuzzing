@@ -134,7 +134,8 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		public void Init ()
 		{
-			_formatter = new SimpleFormatter();
+			_formatter = new SimpleFormatter ();
+			_formatter.IgnoreUnknownMacros = true;
 			XmlFactoryHelpers.ParseValueIncludes(_doc.DocumentElement, _configDir, _formatter, _values);
 			InitRemote ();
 			InitTargetConnection ();
@@ -169,39 +170,39 @@ namespace Fuzzer.XmlFactory
 		/// Initializes the remote control and extracts the commands to execute 
 		/// from the configuration file
 		/// </summary>
-		private void InitRemote()
+		private void InitRemote ()
 		{
 			
 			
 			
-			if(_remoteControlProtocol != null)
+			if (_remoteControlProtocol != null)
 			{
-				_remoteControlProtocol.Dispose();
+				_remoteControlProtocol.Dispose ();
 				_remoteControlProtocol = null;
 			}
 			
-			XmlElement remoteControlNode = (XmlElement)_doc.DocumentElement.SelectSingleNode("RemoteControl");
+			XmlElement remoteControlNode = (XmlElement)_doc.DocumentElement.SelectSingleNode ("RemoteControl");
 
 			//remote control is not mandatory, but strongly recommended.
 			//Without remote control there is no way to capture remote memory allocations
 			//and therefore a lot information to analyze gets lost
-			if(remoteControlNode != null)
+			if (remoteControlNode != null)
 			{
-				_remoteControlProtocol = new RemoteControlProtocol();
-				_remoteControlProtocol.SetConnection(RemoteControlConnectionBuilder.Connect(
-					  _formatter.Format(XmlHelper.ReadString(remoteControlNode, "Host")),
-					  int.Parse(_formatter.Format(XmlHelper.ReadString(remoteControlNode, "Port")))));
+				_remoteControlProtocol = new RemoteControlProtocol ();
+				_remoteControlProtocol.SetConnection (RemoteControlConnectionBuilder.Connect (
+					  _formatter.Format (XmlHelper.ReadString (remoteControlNode, "Host")),
+					  int.Parse (_formatter.Format (XmlHelper.ReadString (remoteControlNode, "Port")))));
 				
 				_remoteControlProtocol.ExecStatus += Handle_remoteControlProtocolExecStatus;
 			
 				
-				foreach(XmlElement execNode in remoteControlNode.SelectNodes("Exec"))
+				foreach (XmlElement execNode in remoteControlNode.SelectNodes ("Exec"))
 				{
 					ExecutionTriggerEnum execTrigger = 
-						(ExecutionTriggerEnum)Enum.Parse(typeof(ExecutionTriggerEnum), execNode.GetAttribute("trigger"), true);
+						(ExecutionTriggerEnum)Enum.Parse (typeof(ExecutionTriggerEnum), execNode.GetAttribute ("trigger"), true);
 					
 					
-					string cmd = _formatter.Format(XmlHelper.ReadString(execNode, "Cmd"));
+					string cmd = XmlFactoryHelpers.GenerateFilename (_configDir, XmlHelper.ReadString (execNode, "Cmd"), _formatter);
 					
 					if(cmd == null)
 						throw new ArgumentException("Exec node without cmd");

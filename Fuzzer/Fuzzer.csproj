@@ -20,7 +20,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters>--analyze --xmlinput=/home/andi/Repos/master-thesis/src/Fuzzer/SampleConfigs/SampleAnalyzeDescription.xml</Commandlineparameters>
+    <Commandlineparameters>--fuzz --xmlinput=../../../test_sources/heap_overflow_test_fuzz.xml</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">

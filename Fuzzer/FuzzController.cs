@@ -21,6 +21,8 @@ using Fuzzer.TargetConnectors;
 using Fuzzer.FuzzDescriptions;
 using System.Collections.Generic;
 using Fuzzer.DataLoggers;
+using System.IO;
+using log4net;
 namespace Fuzzer
 {
 	/// <summary>
@@ -37,7 +39,7 @@ namespace Fuzzer
 		protected string _logDestination;
 		protected Queue<IFuzzDescription> _fuzzDescriptions = new Queue<IFuzzDescription>(); 
 			
-		
+		protected ILog _log = LogManager.GetLogger("FuzzController");
 		
 		public ITargetConnector Connector
 		{
@@ -87,6 +89,9 @@ namespace Fuzzer
 		
 		public void Fuzz ()
 		{
+			if (Directory.Exists (_logDestination) == false)
+				Directory.CreateDirectory (_logDestination);
+			
 			int loggerPrefix = 0;
 			string morePrefix = DateTime.Now.ToString ("dd.MM.yyyy");
 			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);
@@ -106,15 +111,18 @@ namespace Fuzzer
 				//The restore breakpoint is reached.....do the restore
 				if (_snapshot != null && _connector.LastDebuggerStop.StopReason == StopReasonEnum.Breakpoint && _restoreBreakpoint.Address == _connector.LastDebuggerStop.Address)
 				{
+					_log.InfoFormat ("Restore snapshot for prefix #{0}, no error ", loggerPrefix);
 					RestoreAndFuzz (ref loggerPrefix, morePrefix);
 				}
 				else if (_snapshot != null && _connector.LastDebuggerStop.StopReason != StopReasonEnum.Breakpoint)
 				{
+					_log.InfoFormat ("Restore snapshot for prefix #{0}, error ", loggerPrefix);
 					_errorLog.LogDebuggerStop (_connector.LastDebuggerStop);
 
 					RestoreAndFuzz (ref loggerPrefix, morePrefix);
 				}
 				
+				_log.InfoFormat ("Starting fuzz with prefix #{0}", loggerPrefix);
 				_connector.DebugContinue ();
 			}
 		}
