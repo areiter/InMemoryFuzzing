@@ -3,5 +3,6 @@
 	<Path name="gdb_exec">/opt/gdb/bin/gdb</Path>
 	<Path name="log_root">./</Path>
 	<Path name="test_source_root">./</Path>
+	<Path name="register_root">./registers/</Path>
   <Path name="lib_logmem">./liblog_memory_allocations.so</Path>
 </Options>

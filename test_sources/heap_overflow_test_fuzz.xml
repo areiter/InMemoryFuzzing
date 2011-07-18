@@ -26,8 +26,8 @@
   </TargetConnection>
 
   <FuzzDescription>
-    <RegionStart>source|heap_overflow_test.c,11</RegionStart>
-    <RegionEnd>source|heap_overflow_test.c,16</RegionEnd>
+    <RegionStart>source|heap_overflow_test.c,9</RegionStart>
+    <RegionEnd>source|heap_overflow_test.c,14</RegionEnd>
 
     <FuzzLocation>
       <DataRegion>variable|some_num</DataRegion>

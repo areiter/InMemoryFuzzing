@@ -4,8 +4,6 @@
 
 int main(int argc, char** argv){
   printf("Running heap overflow test press enter to continue\n");
- 
-  //getc(stdin);
 
   int some_num = 0;  
   char* data = malloc(100);
