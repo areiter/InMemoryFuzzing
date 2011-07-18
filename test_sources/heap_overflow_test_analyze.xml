@@ -1,0 +1,12 @@
+<Analyze>
+	<Include>config_paths.xml</Include>
+
+	<RegisterTypeResolver name="registertypes/x86_64" />
+	<RegisterFile>{[register_root]}x86-64.registers</RegisterFile>
+	<FuzzLogPath>{[log_root]}log_heap_overflow_test/</FuzzLogPath>
+	<ErrorLog>{[log_root]}errorlog.xml</ErrorLog>
+	
+	<AddAnalyzer name="analyzers/program_error" />
+	<AddAnalyzer name="analyzers/saved_registers" />
+	<AddAnalyzer name="analyzers/simple_heap_overflow" />
+</Analyze>
