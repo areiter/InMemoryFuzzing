@@ -21,6 +21,8 @@ using Iaik.Utils.CommonAttributes;
 using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
+using Fuzzer.TargetConnectors.GDB.CoreDump;
+using System.Text;
 namespace Fuzzer.Analyzers
 {
 	/// <summary>
@@ -63,9 +65,32 @@ namespace Fuzzer.Analyzers
 				Backtrace = backtrace;
 			}
 			
-			public bool ContainsAddress(UInt64 address)
+			public bool ContainsAddress (UInt64 address)
 			{
 				return address >= StartAddress && address <= EndAddress;
+			}
+			
+			public bool IntersectsWith (UInt64 address, UInt64 size)
+			{
+				UInt64 localEndAddress = address + size - 1;
+				
+				return (address <= StartAddress && localEndAddress >= StartAddress) ||
+					   (address >= StartAddress && address <= EndAddress);
+			}
+			
+			/// <summary>
+			/// Calculates the distance of the specified address to this range
+			/// </summary>
+			/// <param name="address"></param>
+			/// <returns></returns>
+			public Int64 Distance (UInt64 address)
+			{
+				if (address < StartAddress)
+					return address - StartAddress;
+				else if (address > EndAddress)
+					return address - EndAddress;
+				else
+					return 0;
 			}
 		}
 		
@@ -90,40 +115,100 @@ namespace Fuzzer.Analyzers
 
 		public override void Analyze (AnalyzeController ctrl)
 		{
-			FileInfo pipeFile = GenerateFile("pipes");		
+			FileInfo pipeFile = GenerateFile ("pipes");
 			
-			if(pipeFile.Exists == false)
+			if (pipeFile.Exists == false)
 			{
-				_log.WarnFormat("Missing '{0}'", pipeFile.FullName);
+				_log.WarnFormat ("Missing '{0}'", pipeFile.FullName);
 				return;
 			}
-			_rangeInfos.Clear();
+			_rangeInfos.Clear ();
 			
-			using(StreamReader pipeReader = new StreamReader(pipeFile.OpenRead()))
+			using (StreamReader pipeReader = new StreamReader (pipeFile.OpenRead ()))
 			{
-				while(!pipeReader.EndOfStream)
+				while (!pipeReader.EndOfStream)
 				{
-					string currentLine = pipeReader.ReadLine();
+					string currentLine = pipeReader.ReadLine ();
 					
 					//Extract line identifier (<id>: ...)
-					int lineIdSeperatorIndex = currentLine.IndexOf(':');
+					int lineIdSeperatorIndex = currentLine.IndexOf (':');
 					
-					if(lineIdSeperatorIndex < 0)
+					if (lineIdSeperatorIndex < 0)
 					{
-						_log.WarnFormat("Invalid line detected '{0}'", currentLine);
+						_log.WarnFormat ("Invalid line detected '{0}'", currentLine);
 						continue;
 					}
 					
-					string lineId = currentLine.Substring(0, lineIdSeperatorIndex).Trim().ToLower();
+					string lineId = currentLine.Substring (0, lineIdSeperatorIndex).Trim ().ToLower ();
 					
-					if(_lineHandlers.ContainsKey(lineId))
-						_lineHandlers[lineId](lineId, lineIdSeperatorIndex, currentLine);
+					//Call line handler
+					if (_lineHandlers.ContainsKey (lineId))
+						_lineHandlers[lineId] (lineId, lineIdSeperatorIndex, currentLine);
 					else
-						_log.WarnFormat("Invalid line id detected '{0}'", lineId);
+						_log.WarnFormat ("Invalid line id detected '{0}'", lineId);
 				}
 			}
 			
+			if (_rangeInfos.Count == 0) 
+			{
+				_log.WarnFormat ("[prefix: {0}] No range infos found, aborting. Maybe the pipes file is missing or the program uses another, unlogged memory allocation technique", _prefix);
+				return;
+			}
+			
+			foreach (InstructionDescription insn in ctrl.ExecutedInstructions)
+			{
+				foreach (MemoryChange memChange in insn.MemoryChanges)
+				{
+					Int64? startDistance = null;
+					RangeInfo rangeStart = null;
+					Int64? endDistance = null;
+					RangeInfo rangeEnd = null;
+					
+					foreach (RangeInfo r in _rangeInfos)
+					{
+						Int64 localStartDistance = r.Distance (memChange.Address);
+						Int64 localEndDistance = r.Distance (memChange.Address + memChange.Value.Length - 1);
+						
+						//Calculate the smallest distance to an allocated block.
+						//Problem is to distinguish between stack accesses and heap memory accesses
+						if (startDistance == null || 
+							localStartDistance == 0 ||
+							(startDistance.Value != 0 && Math.Abs (localStartDistance) > Math.Abs (startDistance)))
+						{
+							startDistance = localStartDistance;
+							rangeStart = r;
+						}
+
+						if (endDistance == null || 
+							localEndDistance == 0 || 
+							(endDistance.Value != 0 && Math.Abs (localEndDistance) > Math.Abs (endDistance)))
+							endDistance = localEndDistance;
+						
+						if (startDistance != null && endDistance != null && startDistance.Value == 0 && endDistance.Value == 0)
+							break;
+					}
+					
+					if (startDistance != null && endDistance != null &&
+						startDistance.Value != 0 && endDistance.Value != 0)
+					{
+						Log(memChange.Address, memChange.Address + memChange.Value.Length - 1, memChange.Value.Length, insn, 
+					}
+					
+				}
+			}
+		
 		}
+		
+		private void Log (UInt64 memStart, UInt64 memEnd, UInt64 size, InstructionDescription insn, IList<UInt64> bt, AnalyzeController ctrl)
+		{
+			XmlElement root = GenerateNode ("simple_heap_overflow");
+			XmlHelper.WriteString (root, "MemStart", string.Format ("0x{0:X}", memStart));
+			XmlHelper.WriteString (root, "MemEnd", string.Format ("0x{0:X}", memEnd));
+			XmlHelper.WriteString (root, "Size", size);
+			XmlHelper.WriteString (root, "At", BuildBacktraceString(bt));			
+		}
+		
+		
 		
 		#endregion
 
@@ -179,6 +264,20 @@ namespace Fuzzer.Analyzers
 			}
 			
 			return bt;
+		}
+		
+		private string BuildBacktraceString (IList<UInt64> bt)
+		{
+			StringBuilder btString = new StringBuilder ();
+			
+			foreach (UInt64 addr in bt)
+			{
+				if (btString.Length > 0)
+					btString.Append (" ");
+				btString.AppendFormat ("0x{0:X}", addr);
+			}
+			
+			return btString.ToString ();
 		}
 		
 		private UInt64? ParseNumber(string name, IDictionary<string, string> arguments)
