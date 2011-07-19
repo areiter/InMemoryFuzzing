@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using Fuzzer.TargetConnectors.GDB.CoreDump;
 using System.Text;
+using System.Xml;
+using Iaik.Utils;
 namespace Fuzzer.Analyzers
 {
 	/// <summary>
@@ -86,12 +88,19 @@ namespace Fuzzer.Analyzers
 			public Int64 Distance (UInt64 address)
 			{
 				if (address < StartAddress)
-					return address - StartAddress;
+					return (long)address - (long)StartAddress;
 				else if (address > EndAddress)
-					return address - EndAddress;
+					return (long)address - (long)EndAddress;
 				else
 					return 0;
 			}
+		}
+		
+		public enum OverflowType
+		{
+			Start,
+			End,
+			StartAndEnd
 		}
 		
 		public delegate void LineHandlerDelegate(string lineId, int lineIdIndex, string currentLine);
@@ -167,13 +176,13 @@ namespace Fuzzer.Analyzers
 					foreach (RangeInfo r in _rangeInfos)
 					{
 						Int64 localStartDistance = r.Distance (memChange.Address);
-						Int64 localEndDistance = r.Distance (memChange.Address + memChange.Value.Length - 1);
+						Int64 localEndDistance = r.Distance (memChange.Address + (UInt64)memChange.Value.Length - 1);
 						
 						//Calculate the smallest distance to an allocated block.
 						//Problem is to distinguish between stack accesses and heap memory accesses
 						if (startDistance == null || 
 							localStartDistance == 0 ||
-							(startDistance.Value != 0 && Math.Abs (localStartDistance) > Math.Abs (startDistance)))
+							(startDistance.Value != 0 && Math.Abs (localStartDistance) > Math.Abs (startDistance.Value)))
 						{
 							startDistance = localStartDistance;
 							rangeStart = r;
@@ -181,30 +190,37 @@ namespace Fuzzer.Analyzers
 
 						if (endDistance == null || 
 							localEndDistance == 0 || 
-							(endDistance.Value != 0 && Math.Abs (localEndDistance) > Math.Abs (endDistance)))
+							(endDistance.Value != 0 && Math.Abs (localEndDistance) > Math.Abs (endDistance.Value)))	
+						{
 							endDistance = localEndDistance;
+							rangeEnd = r;
+						}
 						
 						if (startDistance != null && endDistance != null && startDistance.Value == 0 && endDistance.Value == 0)
 							break;
 					}
 					
-					if (startDistance != null && endDistance != null &&
-						startDistance.Value != 0 && endDistance.Value != 0)
-					{
-						Log(memChange.Address, memChange.Address + memChange.Value.Length - 1, memChange.Value.Length, insn, 
-					}
+					if (startDistance != null && startDistance.Value != 0 && Math.Abs(startDistance.Value) < 4096)
+						Log((endDistance != null && endDistance.Value != 0)?OverflowType.StartAndEnd:OverflowType.Start,
+						    memChange.Address, memChange.Address + (ulong)memChange.Value.Length - 1, 
+						    (ulong)memChange.Value.Length, insn, rangeStart.Backtrace, ctrl);					
+					else if (endDistance != null && endDistance.Value != 0 && Math.Abs(endDistance.Value) < 4096)
+						Log(OverflowType.End, memChange.Address, memChange.Address + (ulong)memChange.Value.Length - 1, 
+						    (ulong)memChange.Value.Length, insn, rangeEnd.Backtrace, ctrl);
+
 					
 				}
 			}
 		
 		}
 		
-		private void Log (UInt64 memStart, UInt64 memEnd, UInt64 size, InstructionDescription insn, IList<UInt64> bt, AnalyzeController ctrl)
+		private void Log (OverflowType overflowType, UInt64 memStart, UInt64 memEnd, UInt64 size, InstructionDescription insn, IList<UInt64> bt, AnalyzeController ctrl)
 		{
 			XmlElement root = GenerateNode ("simple_heap_overflow");
+			XmlHelper.WriteString (root, "OverflowType", overflowType.ToString());
 			XmlHelper.WriteString (root, "MemStart", string.Format ("0x{0:X}", memStart));
 			XmlHelper.WriteString (root, "MemEnd", string.Format ("0x{0:X}", memEnd));
-			XmlHelper.WriteString (root, "Size", size);
+			XmlHelper.WriteString (root, "Size", size.ToString());
 			XmlHelper.WriteString (root, "At", BuildBacktraceString(bt));			
 		}
 		

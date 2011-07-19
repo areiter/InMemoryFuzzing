@@ -155,7 +155,7 @@ namespace Fuzzer.XmlFactory
 		
 		private void InitErrorLog()
 		{
-			_errorLog = XmlHelper.ReadString(_doc.DocumentElement, "ErrorLog");
+			_errorLog = _formatter.Format(XmlHelper.ReadString(_doc.DocumentElement, "ErrorLog"));
 		}
 		
 		private void InitAnalyzers()
