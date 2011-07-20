@@ -49,7 +49,7 @@ namespace Fuzzer.Analyzers
 		/// <summary>
 		/// Contains informtions about an allocated memory range
 		/// </summary>
-		private class RangeInfo
+		public class RangeInfo
 		{
 			public IList<UInt64> Backtrace;
 			public UInt64 StartAddress;			
@@ -122,6 +122,10 @@ namespace Fuzzer.Analyzers
 		}
 
 
+		public override void Init (IDictionary<string, string> configValues, List<KeyValuePair<string, string>> values)
+		{
+			base.Init(configValues, values);
+		}
 		public override void Analyze (AnalyzeController ctrl)
 		{
 			FileInfo pipeFile = GenerateFile ("pipes");

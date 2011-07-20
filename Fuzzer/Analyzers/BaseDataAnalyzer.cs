@@ -21,6 +21,10 @@ using System.Xml;
 using System.IO;
 using log4net;
 using System.Collections.Generic;
+using Fuzzer.TargetConnectors.GDB.CoreDump;
+using Fuzzer.TargetConnectors.RegisterTypes;
+using Fuzzer.TargetConnectors;
+using Iaik.Utils;
 namespace Fuzzer.Analyzers
 {
 	public abstract class BaseDataAnalyzer : IDataAnalyzer
@@ -52,7 +56,7 @@ namespace Fuzzer.Analyzers
 		
 		public abstract string LogIdentifier{ get; }
 		
-		public void Init(IDictionary<string, string> configValues)
+		public virtual void Init(IDictionary<string, string> configValues, List<KeyValuePair<string, string>> values)
 		{
 		}
 		
@@ -75,6 +79,20 @@ namespace Fuzzer.Analyzers
 			newNode.Attributes.Append (newNode.OwnerDocument.CreateAttribute ("type")).Value = type;
 			newNode.Attributes.Append (newNode.OwnerDocument.CreateAttribute ("prefix")).Value = _prefix;
 			return newNode;
+		}
+		
+		protected UInt64? FindProgramCounter (InstructionDescription insn, IRegisterTypeResolver registerTypeResolver, Registers regs)
+		{
+			string programCounterName = registerTypeResolver.GetRegisterName (RegisterTypeEnum.ProgramCounter);
+			Register pcReg = regs.FindRegisterByName (programCounterName);
+			
+			foreach (RegisterChange regChange in insn.RegisterChanges)
+			{
+				if (regChange.Regnum == pcReg.Num)
+					return ByteHelper.ByteArrayToUInt64 (regChange.Value, 0, regChange.Value.Length);
+			}
+			
+			return null;
 		}
 	}
 }

@@ -75,19 +75,7 @@ namespace Fuzzer.Analyzers
 					
 		}
 		
-		private UInt64? FindProgramCounter (InstructionDescription insn, IRegisterTypeResolver registerTypeResolver, Registers regs)
-		{
-			string programCounterName = registerTypeResolver.GetRegisterName (RegisterTypeEnum.ProgramCounter);
-			Register pcReg = regs.FindRegisterByName (programCounterName);
-			
-			foreach (RegisterChange regChange in insn.RegisterChanges)
-			{
-				if (regChange.Regnum == pcReg.Num)
-					return ByteHelper.ByteArrayToUInt64 (regChange.Value, 0, regChange.Value.Length);
-			}
-			
-			return null;
-		}
+		
 		
 		private void SavedRegistersInRange (IStackFrameInfo stackFrameInfo, UInt64 address, int size, InstructionDescription insn, AnalyzeController ctrl)
 		{

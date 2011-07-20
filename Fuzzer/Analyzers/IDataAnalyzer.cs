@@ -42,7 +42,7 @@ namespace Fuzzer.Analyzers
 		/// Gets called on instantiation
 		/// </summary>
 		/// <param name="configValues"></param>
-		void Init(IDictionary<string, string> configValues);
+		void Init(IDictionary<string, string> configValues, List<KeyValuePair<string, string>> values);
 		
 		/// <summary>
 		/// Setsup the data analyzer

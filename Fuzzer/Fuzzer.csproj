@@ -160,6 +160,7 @@
     <Compile Include="Analyzers\SimpleHeapOverflowAnalyzer.cs" />
     <Compile Include="XmlFactory\XmlAnalyzeFactory.cs" />
     <Compile Include="XmlFactory\XmlFactoryHelpers.cs" />
+    <Compile Include="Analyzers\MemoryZonesAnalyzer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -172,12 +172,18 @@ namespace Fuzzer.XmlFactory
 					throw new ArgumentException(string.Format(
 						"Could not create instance from analyzer '{0}'", analyzerId));
 				
-				IDictionary<string, string> values = new Dictionary<string, string>();
+				IDictionary<string, string> configValues = new Dictionary<string, string>();
+				List<KeyValuePair<string, string>> values = new List<KeyValuePair<string, string>>();
 				
-				foreach(XmlElement paramNode in analyzerNode.SelectNodes("Param"))
-					values.Add(paramNode.GetAttribute("name"), paramNode.InnerText);
+				foreach(XmlElement paramNode in analyzerNode.ChildNodes)
+				{
+					if(paramNode.Name == "Param")
+						configValues.Add(paramNode.GetAttribute("name"), paramNode.InnerText);
+					else
+						values.Add(new KeyValuePair<string, string>(paramNode.Name, paramNode.InnerText));
+				}
 				
-				analyzer.Init(values);
+				analyzer.Init(configValues, values);
 				_analyzers.Add(analyzer);
 			}
 		}

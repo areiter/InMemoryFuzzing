@@ -19,6 +19,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Iaik.Utils
 {
@@ -84,6 +85,20 @@ namespace Iaik.Utils
 			
 			
 			return f.Format (expression);
+		}
+		
+		public static UInt64 StringToUInt64 (string val)
+		{
+			NumberStyles style = NumberStyles.Number;
+			int offset = 0;
+			
+			if(val.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase))
+			{
+				style = NumberStyles.HexNumber;
+				offset = 2;
+			}
+			                  
+			return UInt64.Parse(val.Substring(offset), style);
 		}
 
 	}
