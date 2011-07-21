@@ -104,7 +104,7 @@
 		  -->
 		<FuzzLocation>
 		    <!-- Specifies the data region to fuzz, syntax:
-		    	 <specifier>:<identifier>
+		    	 <specifier>|<identifier>
 		    	 
 		    	 The size of the specified region is specified using the data generator settings
 		    	 
@@ -152,6 +152,12 @@
 			<!-- Maximum length of generated data -->
 			<DataGenArg name="maxlen">10000</DataGenArg>
 			
+			<!-- Specifies how the length of the generated data is determined
+				 Valid values are: random (default)
+				 				   increase|<amount> e.g. increase|5
+				 				   decrease|<amount> e.g. decrease|5
+			  -->
+			<DataGenArg name="lentype">random</DataGenArg>
 			<!--
 			     Type of generated data
 			     			
@@ -168,6 +174,14 @@
 			AllNullTerminated
 			  -->
 			<DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
+			
+			<!--
+			    Specifies the stop condition for this FuzzLocation
+			    valid values are: 
+			       none (default) ... Fuzzing process keeps going as long as it gets interrupted by the user
+			       count|10       ... The Fuzzing process is executed count times
+			  -->
+			<StopCondition>none</StopCondition>
 		</FuzzLocation>
 		
 	</FuzzDescription>

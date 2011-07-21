@@ -161,6 +161,7 @@
     <Compile Include="XmlFactory\XmlAnalyzeFactory.cs" />
     <Compile Include="XmlFactory\XmlFactoryHelpers.cs" />
     <Compile Include="Analyzers\MemoryZonesAnalyzer.cs" />
+    <Compile Include="FuzzDescriptions\IFuzzStopCondition.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

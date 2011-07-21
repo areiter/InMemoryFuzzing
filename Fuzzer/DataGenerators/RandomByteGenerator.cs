@@ -56,10 +56,11 @@ namespace Fuzzer.DataGenerators
 		private byte[] _buffer = null;
 		private Random _r = new Random();
 		private DataGeneratorLogger _logger;
+		private IDataGeneratorLenType _lenType = null;
 		
-		public RandomByteGenerator (int minLen, int maxLen, ByteType byteType)
+		public RandomByteGenerator (int minLen, int maxLen, ByteType byteType, IDataGeneratorLenType lenType)
 		{
-			Init(minLen, maxLen, byteType);
+			Init(minLen, maxLen, byteType, lenType);
 			
 		}
 		
@@ -71,22 +72,36 @@ namespace Fuzzer.DataGenerators
 			
 		}
 	
-		private void Init(int minLen, int maxLen, ByteType byteType)
+		private void Init (int minLen, int maxLen, ByteType byteType, string lenType)
 		{
 			_minLen = minLen;
 			_maxLen = maxLen;
 			_byteType = byteType;
 			if (_minLen == _maxLen)
 				_buffer = new byte[_minLen];
+			
+			_lenType = DataGeneratorLenTypeFactory.Create (minLen, maxLen, lenType);
+		}
+		
+		private void Init (int minLen, int maxLen, ByteType byteType, IDataGeneratorLenType lenType)
+		{
+			_minLen = minLen;
+			_maxLen = maxLen;
+			_byteType = byteType;
+			if (_minLen == _maxLen)
+				_buffer = new byte[_minLen];
+			
+			_lenType = lenType;
 		}
 
 		#region IDataGenerator implementation
-		public void Setup(IDictionary<string, string> config)
+		public void Setup (IDictionary<string, string> config)
 		{
-			Init(
-			     DictionaryHelper.GetInt("minlen", config, 1),
-			     DictionaryHelper.GetInt("maxlen", config, 100),
-			     DictionaryHelper.GetEnum<ByteType>("type", config, ByteType.PrintableASCIINullTerminated)
+			Init (
+			     DictionaryHelper.GetInt ("minlen", config, 1),
+			     DictionaryHelper.GetInt ("maxlen", config, 100),
+			     DictionaryHelper.GetEnum<ByteType>("type", config, ByteType.PrintableASCIINullTerminated),
+				 DictionaryHelper.GetString("lentype", config, null)
 			     );
 			     
 		}
@@ -102,14 +117,14 @@ namespace Fuzzer.DataGenerators
 			{
 				GenerateBytes (_buffer);
 				
-				if(_logger != null)
+				if (_logger != null)
 					_logger.LogData (_buffer);
 				
 				return _buffer;
 			}
 			else
 			{
-				int byteLen = _r.Next (_minLen, _maxLen);
+				int byteLen = _lenType.NextLength ();
 				byte[] buffer = new byte[byteLen];
 				GenerateBytes (buffer);
 				

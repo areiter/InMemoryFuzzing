@@ -65,7 +65,15 @@ namespace Fuzzer.XmlFactory
 		public IDataGenerator DataGenerator
 		{
 			get { return _dataGen; }
-			set { _dataGen = value;}
+			set { _dataGen = value; }
+		}
+		
+		private IFuzzStopCondition _fuzzStopCondition = null;
+		
+		public IFuzzStopCondition FuzzStopCondition
+		{
+			get { return _fuzzStopCondition; }
+			set { _fuzzStopCondition = value;}
 		}
 		
 		public FuzzLocationInfo (ITargetConnector connector)

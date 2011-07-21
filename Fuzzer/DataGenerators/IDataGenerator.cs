@@ -51,5 +51,106 @@ namespace Fuzzer.DataGenerators
 		/// <param name="config"></param>
 		void Setup(IDictionary<string, string> config);
 	}
+	
+	/// <summary>
+	/// Implemented by classes that provide custom fuzz-data-length-schemes
+	/// </summary>
+	public interface IDataGeneratorLenType
+	{
+		/// <summary>
+		/// Returns the length for the next data block
+		/// </summary>
+		/// <returns></returns>
+		int NextLength();
+	}
+	
+	public static class DataGeneratorLenTypeFactory
+	{
+		public static IDataGeneratorLenType Create (int minlen, int maxlen, string lentypeSpecifier)
+		{
+			string[] lentypeParts = lentypeSpecifier.Split (new char[] { '|' }, 2);
+			
+			int arg1 = 0;
+			if (lentypeParts[0].Equals ("random"))
+				return new RandomDataGeneratorLenType (minlen, maxlen);
+			else if (lentypeParts[0].Equals ("increase") && lentypeParts.Length == 2 && int.TryParse (lentypeParts[1], out arg1))
+				return new IncreaseGeneratorLenType (minlen, maxlen, arg1);
+			else if (lentypeParts[0].Equals ("decrease") && lentypeParts.Length == 2 && int.TryParse (lentypeParts[1], out arg1))
+				return new DecreaseGeneratorLenType (minlen, maxlen, arg1);
+			else
+				throw new NotImplementedException (string.Format("Specified datagenerator len type '{0}' not supported", lentypeSpecifier));
+		}
+	}
+	
+	public class RandomDataGeneratorLenType : IDataGeneratorLenType
+	{
+		private int _minlen;
+		private int _maxlen;
+		private Random _r;
+		
+		public RandomDataGeneratorLenType (int minlen, int maxlen)
+		{
+			_minlen = minlen;
+			_maxlen = maxlen;
+			_r = new Random ();
+		}
+	
+
+		#region IDataGeneratorLenType implementation
+		public int NextLength ()
+		{
+			return _r.Next (_minlen, _maxlen);
+		}
+		#endregion
+	}
+	
+	public class IncreaseGeneratorLenType : IDataGeneratorLenType
+	{
+		private int _minlen;
+		private int _maxlen;
+		private int _step;
+		private int _current;
+		
+		public IncreaseGeneratorLenType (int minlen, int maxlen, int step)
+		{
+			_minlen = minlen;
+			_maxlen = maxlen;
+			_current = -1;
+		}
+	
+
+		#region IDataGeneratorLenType implementation
+		public int NextLength ()
+		{
+			_current = (_current + _step) % (_maxlen - _minlen) + _minlen;
+			return _current;
+		}
+		#endregion
+	}
+	
+	public class DecreaseGeneratorLenType : IDataGeneratorLenType
+	{
+		private int _minlen;
+		private int _maxlen;
+		private int _step;
+		private int _current;
+
+		public DecreaseGeneratorLenType (int minlen, int maxlen, int step)
+		{
+			_minlen = minlen;
+			_maxlen = maxlen;
+			_step = step;
+			_current = maxlen;
+		}
+
+
+		#region IDataGeneratorLenType implementation
+		public int NextLength ()
+		{
+			_current = (_current - _step) % (_maxlen - _minlen) + _minlen;
+			return _current;
+		}
+		#endregion
+	}
 }
 

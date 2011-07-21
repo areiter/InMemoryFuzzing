@@ -374,6 +374,21 @@ namespace Fuzzer.XmlFactory
 			FuzzLocationInfo fuzzLocationInfo = new FuzzLocationInfo (_connector);
 			fuzzLocationInfo.SetDataRegion (XmlHelper.ReadString (rootNode, "DataRegion"));
 			
+			
+			string stopCondition = XmlHelper.ReadString (rootNode, "StopCondition");
+			if (stopCondition == null || stopCondition == string.Empty || stopCondition.Equals ("none"))
+				fuzzLocationInfo.FuzzStopCondition = null;
+			else
+			{
+				string[] stopConditionParts = stopCondition.Split (new char[] { '|' }, 2);
+				
+				if (stopConditionParts[0].Equals ("count", StringComparison.InvariantCultureIgnoreCase) && stopCondition.Length == 2)
+					fuzzLocationInfo.FuzzStopCondition = new CountFuzzStopCondition (int.Parse (stopConditionParts[1]));
+				else
+					throw new NotImplementedException (string.Format ("Invalid stop condition identifier '{0}'", stopCondition));
+			}
+			
+			
 			IDataGenerator dataGen = GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<IDataGenerator> (
 				XmlHelper.ReadString (rootNode, "DataGenerator"));
 			IDictionary<string, string> arguments = new Dictionary<string, string> ();
