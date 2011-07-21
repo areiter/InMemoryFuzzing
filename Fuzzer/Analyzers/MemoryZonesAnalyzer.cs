@@ -119,16 +119,17 @@ namespace Fuzzer.Analyzers
 		
 		public override void Analyze (AnalyzeController ctrl)
 		{
-			foreach(InstructionDescription insn in ctrl.ExecutedInstructions)
+			foreach (InstructionDescription insn in ctrl.ExecutedInstructions)
 			{
-				foreach(MemoryChange memChange in insn.MemoryChanges)
+				foreach (MemoryChange memChange in insn.MemoryChanges)
 				{
-					foreach(MemoryZone memZone in _zones)
+					foreach (MemoryZone memZone in _zones)
 					{
-						if(memZone.IntersectsWith(memChange.Address, (ulong)memChange.Value.Length) &&
+						if (memZone.IntersectsWith (memChange.Address, (ulong)memChange.Value.Length) &&
 						   memZone.Zone == MemoryZonesAnalyzer.MemoryZone.ZoneType.RedZone)
 						{
-							//TODO: LOGME!!
+							Log (memZone, memChange.Address, memChange.Address + (ulong)memChange.Value.Length - 1, 
+								(ulong)memChange.Value.Length, insn, ctrl);
 							break;
 						}
 					}
