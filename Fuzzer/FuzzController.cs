@@ -96,7 +96,7 @@ namespace Fuzzer
 			string morePrefix = DateTime.Now.ToString ("dd.MM.yyyy");
 			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);
 			
-			while (true)
+			while (_fuzzDescriptions.Count > 0)
 			{
 				
 				//Is the snapshot already reached and active? Create one if it does not exist
@@ -136,7 +136,15 @@ namespace Fuzzer
 			_dataLogger.StartingFuzzRun ();
 			
 			IFuzzDescription currentDescription = _fuzzDescriptions.Dequeue ();
+			if(currentDescription.StopCondition != null)
+				currentDescription.StopCondition.StartFuzzRound();
+
 			currentDescription.Run (ref _snapshot);
+			
+			if(currentDescription.StopCondition != null &&
+			   currentDescription.StopCondition.Finished == true)
+				return;
+			
 			_fuzzDescriptions.Enqueue (currentDescription);
 		}
 		

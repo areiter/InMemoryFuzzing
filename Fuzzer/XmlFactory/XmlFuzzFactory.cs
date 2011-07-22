@@ -380,9 +380,8 @@ namespace Fuzzer.XmlFactory
 				fuzzLocationInfo.FuzzStopCondition = null;
 			else
 			{
-				string[] stopConditionParts = stopCondition.Split (new char[] { '|' }, 2);
-				
-				if (stopConditionParts[0].Equals ("count", StringComparison.InvariantCultureIgnoreCase) && stopCondition.Length == 2)
+				string[] stopConditionParts = stopCondition.Split (new char[] { '|' }, 2);		
+				if (stopConditionParts[0].Equals ("count", StringComparison.InvariantCultureIgnoreCase) && stopConditionParts.Length == 2)
 					fuzzLocationInfo.FuzzStopCondition = new CountFuzzStopCondition (int.Parse (stopConditionParts[1]));
 				else
 					throw new NotImplementedException (string.Format ("Invalid stop condition identifier '{0}'", stopCondition));
@@ -402,6 +401,7 @@ namespace Fuzzer.XmlFactory
 				XmlHelper.ReadString (rootNode, "DataType"));
 			fuzzDescription.SetDataGenerator (dataGen);
 			fuzzDescription.SetFuzzTarget (fuzzLocationInfo.DataRegion);
+			fuzzDescription.StopCondition = fuzzLocationInfo.FuzzStopCondition;
 			fuzzLocationInfo.FuzzDescription = fuzzDescription;
 			
 			return fuzzLocationInfo;

@@ -48,6 +48,16 @@ namespace Fuzzer.FuzzDescriptions
 		/// </summary>
 		private byte[] _currentFuzzData = null;
 		
+		
+		private IFuzzStopCondition _stopCondition = null;
+		
+		
+		public IFuzzStopCondition StopCondition
+		{
+			get{ return _stopCondition; }
+			set{ _stopCondition = value;}
+		}
+		
 		public SingleValueFuzzDescription ()
 		{			
 		}

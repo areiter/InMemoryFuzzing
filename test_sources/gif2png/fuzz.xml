@@ -1,0 +1,54 @@
+<Fuzz>
+  <Include>config_paths.xml</Include>
+  <RemoteControl>
+    <Host>localhost</Host>
+    <Port>8899</Port>
+    
+    <Exec trigger="immediate">
+      <Cmd>{[gdbserver_exec]}</Cmd>		
+      <Arg>--wrapper</Arg>
+      <Arg>env</Arg>
+      <Arg>LD_PRELOAD={[lib_logmem]}</Arg>
+      <Arg>LOG_MEM_PIPE=logmem_pipe</Arg>-->
+      <Arg>--</Arg>
+      <Arg>:1234</Arg>
+      <Arg>{[test_source_root]}gif2png</Arg>
+      <Arg>DUMMYARGUMENT</Arg>
+    </Exec>
+  </RemoteControl>
+
+  <TargetConnection>
+    <Connector>general/gdb</Connector>
+    <Config key="gdb_exec">{[gdb_exec]}</Config>
+    <Config key="gdb_log">stream:stderr</Config>
+    <Config key="target">extended-remote localhost:1234</Config>
+
+    <Config key="file">{[test_source_root]}gif2png</Config>
+  </TargetConnection>
+
+  <FuzzDescription>
+    <RegionStart>source|gif2png.c,877</RegionStart>
+    <RegionEnd>source|gif2png.c,878</RegionEnd>
+
+    <FuzzLocation>
+      <DataRegion>variable|argv[1]</DataRegion>
+      <DataType>fuzzdescription/pointer_value</DataType>
+      <DataGenerator>datagen/random_bytes</DataGenerator>
+      <DataGenArg name="minlen">2</DataGenArg>
+      <DataGenArg name="maxlen">30000</DataGenArg>
+      <DataGenArg name="lentype">increase|1000</DataGenArg>
+      <DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
+      <StopCondition>count|30</StopCondition>
+    </FuzzLocation>
+  </FuzzDescription>
+
+  <Logger>
+    <Destination>{[log_root]}</Destination>
+    <UseLogger name="datagenlogger" />
+    <UseLogger name="connectorlogger" />
+    <UseLogger name="stackframelogger" />
+    <UseLogger name="remotepipelogger">
+      <PipeName>logmem_pipe</PipeName>
+    </UseLogger>
+  </Logger>
+</Fuzz>

@@ -32,6 +32,9 @@ namespace Fuzzer.FuzzDescriptions
 	/// </remarks>
 	public interface IFuzzDescription
 	{
+		
+		IFuzzStopCondition StopCondition{ get; set; }
+		
 		/// <summary>
 		/// Is called before the first fuzzing round
 		/// Do all initializations here
@@ -42,6 +45,7 @@ namespace Fuzzer.FuzzDescriptions
 		void SetFuzzTarget(ISymbolTableVariable fuzzTarget);
 		
 		void SetDataGenerator(IDataGenerator dataGenerator);
+	
 		
 		/// <summary>
 		/// Insert the modified values here

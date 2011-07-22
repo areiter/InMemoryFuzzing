@@ -115,6 +115,7 @@ namespace Fuzzer.DataGenerators
 		{
 			_minlen = minlen;
 			_maxlen = maxlen;
+			_step = step;
 			_current = -1;
 		}
 	

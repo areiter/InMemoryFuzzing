@@ -62,15 +62,29 @@ namespace Fuzzer.TargetConnectors.GDB
 				IAddressSpecifier myAddress = null;
 				ManualResetEvent evt = new ManualResetEvent (false);
 				
-				//Step 1: "info address <name>" to get the location of the value
-				_connector.QueueCommand (new InfoAddressCmd (this, 
-				delegate(ISymbol symbol, IAddressSpecifier address)
+				//HACK
+				if(this.Symbol.Contains("["))
 				{
-					myAddress = address;
-					evt.Set ();
-				}, _connector));
-				
-				evt.WaitOne ();
+					_connector.QueueCommand(new ExamineCmd(_connector, this,
+					      delegate(ISymbol symbol, IAddressSpecifier address)
+						{
+							myAddress = address;
+							evt.Set ();
+						}));         
+					evt.WaitOne();                               
+				}
+				else
+				{
+					//Step 1: "info address <name>" to get the location of the value
+					_connector.QueueCommand (new InfoAddressCmd (this, 
+					delegate(ISymbol symbol, IAddressSpecifier address)
+					{
+						myAddress = address;
+						evt.Set ();
+					}, _connector));
+					
+					evt.WaitOne ();
+				}
 				
 				if (myAddress == null)
 					return null;

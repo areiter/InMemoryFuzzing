@@ -51,6 +51,16 @@ namespace Fuzzer.FuzzDescriptions
 		/// </summary>
 		private IAllocatedMemory _currentAllocatedMemory = null;
 		
+		
+		private IFuzzStopCondition _stopCondition = null;
+		
+		
+		public IFuzzStopCondition StopCondition
+		{
+			get{ return _stopCondition; }
+			set{ _stopCondition = value;}
+		}
+		
 		public PointerValueFuzzDescription ()
 		{
 			
