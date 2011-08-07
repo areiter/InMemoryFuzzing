@@ -97,12 +97,31 @@
 		     For different location specifiers see FuzzStart
 		  -->
 		<RegionEnd>address|0x400810</RegionEnd>
-		
+
 		
 		<!-- Defines a single location (variable or memory location) to fuzz, and its data generator.
 		     Multiple FuzzLocation tags can be specified
 		  -->
 		<FuzzLocation>
+			<!--
+				The trigger specifies the time when this fuzzlocation gets invoked.
+				valid values are:
+				
+				start [default]: The fuzz location gets invoked before every fuzzer run (equivalent to start|1)
+				start|<counter>: The fuzz location gets invoked every <counter>-times before the fuzzer runs.
+				                 The location does not get invoked on the first fuzzer run
+				start|!<counter>: Same as start|<counter> except that the location also gets invoked on the very first run. 
+				end
+				end|<counter>
+				end|!<counter>
+				
+				location|<location_specification>: 
+							The location gets invoked once the specification is reached.
+							For details on the location specification see FuzzDescription/RegionStart
+				
+			-->
+			<Trigger>start</Trigger>
+			
 		    <!-- Specifies the data region to fuzz, syntax:
 		    	 <specifier>|<identifier>
 		    	 
