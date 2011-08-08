@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using Fuzzer.DataLoggers;
 using System.IO;
 using log4net;
+using Fuzzer.FuzzLocations;
 namespace Fuzzer
 {
 	/// <summary>
@@ -31,13 +32,11 @@ namespace Fuzzer
 	public class FuzzController
 	{
 		protected ITargetConnector _connector;
-		protected IBreakpoint _snapshotBreakpoint;
 		protected ISnapshot _snapshot;
-		protected IBreakpoint _restoreBreakpoint;
 		protected IDataLogger _dataLogger;
 		protected ErrorLog _errorLog = null;
 		protected string _logDestination;
-		protected Queue<IFuzzDescription> _fuzzDescriptions = new Queue<IFuzzDescription>(); 
+		protected FuzzDescription _fuzzDescription;
 			
 		protected ILog _log = LogManager.GetLogger("FuzzController");
 		
@@ -47,23 +46,30 @@ namespace Fuzzer
 		}
 		
 		/// <summary>
+		/// Gets the current snapshot, for some fuzz descriptions it may be required to change/recreate the snapshot
+		/// </summary>
+		public ISnapshot Snapshot
+		{
+			get { return _snapshot; }
+			set { _snapshot = value;}
+		}
+		
+		/// <summary>
 		/// Creates a new FuzzController. Once the snapshotBreakpoint is reached a snapshot is created.
 		/// The snapshot gets restored once restore Breakpoint is reached
 		/// </summary>
 		/// <param name="connector">connector to use</param>
 		/// <param name="snapshotBreakpoint">Location to create a snapshot</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
-		public FuzzController (ITargetConnector connector, IBreakpoint snapshotBreakpoint, IBreakpoint restoreBreakpoint, string logDestination,
-			IDataLogger logger, params IFuzzDescription[] fuzzDescriptions)
+		public FuzzController (ITargetConnector connector, string logDestination,
+			IDataLogger logger, FuzzDescription fuzzDescription)
 		{
 			_connector = connector;
-			_snapshotBreakpoint = snapshotBreakpoint;
 			_snapshot = null;
-			_restoreBreakpoint = restoreBreakpoint;
 			_dataLogger = logger;
 			_logDestination = logDestination;
-			
-			InitFuzzDescriptions (fuzzDescriptions);
+			_fuzzDescription = fuzzDescription;
+			_fuzzDescription.Init ();
 		}
 		
 		/// <summary>
@@ -73,18 +79,18 @@ namespace Fuzzer
 		/// <param name="connector">connector to use</param>
 		/// <param name="snapshot">The snapshot to restore once restore Breakpoint is reachead</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
-		public FuzzController (ITargetConnector connector, ISnapshot snapshot, IBreakpoint restoreBreakpoint, string logDestination,
-			IDataLogger logger, params IFuzzDescription[] fuzzDescriptions)
+		public FuzzController (ITargetConnector connector, ISnapshot snapshot, string logDestination,
+			IDataLogger logger, FuzzDescription fuzzDescription)
 		{
 			_connector = connector;
-			_snapshotBreakpoint = null;
 			_snapshot = snapshot;
-			_restoreBreakpoint = restoreBreakpoint;
 			_dataLogger = logger;
 			_logDestination = logDestination;
 			
 			_errorLog = new ErrorLog (_logDestination);
-			InitFuzzDescriptions (fuzzDescriptions);
+			
+			_fuzzDescription = fuzzDescription;
+			_fuzzDescription.Init ();
 		}
 		
 		public void Fuzz ()
@@ -96,12 +102,12 @@ namespace Fuzzer
 			string morePrefix = DateTime.Now.ToString ("dd.MM.yyyy");
 			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);
 			
-			while (_fuzzDescriptions.Count > 0)
+			while (_fuzzDescription.FuzzLocation.Count > 0)
 			{
 				
 				//Is the snapshot already reached and active? Create one if it does not exist
 				if (_snapshot == null && _connector.LastDebuggerStop != null &&
-					_snapshotBreakpoint.Address == _connector.LastDebuggerStop.Address && 
+					_fuzzDescription.SnapshotBreakpoint.Address == _connector.LastDebuggerStop.Address && 
 					_connector.LastDebuggerStop.StopReason == StopReasonEnum.Breakpoint)
 				{
 					_dataLogger.StartingFuzzRun ();
@@ -109,17 +115,20 @@ namespace Fuzzer
 				}
 				
 				//The restore breakpoint is reached.....do the restore
-				if (_snapshot != null && _connector.LastDebuggerStop.StopReason == StopReasonEnum.Breakpoint && _restoreBreakpoint.Address == _connector.LastDebuggerStop.Address)
+				if (_snapshot != null && _connector.LastDebuggerStop.StopReason == StopReasonEnum.Breakpoint && _fuzzDescription.RestoreBreakpoint.Address == _connector.LastDebuggerStop.Address)
 				{
 					_log.InfoFormat ("Restore snapshot for prefix #{0}, no error ", loggerPrefix);
 					RestoreAndFuzz (ref loggerPrefix, morePrefix);
 				}
+				
+				//Another breakpoint is reached, maybe a trigger breakpoint?
 				else if (_snapshot != null && _connector.LastDebuggerStop.StopReason != StopReasonEnum.Breakpoint)
 				{
-					_log.InfoFormat ("Restore snapshot for prefix #{0}, error ", loggerPrefix);
-					_errorLog.LogDebuggerStop (_connector.LastDebuggerStop);
+					//_log.InfoFormat ("Restore snapshot for prefix #{0}, error ", loggerPrefix);
+					//_errorLog.LogDebuggerStop (_connector.LastDebuggerStop);
 
-					RestoreAndFuzz (ref loggerPrefix, morePrefix);
+					//RestoreAndFuzz (ref loggerPrefix, morePrefix);
+					InvokeFuzzLocations(TriggerEnum.Location, _connector.LastDebuggerStop.Address);
 				}
 				
 				_log.InfoFormat ("Starting fuzz with prefix #{0}", loggerPrefix);
@@ -129,38 +138,36 @@ namespace Fuzzer
 		
 		private void RestoreAndFuzz (ref int loggerPrefix, string morePrefix)
 		{
+			InvokeFuzzLocations (TriggerEnum.End, null);
 			_dataLogger.FinishedFuzzRun ();
 			_snapshot.Restore ();
 
-			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);			
+			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);
 			_dataLogger.StartingFuzzRun ();
 			
-			IFuzzDescription currentDescription = _fuzzDescriptions.Dequeue ();
-			if(currentDescription.StopCondition != null)
-				currentDescription.StopCondition.StartFuzzRound();
-
-			currentDescription.Run (ref _snapshot);
+			_fuzzDescription.NextFuzzRun ();
 			
-			if(currentDescription.StopCondition != null &&
-			   currentDescription.StopCondition.Finished == true)
-				return;
+			InvokeFuzzLocations (TriggerEnum.Start, null);			
+		}
+		
+		private void InvokeFuzzLocations (TriggerEnum triggerType, object triggerData)
+		{
+			List<IFuzzLocation> fuzzLocationsToRemove = new List<IFuzzLocation> ();
+			foreach (IFuzzLocation fuzzLocation in _fuzzDescription.FuzzLocation) {
+				if (fuzzLocation.IsFinished)
+					fuzzLocationsToRemove.Add (fuzzLocation); else if (fuzzLocation.IsTriggered (triggerType, triggerData)) {
+					fuzzLocation.Run (this);
+				}
+			}
 			
-			_fuzzDescriptions.Enqueue (currentDescription);
+			foreach (IFuzzLocation toRemove in fuzzLocationsToRemove)
+				_fuzzDescription.FuzzLocation.Remove (toRemove);
 		}
 		
 		private void IncrementLoggerPrefix (ref int loggerPrefix, string morePrefix)
 		{
 			loggerPrefix++;
 			_dataLogger.Prefix = string.Format ("{0}", loggerPrefix, morePrefix);
-		}
-		
-		private void InitFuzzDescriptions (IFuzzDescription[] fuzzDescriptions)
-		{
-			foreach (IFuzzDescription desc in fuzzDescriptions)
-			{
-				desc.Init (this);
-				_fuzzDescriptions.Enqueue (desc);
-			}
 		}
 	}
 }

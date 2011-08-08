@@ -118,9 +118,39 @@
 				location|<location_specification>: 
 							The location gets invoked once the specification is reached.
 							For details on the location specification see FuzzDescription/RegionStart
+							
+			    Specify multiple triggers to invoke the fuzz location multiple times
 				
 			-->
-			<Trigger>start</Trigger>
+			<Trigger>start|2</Trigger>
+			
+			<!--
+			    Specifies the stop condition for this FuzzLocation
+			    valid values are: 
+			       none (default) ... Fuzzing process keeps going as long as it gets interrupted by the user
+			       count|10       ... The Fuzzing process is executed count times
+			  -->
+			<StopCondition>none</StopCondition>
+			
+			<!--
+				Specifies the fuzzer type to use for this location.
+				
+				The further arguments depend on the specified fuzzer.
+				
+				Currently valid fuzzers are:
+				
+				fuzzer/in_memory: Use the in-memory fuzzer, it requires the following arguments:
+				  DataRegion, DataType, DataGenerator + args
+				
+				fuzzer/unix_socket: Connect to the specified unix socket. It requires the following arguments:
+					  <SocketPath>/path/to/sockt.file</SocketPath>, DataGenerator + args
+
+        		fuzzer/net_socket: Connect to the specified host, it requires the following arguments:
+            			<Host>[udp|tcp]:[hostname]:[port]</Host>, DataGenerator + args
+
+				  
+			  -->
+			<FuzzerType>fuzzer/in_memory</FuzzerType>
 			
 		    <!-- Specifies the data region to fuzz, syntax:
 		    	 <specifier>|<identifier>
@@ -194,13 +224,7 @@
 			  -->
 			<DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
 			
-			<!--
-			    Specifies the stop condition for this FuzzLocation
-			    valid values are: 
-			       none (default) ... Fuzzing process keeps going as long as it gets interrupted by the user
-			       count|10       ... The Fuzzing process is executed count times
-			  -->
-			<StopCondition>none</StopCondition>
+			
 		</FuzzLocation>
 		
 	</FuzzDescription>

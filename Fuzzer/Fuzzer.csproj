@@ -20,7 +20,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters>--fuzz --xmlinput=../../../test_sources/gif2png/fuzz.xml</Commandlineparameters>
+    <Commandlineparameters>--fuzz --xmlinput=../../SampleConfigs/SampleFuzzDescription.xml</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
@@ -103,7 +103,6 @@
     <Compile Include="TargetConnectors\SimpleSymbol.cs" />
     <Compile Include="FuzzController.cs" />
     <Compile Include="TargetConnectors\IAllocatedMemory.cs" />
-    <Compile Include="FuzzDescriptions\IFuzzDescription.cs" />
     <Compile Include="FuzzDescriptions\SingleValueFuzzDescription.cs" />
     <Compile Include="DataGenerators\IDataGenerator.cs" />
     <Compile Include="DataGenerators\RandomByteGenerator.cs" />
@@ -147,7 +146,6 @@
     <Compile Include="XmlFactory\FuzzDescriptionInfo.cs" />
     <Compile Include="TargetConnectors\GDB\InfoLineCmd.cs" />
     <Compile Include="TargetConnectors\GDB\InfoLineRH.cs" />
-    <Compile Include="XmlFactory\FuzzLocationInfo.cs" />
     <Compile Include="TargetConnectors\CalculatedSymbolTableVariable.cs" />
     <Compile Include="TargetConnectors\GDB\GDBCalculatedSymbolTableVariable.cs" />
     <Compile Include="TargetConnectors\GDB\DeleteBreakpointRH.cs" />
@@ -164,6 +162,14 @@
     <Compile Include="FuzzDescriptions\IFuzzStopCondition.cs" />
     <Compile Include="TargetConnectors\GDB\ExamineCmd.cs" />
     <Compile Include="TargetConnectors\GDB\ExamineRH.cs" />
+    <Compile Include="FuzzDescriptions\IFuzzTech.cs" />
+    <Compile Include="FuzzLocations\IFuzzLocation.cs" />
+    <Compile Include="FuzzLocations\InMemoryFuzzLocation.cs" />
+    <Compile Include="FuzzLocations\BaseFuzzLocation.cs" />
+    <Compile Include="FuzzDescriptions\FuzzDescription.cs" />
+    <Compile Include="FuzzDescriptions\ITrigger.cs" />
+    <Compile Include="FuzzDescriptions\Trigger.cs" />
+    <Compile Include="FuzzLocations\UnixSocketFuzzLocation.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -180,6 +186,7 @@
     <Folder Include="SampleConfigs\" />
     <Folder Include="XmlFactory\" />
     <Folder Include="Analyzers\" />
+    <Folder Include="FuzzLocations\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">

@@ -21,6 +21,7 @@ using Fuzzer.TargetConnectors;
 using System.Collections.Generic;
 using Iaik.Utils;
 using System.Globalization;
+using Fuzzer.FuzzLocations;
 namespace Fuzzer.XmlFactory
 {
 	public class FuzzDescriptionInfo
@@ -54,9 +55,9 @@ namespace Fuzzer.XmlFactory
 		/// <summary>
 		/// Contains all fuzz locations for this single region
 		/// </summary>
-		private List<FuzzLocationInfo> _fuzzLocations = new List<FuzzLocationInfo>();
+		private List<IFuzzLocation> _fuzzLocations = new List<IFuzzLocation>();
 		
-		public IEnumerable<FuzzLocationInfo> FuzzLocations
+		public IEnumerable<IFuzzLocation> FuzzLocations
 		{
 			get { return _fuzzLocations; }
 		}
@@ -83,7 +84,7 @@ namespace Fuzzer.XmlFactory
 		/// <param name="regionSpecifier"></param>
 		public void SetFuzzRegionStart (string regionSpecifier)
 		{
-			_regionStart = ParseRegionAddress (regionSpecifier, false);
+			_regionStart = ParseRegionAddress (regionSpecifier, false, _connector);
 		}
 		
 		/// <summary>
@@ -95,15 +96,15 @@ namespace Fuzzer.XmlFactory
 		/// <param name="regionSpecifier"></param>
 		public void SetFuzzRegionEnd (string regionSpecifier)
 		{
-			_regionEnd = ParseRegionAddress (regionSpecifier, true);
+			_regionEnd = ParseRegionAddress (regionSpecifier, true, _connector);
 		}
 		
-		public void AddFuzzLocation (FuzzLocationInfo fuzzLocation)
+		public void AddFuzzLocation (IFuzzLocation fuzzLocation)
 		{
 			_fuzzLocations.Add (fuzzLocation);
 		}
 		
-		private IAddressSpecifier ParseRegionAddress (string regionSpecifier, bool allowMethodRet)
+		public static IAddressSpecifier ParseRegionAddress (string regionSpecifier, bool allowMethodRet, ITargetConnector connector)
 		{
 			KeyValuePair<string, string>? regionSpecifierPair = StringHelper.SplitToKeyValue (regionSpecifier, "|");
 			if (regionSpecifierPair == null)
@@ -113,8 +114,8 @@ namespace Fuzzer.XmlFactory
 			
 			switch (regionSpecifierPair.Value.Key) {
 			case "method":
-				AssertSymbolTable ();
-				ISymbolTableMethod method = _connector.SymbolTable.FindMethod (regionSpecifierPair.Value.Value);
+				AssertSymbolTable (connector);
+				ISymbolTableMethod method = connector.SymbolTable.FindMethod (regionSpecifierPair.Value.Value);
 				if (method == null)
 					throw new FuzzParseException ("Could not find method with name '{0}', have you realy attached debugging symbols?", regionSpecifierPair.Value.Value);
 				
@@ -136,8 +137,8 @@ namespace Fuzzer.XmlFactory
 				break;
 			
 			case "source":
-				AssertSymbolTable ();
-				breakAddress = _connector.SymbolTable.SourceToAddress (regionSpecifierPair.Value.Value);
+				AssertSymbolTable (connector);
+				breakAddress = connector.SymbolTable.SourceToAddress (regionSpecifierPair.Value.Value);
 				if (breakAddress == null)
 					throw new FuzzParseException ("Specified source '{0}' is invalid", regionSpecifierPair.Value.Value);
 				break;
@@ -149,9 +150,9 @@ namespace Fuzzer.XmlFactory
 			return breakAddress;
 		}
 		
-		private void AssertSymbolTable()
+		private static void AssertSymbolTable(ITargetConnector connector)
 		{
-			if(_connector.SymbolTable == null)
+			if(connector.SymbolTable == null)
 				throw new ArgumentException("Connector does not have a symbol table");
 		}
 				                                  

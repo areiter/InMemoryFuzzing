@@ -20,27 +20,19 @@ using System;
 using Fuzzer.TargetConnectors;
 using Fuzzer.DataGenerators;
 using Iaik.Utils.CommonAttributes;
+using Fuzzer.FuzzLocations;
 
 namespace Fuzzer.FuzzDescriptions
 {
 	[ClassIdentifier("fuzzdescription/pointer_value")]
-	public class PointerValueFuzzDescription : IFuzzDescription
+	public class PointerValueFuzzDescription : IFuzzTech
 	{
+		
 		/// <summary>
-		/// The target variable to fuzz
+		/// Location to fuzz
 		/// </summary>
-		private ISymbolTableVariable _fuzzTarget;
-
-		/// <summary>
-		/// The generator
-		/// </summary>
-		private IDataGenerator _dataGenerator;
-
-		/// <summary>
-		/// The current fuzz controller
-		/// </summary>
-		private FuzzController _fuzzController;
-
+		private InMemoryFuzzLocation _fuzzLocation;
+		
 		/// <summary>
 		/// The current data written to the fuzzing target
 		/// </summary>
@@ -51,68 +43,51 @@ namespace Fuzzer.FuzzDescriptions
 		/// </summary>
 		private IAllocatedMemory _currentAllocatedMemory = null;
 		
-		
-		private IFuzzStopCondition _stopCondition = null;
-		
-		
-		public IFuzzStopCondition StopCondition
-		{
-			get{ return _stopCondition; }
-			set{ _stopCondition = value;}
-		}
-		
-		public PointerValueFuzzDescription ()
-		{
 			
+		public PointerValueFuzzDescription (IFuzzLocation fuzzLocation)
+		{
+			if (typeof(InMemoryFuzzLocation).IsAssignableFrom (fuzzLocation.GetType ()) == false)
+				throw new ArgumentException ("PointerValueFuzzDescription needs an in memory fuzzer");
+			
+			_fuzzLocation = (InMemoryFuzzLocation)fuzzLocation;
 		}
 	
 
 		#region IFuzzDescription implementation
-		public void Init (FuzzController fuzzController)
+		public void Init ()
 		{
-			_fuzzController = fuzzController;
-		}
-		
-		public void SetFuzzTarget (ISymbolTableVariable fuzzTarget)
-		{
-			_fuzzTarget = fuzzTarget;
 		}
 
-		public void SetDataGenerator (IDataGenerator dataGenerator)
-		{
-			_dataGenerator = dataGenerator;
-		}
-
-		public void Run (ref ISnapshot snapshot)
+		public void Run (FuzzController ctrl)
 		{
 			//It is assumed that currently the program is stopped at the snapshot
 			
-			snapshot.Destroy ();
+			ctrl.Snapshot.Destroy ();
 			
 			if (_currentAllocatedMemory != null)
 			{
-				_fuzzController.Connector.FreeMemory (_currentAllocatedMemory);
+				ctrl.Connector.FreeMemory (_currentAllocatedMemory);
 				_currentAllocatedMemory = null;
 			}
 			
-			_currentFuzzData = _dataGenerator.GenerateData ();
-			_currentAllocatedMemory = _fuzzController.Connector.AllocateMemory ((UInt64)_currentFuzzData.Length);
-			_fuzzController.Connector.WriteMemory (_currentFuzzData, _currentAllocatedMemory.Address, (UInt64)_currentFuzzData.Length);
+			_currentFuzzData = _fuzzLocation.DataGenerator.GenerateData ();
+			_currentAllocatedMemory = ctrl.Connector.AllocateMemory ((UInt64)_currentFuzzData.Length);
+			ctrl.Connector.WriteMemory (_currentFuzzData, _currentAllocatedMemory.Address, (UInt64)_currentFuzzData.Length);
 			
 			//TODO: Big-Little endian handling
 			byte[] addressBytes = BitConverter.GetBytes (_currentAllocatedMemory.Address);
 			byte[] realAddressBytes;
 			
-			if (addressBytes.Length != _fuzzTarget.Size)
+			if (addressBytes.Length != _fuzzLocation.FuzzTarget.Size)
 			{
-				realAddressBytes = new byte[_fuzzTarget.Size];
+				realAddressBytes = new byte[_fuzzLocation.FuzzTarget.Size];
 				Array.Copy (addressBytes, realAddressBytes, Math.Min (addressBytes.Length, realAddressBytes.Length));
 			}
 			else
 				realAddressBytes = addressBytes;
 			
-			_fuzzController.Connector.WriteMemory (realAddressBytes, _fuzzTarget.Address.Value, (UInt64)realAddressBytes.Length);
-			snapshot = _fuzzController.Connector.CreateSnapshot ();
+			ctrl.Connector.WriteMemory (realAddressBytes, _fuzzLocation.FuzzTarget.Address.Value, (UInt64)realAddressBytes.Length);
+			ctrl.Snapshot = ctrl.Connector.CreateSnapshot ();
 		}
 		#endregion
 }

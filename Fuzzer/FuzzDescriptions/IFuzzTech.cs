@@ -22,30 +22,17 @@ using Fuzzer.DataGenerators;
 namespace Fuzzer.FuzzDescriptions
 {
 	/// <summary>
-	/// Associates variables (or memory regions) with datagenerators
-	/// there may also be multiple variables that depend on a single fuzz description
+	/// Describes a single "fuzzin technique" e.g.
+	/// InMemoryPointerValue, InMemorySingleValue, UnixSocket, NetSocket,....
 	/// </summary>
-	/// <remarks>
-	/// For config-file-support of the implemented fuzz description, they are supposed to
-	/// provide a ctor with the vollowing arguments: 
-	///        (ISymbolTableVariable fuzzTarget, IDataGenerator dataGenerator)
-	/// </remarks>
-	public interface IFuzzDescription
+	public interface IFuzzTech
 	{
-		
-		IFuzzStopCondition StopCondition{ get; set; }
 		
 		/// <summary>
 		/// Is called before the first fuzzing round
 		/// Do all initializations here
 		/// </summary>
-		/// <param name="fuzzController">The associated FuzzController</param>
-		void Init(FuzzController fuzzController);
-		
-		void SetFuzzTarget(ISymbolTableVariable fuzzTarget);
-		
-		void SetDataGenerator(IDataGenerator dataGenerator);
-	
+		void Init();
 		
 		/// <summary>
 		/// Insert the modified values here
@@ -54,7 +41,7 @@ namespace Fuzzer.FuzzDescriptions
 		/// Changing variables may require the snapshot to be recreated (this implies that the program counter
 		/// is located at the beginning of the snapshot)
 		/// </remarks>
-		void Run(ref ISnapshot snapshot);
+		void Run(FuzzController ctrl);
 		
 		
 	}

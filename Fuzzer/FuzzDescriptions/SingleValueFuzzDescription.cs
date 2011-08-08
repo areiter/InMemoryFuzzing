@@ -20,28 +20,20 @@ using System;
 using Fuzzer.TargetConnectors;
 using Iaik.Utils.CommonAttributes;
 using Fuzzer.DataGenerators;
+using Fuzzer.FuzzLocations;
 namespace Fuzzer.FuzzDescriptions
 {
 	/// <summary>
 	/// Fuzzes a single variable with a simple type (no pointer). e.g. int, int64, ...
 	/// </summary>
 	[ClassIdentifier("fuzzdescription/single_value")]
-	public class SingleValueFuzzDescription : IFuzzDescription
+	public class SingleValueFuzzDescription : IFuzzTech
 	{
-		/// <summary>
-		/// The target variable to fuzz
-		/// </summary>
-		private ISymbolTableVariable _fuzzTarget;
 		
 		/// <summary>
-		/// The generator
+		/// The associated fuzz location
 		/// </summary>
-		private IDataGenerator _dataGenerator;
-		
-		/// <summary>
-		/// The current fuzz controller
-		/// </summary>
-		private FuzzController _fuzzController;
+		private InMemoryFuzzLocation _fuzzLocation;
 		
 		/// <summary>
 		/// The current data written to the fuzzing target
@@ -49,40 +41,26 @@ namespace Fuzzer.FuzzDescriptions
 		private byte[] _currentFuzzData = null;
 		
 		
-		private IFuzzStopCondition _stopCondition = null;
-		
-		
-		public IFuzzStopCondition StopCondition
+		public SingleValueFuzzDescription (IFuzzLocation fuzzLocation)
 		{
-			get{ return _stopCondition; }
-			set{ _stopCondition = value;}
-		}
-		
-		public SingleValueFuzzDescription ()
-		{			
+			if (typeof(InMemoryFuzzLocation).IsAssignableFrom (fuzzLocation.GetType ()) == false)
+				throw new ArgumentException ("PointerValueFuzzDescription needs an in memory fuzzer");
+			
+			_fuzzLocation = (InMemoryFuzzLocation)fuzzLocation;
 		}
 	
 
 		#region IFuzzDescription implementation
-		public void Init (FuzzController fuzzController)
+		public void Init ()
 		{
-			_fuzzController = fuzzController;
 		}
 
-		public void SetFuzzTarget (ISymbolTableVariable fuzzTarget)
+		public void Run (FuzzController fuzzController)
 		{
-			_fuzzTarget = fuzzTarget;
-		}
-
-		public void SetDataGenerator (IDataGenerator dataGenerator)
-		{
-			_dataGenerator = dataGenerator;
-		}
-
-		public void Run (ref ISnapshot snapshot)
-		{
-			_currentFuzzData = _dataGenerator.GenerateData ();
-			_fuzzController.Connector.WriteMemory (_currentFuzzData, _fuzzTarget.Address.Value, (UInt64)_currentFuzzData.Length, ref snapshot);
+			_currentFuzzData = _fuzzLocation.DataGenerator.GenerateData ();
+			ISnapshot snapshot = fuzzController.Snapshot;
+			fuzzController.Connector.WriteMemory (_currentFuzzData, _fuzzLocation.FuzzTarget.Address.Value, (UInt64)_currentFuzzData.Length, ref snapshot);
+			fuzzController.Snapshot = snapshot;
 		}
 		#endregion
 }

@@ -61,6 +61,12 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Security" />
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Fuzzer\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security" />
+    <Reference Include="Mono.Posix" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
@@ -98,6 +104,17 @@
     <Compile Include="IO\MultiTextReader.cs" />
     <Compile Include="XmlHelper.cs" />
     <Compile Include="SimpleFormatter.cs" />
+    <Compile Include="Net\ConnectionFactory.cs" />
+    <Compile Include="Net\FrontEndConnection.cs" />
+    <Compile Include="Net\FrontEndConnectionAttribute.cs" />
+    <Compile Include="Net\NamedPipeConnection.cs" />
+    <Compile Include="Net\SslConnection.cs" />
+    <Compile Include="Net\SslConnectionBuilder.cs" />
+    <Compile Include="Net\TcpSocketConnection.cs" />
+    <Compile Include="Net\UnixSocketConnection.cs" />
+    <Compile Include="Net\ConnectionBuilderSettings.cs" />
+    <Compile Include="Net\IConnectionBuilder.cs" />
+    <Compile Include="Net\Exceptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

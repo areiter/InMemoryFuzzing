@@ -28,6 +28,7 @@ using Iaik.Utils.CommonFactories;
 using Fuzzer.DataGenerators;
 using Fuzzer.FuzzDescriptions;
 using Fuzzer.DataLoggers;
+using Fuzzer.FuzzLocations;
 namespace Fuzzer.XmlFactory
 {
 	/// <summary>
@@ -148,15 +149,16 @@ namespace Fuzzer.XmlFactory
 			List<FuzzController> fuzzControllers = new List<FuzzController> ();
 			foreach (FuzzDescriptionInfo info in _fuzzDescriptions)
 			{
-				List<IFuzzDescription> fuzzDescriptions = new List<IFuzzDescription> ();
-				foreach (FuzzLocationInfo desc in info.FuzzLocations)
-					fuzzDescriptions.Add (desc.FuzzDescription);
-			
+
 				IBreakpoint snapshot = _connector.SetSoftwareBreakpoint (info.RegionStart.ResolveAddress ().Value, 0, "snapshot");
 				IBreakpoint restore = _connector.SetSoftwareBreakpoint (info.RegionEnd.ResolveAddress ().Value, 0, "restore");
-				
-				fuzzControllers.Add (new FuzzController (_connector, snapshot, restore, _logDestination,
-					new LoggerCollection (_loggers.ToArray ()), fuzzDescriptions.ToArray ()));
+
+				FuzzDescription fuzzDescription = new FuzzDescription (snapshot, restore);
+				fuzzDescription.FuzzLocation.AddRange (info.FuzzLocations);
+
+				fuzzControllers.Add (new FuzzController (_connector, _logDestination,
+					new LoggerCollection (_loggers.ToArray ()), 
+						fuzzDescription));
 			
 			}
 			
@@ -315,7 +317,7 @@ namespace Fuzzer.XmlFactory
 					foreach(var fuzzDescInfo in _fuzzDescriptions)
 					{
 						foreach(var fuzzLocationInfo in fuzzDescInfo.FuzzLocations)
-							fuzzLocationInfo.DataGenerator.SetLogger(datagenLogger);
+							fuzzLocationInfo.SetLogger(LoggerDestinationEnum.DataGenLogger, datagenLogger);
 					}
 					_loggers.Add(datagenLogger);
 					break;
@@ -364,49 +366,22 @@ namespace Fuzzer.XmlFactory
 			return fuzzDescription;
 		}
 		
-		/// <summary>
-		/// Reads a single FuzzLocation with its datagenerator and data type
-		/// </summary>
-		/// <param name="rootNode"></param>
-		/// <returns></returns>
-		private FuzzLocationInfo ReadFuzzLocation (XmlElement rootNode)
+		private IFuzzLocation ReadFuzzLocation (XmlElement fuzzLocationNode)
 		{
-			FuzzLocationInfo fuzzLocationInfo = new FuzzLocationInfo (_connector);
-			fuzzLocationInfo.SetDataRegion (XmlHelper.ReadString (rootNode, "DataRegion"));
+			string fuzzerType = XmlHelper.ReadString (fuzzLocationNode, "FuzzerType");
+			if (fuzzerType == null)
+				throw new FuzzParseException ("Could not find 'FuzzerType'-Node");
 			
+			IFuzzLocation fuzzLocation = GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<IFuzzLocation> (fuzzerType);
 			
-			string stopCondition = XmlHelper.ReadString (rootNode, "StopCondition");
-			if (stopCondition == null || stopCondition == string.Empty || stopCondition.Equals ("none"))
-				fuzzLocationInfo.FuzzStopCondition = null;
-			else
-			{
-				string[] stopConditionParts = stopCondition.Split (new char[] { '|' }, 2);		
-				if (stopConditionParts[0].Equals ("count", StringComparison.InvariantCultureIgnoreCase) && stopConditionParts.Length == 2)
-					fuzzLocationInfo.FuzzStopCondition = new CountFuzzStopCondition (int.Parse (stopConditionParts[1]));
-				else
-					throw new NotImplementedException (string.Format ("Invalid stop condition identifier '{0}'", stopCondition));
-			}
+			if (fuzzLocation == null)
+				throw new FuzzParseException (string.Format ("Could not find fuzz location implementation with identifier '{0}'", fuzzerType));
 			
-			
-			IDataGenerator dataGen = GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<IDataGenerator> (
-				XmlHelper.ReadString (rootNode, "DataGenerator"));
-			IDictionary<string, string> arguments = new Dictionary<string, string> ();
-			foreach (XmlElement datagenArgNode in rootNode.SelectNodes ("DataGenArg"))
-				arguments.Add (datagenArgNode.GetAttribute ("name"), datagenArgNode.InnerText);
-			dataGen.Setup (arguments);
-			
-			fuzzLocationInfo.DataGenerator = dataGen;
-			
-			IFuzzDescription fuzzDescription = GenericClassIdentifierFactory.CreateFromClassIdentifierOrType<IFuzzDescription> (
-				XmlHelper.ReadString (rootNode, "DataType"));
-			fuzzDescription.SetDataGenerator (dataGen);
-			fuzzDescription.SetFuzzTarget (fuzzLocationInfo.DataRegion);
-			fuzzDescription.StopCondition = fuzzLocationInfo.FuzzStopCondition;
-			fuzzLocationInfo.FuzzDescription = fuzzDescription;
-			
-			return fuzzLocationInfo;
+			fuzzLocation.Init (fuzzLocationNode, _connector);
+			return fuzzLocation;
 		}
-
+		
+		
 		/// <summary>
 		/// Called after an exec call has been sent to the remote target
 		/// </summary>
