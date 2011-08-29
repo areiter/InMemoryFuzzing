@@ -20,7 +20,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters>--fuzz --xmlinput=../../SampleConfigs/SampleFuzzDescription.xml</Commandlineparameters>
+    <Commandlineparameters>--fuzz --xmlinput=../../../test_sources/proftpd-1.3.0a/fuzz.xml</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
@@ -170,6 +170,9 @@
     <Compile Include="FuzzDescriptions\ITrigger.cs" />
     <Compile Include="FuzzDescriptions\Trigger.cs" />
     <Compile Include="FuzzLocations\UnixSocketFuzzLocation.cs" />
+    <Compile Include="FuzzLocations\PredefinedFuzzLocation.cs" />
+    <Compile Include="FuzzLocations\FuzzHelpers\DelayFuzzHelper.cs" />
+    <Compile Include="DataGenerators\FixedByteGenerator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -187,6 +190,7 @@
     <Folder Include="XmlFactory\" />
     <Folder Include="Analyzers\" />
     <Folder Include="FuzzLocations\" />
+    <Folder Include="FuzzLocations\FuzzHelpers\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.csproj">

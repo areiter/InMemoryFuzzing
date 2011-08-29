@@ -21,9 +21,11 @@ using System.Xml;
 using Fuzzer.TargetConnectors;
 using Iaik.Utils.Net;
 using Iaik.Utils;
+using Iaik.Utils.CommonAttributes;
+using System.Collections.Generic;
 namespace Fuzzer.FuzzLocations
 {
-	
+	[ClassIdentifier("fuzzer/unix_socket")]
 	public class UnixSocketFuzzLocation : BaseFuzzLocation
 	{
 		private UnixSocketConnection _socket;
@@ -48,17 +50,35 @@ namespace Fuzzer.FuzzLocations
 		
 		#endregion
 		
-		public override void Init (XmlElement fuzzLocationRoot, ITargetConnector connector)
+		public override void Init (XmlElement fuzzLocationRoot, ITargetConnector connector, Dictionary<string, IFuzzLocation> predefinedFuzzers)
 		{
-			base.Init (fuzzLocationRoot, connector);
+			base.Init (fuzzLocationRoot, connector, predefinedFuzzers);
 			
 			_socket = new UnixSocketConnection (XmlHelper.ReadString (fuzzLocationRoot, "SocketPath"));
-			_socket.Connect ();
+			
 		}
 		
 		public override void Run (FuzzController ctrl)
 		{
 			base.Run (ctrl);
+			
+			if (!_socket.Connected)
+				_socket.Connect ();
+			
+			byte[] data = _dataGenerator.GenerateData ();
+			_socket.Write (data, 0, data.Length);
+		}
+		
+		protected override void Disposing ()
+		{ 
+			base.Dispose ();
+			
+			if (_socket != null && _socket.Connected)
+			{
+				_socket.Close ();
+				_socket.Dispose ();
+				_socket = null;
+			}
 		}
 		
 	}

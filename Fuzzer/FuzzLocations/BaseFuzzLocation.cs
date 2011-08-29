@@ -32,6 +32,33 @@ namespace Fuzzer.FuzzLocations
 	/// </summary>
 	public abstract class BaseFuzzLocation : IFuzzLocation
 	{
+		public class ChangeableComponents
+		{
+			public IFuzzStopCondition StopCondition;
+			public IDataGenerator DataGenerator;
+			public ITrigger[] Triggers;
+			public bool IsPreCondition;
+			
+			public ChangeableComponents (IFuzzStopCondition stopCondition,
+				IDataGenerator dataGenerator,
+				ITrigger[] triggers,
+				bool isPreCondition)
+			{
+				StopCondition = stopCondition;
+				DataGenerator = dataGenerator;
+				Triggers = triggers;
+				IsPreCondition = isPreCondition;
+			}
+			
+		}
+		
+		protected List<ChangeableComponents> _changeableComponents = new List<ChangeableComponents>();
+		
+		/// <summary>
+		/// Associated connector
+		/// </summary>
+		protected ITargetConnector _connector = null;
+		
 		/// <summary>
 		/// Specifies the stop condition of this fuzz location
 		/// </summary>
@@ -46,6 +73,11 @@ namespace Fuzzer.FuzzLocations
 		/// Contains all location triggers
 		/// </summary>
 		protected ITrigger[] _triggers = null;
+		
+		/// <summary>
+		/// Determines if the current fuzz location is a precondition (no logging or snapshots)
+		/// </summary>
+		protected bool _isPreCondition = false;
 		
 		/// <summary>
 		/// Returns if the implementing class expects an [StopCondition] tag
@@ -63,16 +95,42 @@ namespace Fuzzer.FuzzLocations
 		protected abstract bool SupportsTrigger { get; }
 		
 		#region IFuzzLocation implementation
-		public virtual void Init (XmlElement fuzzLocationRoot, ITargetConnector connector)
+		public virtual void Init (XmlElement fuzzLocationRoot, ITargetConnector connector, Dictionary<string, IFuzzLocation> predefinedFuzzers)
 		{
+			_connector = connector;			
+		}
+		
+		public object InitChanges (XmlElement fuzzLocationRoot)
+		{
+			_isPreCondition = fuzzLocationRoot.Name == "PreCondition";
+			
 			if (SupportsStopCondition)
 				ReadStopCondition (fuzzLocationRoot);
+			else
+				_stopCondition = null;
 			
 			if (SupportsDataGen)
 				ReadDataGen (fuzzLocationRoot);
+			else
+				_dataGenerator = null;
 			
 			if (SupportsTrigger)
-				ReadTriggers (fuzzLocationRoot, connector);
+				ReadTriggers (fuzzLocationRoot, _connector);
+			else
+				_triggers = null;
+			
+			ChangeableComponents changeableComponent = new ChangeableComponents (
+				_stopCondition, _dataGenerator, _triggers, _isPreCondition);
+			_changeableComponents.Add (changeableComponent);
+			
+			InternInitChanges (changeableComponent, fuzzLocationRoot);
+			
+			return changeableComponent;
+		}
+		
+		protected virtual void InternInitChanges (object changeableId, XmlElement fuzzLocationRoot)
+		{
+			
 		}
 		
 		private void ReadStopCondition (XmlElement root)
@@ -135,6 +193,8 @@ namespace Fuzzer.FuzzLocations
 		
 		public virtual void Run (FuzzController ctrl)
 		{
+			
+			
 			if (_stopCondition != null)
 				_stopCondition.StartFuzzRound ();
 			
@@ -143,6 +203,17 @@ namespace Fuzzer.FuzzLocations
 				foreach (ITrigger trigger in _triggers)
 					trigger.NextFuzzRun ();
 			}
+		}
+		
+		public void ApplyChangeableId (object changeableId)
+		{
+			if (changeableId != null && changeableId is ChangeableComponents && _changeableComponents.Contains ((ChangeableComponents)changeableId)) {
+				_stopCondition = ((ChangeableComponents)changeableId).StopCondition;
+				_dataGenerator = ((ChangeableComponents)changeableId).DataGenerator;
+				_triggers = ((ChangeableComponents)changeableId).Triggers;
+				_isPreCondition = ((ChangeableComponents)changeableId).IsPreCondition;
+			} else if (changeableId != null)
+				throw new ArgumentException ("Unexpected changeable id");
 		}
 
 		public virtual bool IsFinished 
@@ -162,8 +233,19 @@ namespace Fuzzer.FuzzLocations
 			
 			return false;
 		}
-		
 		#endregion		
+		
+		protected virtual void Disposing ()
+		{
+		}
+		
+		#region IDisposable implementation
+		public void Dispose ()
+		{
+			Disposing ();	
+		}
+		#endregion
+
 	}
 }
 

@@ -116,6 +116,18 @@ namespace Fuzzer.XmlFactory
 		/// </summary>
 		private SimpleFormatter _formatter = null;
 		
+		/// <summary>
+		/// Contains all predefined fuzzers.
+		/// They can be referenced by using fuzzer/predefined and specifying its id
+		/// </summary>
+		private Dictionary<string, IFuzzLocation> _predefinedFuzzers = new Dictionary<string, IFuzzLocation>();
+		
+		/// <summary>
+		/// Contains all fuzzlocations that get executed to trigger the fuzz location position.
+		/// They get executed in order they are contained in the description file
+		/// </summary>
+		private List<IFuzzLocation> _preConditions = new List<IFuzzLocation>();
+			
 		public XmlFuzzFactory (string path)
 		{
 			FileInfo configFile = new FileInfo(path);
@@ -137,9 +149,11 @@ namespace Fuzzer.XmlFactory
 		{
 			_formatter = new SimpleFormatter ();
 			_formatter.IgnoreUnknownMacros = true;
-			XmlFactoryHelpers.ParseValueIncludes(_doc.DocumentElement, _configDir, _formatter, _values);
+			XmlFactoryHelpers.ParseValueIncludes (_doc.DocumentElement, _configDir, _formatter, _values);
 			InitRemote ();
 			InitTargetConnection ();
+			InitPreDefinedFuzzers ();
+			InitPreCondition ();
 			InitFuzzDescription ();
 			InitLoggers ();
 		}
@@ -158,7 +172,7 @@ namespace Fuzzer.XmlFactory
 
 				fuzzControllers.Add (new FuzzController (_connector, _logDestination,
 					new LoggerCollection (_loggers.ToArray ()), 
-						fuzzDescription));
+						fuzzDescription, _preConditions.ToArray()));
 			
 			}
 			
@@ -283,6 +297,34 @@ namespace Fuzzer.XmlFactory
 		}
 		
 		/// <summary>
+		/// Initializes all predefined fuzzers
+		/// </summary>
+		private void InitPreDefinedFuzzers ()
+		{
+			foreach (XmlElement element in _doc.DocumentElement.SelectNodes ("DefineFuzzer"))
+			{
+				string id = XmlHelper.ReadString (element, "Id");
+				_predefinedFuzzers.Add (id, ReadFuzzLocation (element, false));
+			}
+		}
+		
+		/// <summary>
+		/// Reads and initializes the pre-fuzz-conditions.
+		/// they get executed once the configuration file is read and the connection has been established
+		/// </summary>
+		private void InitPreCondition ()
+		{
+			List<IFuzzLocation> fuzzLocations = new List<IFuzzLocation> ();
+			foreach (XmlElement preTriggerElement in _doc.DocumentElement.SelectNodes ("PreCondition"))
+			{
+				IFuzzLocation fuzzLocation = ReadFuzzLocation (preTriggerElement, true);
+				fuzzLocations.Add (fuzzLocation);
+			}
+			
+			_preConditions = fuzzLocations;
+		}
+		
+		/// <summary>
 		/// Reads all fuzzDescriptions
 		/// TODO: currently only the first fuzz description is read
 		/// </summary>
@@ -361,12 +403,12 @@ namespace Fuzzer.XmlFactory
 			fuzzDescription.SetFuzzRegionEnd (XmlHelper.ReadString (rootNode, "RegionEnd"));
 		
 			foreach (XmlElement fuzzLocationNode in rootNode.SelectNodes ("FuzzLocation"))
-				fuzzDescription.AddFuzzLocation (ReadFuzzLocation (fuzzLocationNode));
+				fuzzDescription.AddFuzzLocation (ReadFuzzLocation (fuzzLocationNode, true));
 			
 			return fuzzDescription;
 		}
 		
-		private IFuzzLocation ReadFuzzLocation (XmlElement fuzzLocationNode)
+		private IFuzzLocation ReadFuzzLocation (XmlElement fuzzLocationNode, bool readChangeableContent)
 		{
 			string fuzzerType = XmlHelper.ReadString (fuzzLocationNode, "FuzzerType");
 			if (fuzzerType == null)
@@ -377,7 +419,10 @@ namespace Fuzzer.XmlFactory
 			if (fuzzLocation == null)
 				throw new FuzzParseException (string.Format ("Could not find fuzz location implementation with identifier '{0}'", fuzzerType));
 			
-			fuzzLocation.Init (fuzzLocationNode, _connector);
+			fuzzLocation.Init (fuzzLocationNode, _connector, _predefinedFuzzers);
+			
+			if(readChangeableContent)
+				fuzzLocation.InitChanges (fuzzLocationNode);
 			return fuzzLocation;
 		}
 		

@@ -138,7 +138,7 @@ namespace Iaik.Utils.Net
 				_logger.Info(string.Format("Connecting to '{0}'", _socketFile));
 				try
 				{
-					_socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+					_socket = new Socket(AddressFamily.Unix, SocketType.Stream, (ProtocolType)0);
 					_socket.Connect(_endpoint);
 				}
 				catch(Exception ex)

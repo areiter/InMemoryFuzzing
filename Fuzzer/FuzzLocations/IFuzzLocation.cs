@@ -21,6 +21,7 @@ using System.Xml;
 using Fuzzer.TargetConnectors;
 using Fuzzer.FuzzDescriptions;
 using Fuzzer.DataLoggers;
+using System.Collections.Generic;
 namespace Fuzzer.FuzzLocations
 {
 	public enum LoggerDestinationEnum
@@ -33,7 +34,7 @@ namespace Fuzzer.FuzzLocations
 	/// Specifies a single fuzzlocation e.g. a memory location, a socket file, a tcp port,...
 	/// and its data generator, trigger and stop condition
 	/// </summary>
-	public interface IFuzzLocation
+	public interface IFuzzLocation : IDisposable
 	{
 		
 		/// <summary>
@@ -71,12 +72,26 @@ namespace Fuzzer.FuzzLocations
 		/// For simplicity it is assumed that an xml based configuration is used, if other technologies are used,
 		/// it should always be possible to convert the configuration to xml configuration
 		/// </remarks>
-		void Init(XmlElement fuzzLocationRoot, ITargetConnector connector);
+		void Init(XmlElement fuzzLocationRoot, ITargetConnector connector, Dictionary<string, IFuzzLocation> predefinedFuzzers );
+		
+		/// <summary>
+		/// Initializes the changeable content of the fuzz location (Data Generator,...)
+		/// </summary>
+		/// <param name="fuzzLocationRoot">
+		/// A <see cref="XmlElement"/>
+		/// </param>
+		/// <returns>Returns identifier to select the desired instance of the changeable attributes (provide in Run)</returns>
+		object InitChanges(XmlElement fuzzLocationRoot);
+		
+
+		void ApplyChangeableId (object id);
 		
 		/// <summary>
 		/// Invokes the fuzz location
 		/// </summary>
-		/// <param name="ctrl"></param>
+		/// <param name="ctrl">
+		/// A <see cref="FuzzController"/>
+		/// </param>
 		void Run(FuzzController ctrl);
 	}
 }

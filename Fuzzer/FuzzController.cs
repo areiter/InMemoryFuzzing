@@ -24,6 +24,7 @@ using Fuzzer.DataLoggers;
 using System.IO;
 using log4net;
 using Fuzzer.FuzzLocations;
+using System.Threading;
 namespace Fuzzer
 {
 	/// <summary>
@@ -39,6 +40,8 @@ namespace Fuzzer
 		protected FuzzDescription _fuzzDescription;
 			
 		protected ILog _log = LogManager.GetLogger("FuzzController");
+		
+		protected IFuzzLocation[] _preConditions;
 		
 		public ITargetConnector Connector
 		{
@@ -62,7 +65,7 @@ namespace Fuzzer
 		/// <param name="snapshotBreakpoint">Location to create a snapshot</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
 		public FuzzController (ITargetConnector connector, string logDestination,
-			IDataLogger logger, FuzzDescription fuzzDescription)
+			IDataLogger logger, FuzzDescription fuzzDescription, IFuzzLocation[] preConditions)
 		{
 			_connector = connector;
 			_snapshot = null;
@@ -70,6 +73,8 @@ namespace Fuzzer
 			_logDestination = logDestination;
 			_fuzzDescription = fuzzDescription;
 			_fuzzDescription.Init ();
+			
+			_preConditions = preConditions;
 		}
 		
 		/// <summary>
@@ -80,7 +85,7 @@ namespace Fuzzer
 		/// <param name="snapshot">The snapshot to restore once restore Breakpoint is reachead</param>
 		/// <param name="restoreBreakpoint">Location to restore the snapshot</param>
 		public FuzzController (ITargetConnector connector, ISnapshot snapshot, string logDestination,
-			IDataLogger logger, FuzzDescription fuzzDescription)
+			IDataLogger logger, FuzzDescription fuzzDescription, IFuzzLocation[] preConditions)
 		{
 			_connector = connector;
 			_snapshot = snapshot;
@@ -91,12 +96,28 @@ namespace Fuzzer
 			
 			_fuzzDescription = fuzzDescription;
 			_fuzzDescription.Init ();
+			
+			_preConditions = preConditions;
 		}
 		
 		public void Fuzz ()
 		{
 			if (Directory.Exists (_logDestination) == false)
 				Directory.CreateDirectory (_logDestination);
+			
+			
+			//Invoke the pre conditions
+			ThreadPool.QueueUserWorkItem (new WaitCallback (
+				delegate(object state) 
+				{
+				if (_preConditions != null)
+					{
+						foreach (IFuzzLocation preCondition in _preConditions)
+						{
+							preCondition.Run (this);
+						}
+					}
+				}), null);
 			
 			int loggerPrefix = 0;
 			string morePrefix = DateTime.Now.ToString ("dd.MM.yyyy");

@@ -1,0 +1,8 @@
+<Options>
+  <Path name="gdbserver_exec">/opt/gdb/bin/gdbserver</Path>
+  <Path name="gdb_exec">/opt/gdb/bin/gdb</Path>
+  <Path name="log_root">./log/</Path>
+  <Path name="test_source_root">./src/</Path>
+  <Path name="register_root">../registers/</Path>
+  <Path name="lib_logmem">../liblog_memory_allocations.so</Path>
+</Options>

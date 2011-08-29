@@ -67,9 +67,9 @@ namespace Fuzzer.FuzzLocations
 		
 		#endregion
 		
-		public override void Init (XmlElement fuzzLocationRoot, ITargetConnector connector)
+		public override void Init (XmlElement fuzzLocationRoot, ITargetConnector connector, Dictionary<string, IFuzzLocation> predefinedFuzzers)
 		{
-			base.Init (fuzzLocationRoot, connector);
+			base.Init (fuzzLocationRoot, connector, predefinedFuzzers);
 		
 			SetDataRegion (XmlHelper.ReadString (fuzzLocationRoot, "DataRegion"), connector);
 			SetDataType (XmlHelper.ReadString (fuzzLocationRoot, "DataType"));
