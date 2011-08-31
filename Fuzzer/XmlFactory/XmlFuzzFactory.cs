@@ -318,6 +318,7 @@ namespace Fuzzer.XmlFactory
 			foreach (XmlElement preTriggerElement in _doc.DocumentElement.SelectNodes ("PreCondition"))
 			{
 				IFuzzLocation fuzzLocation = ReadFuzzLocation (preTriggerElement, true);
+				
 				fuzzLocations.Add (fuzzLocation);
 			}
 			
@@ -360,6 +361,9 @@ namespace Fuzzer.XmlFactory
 					{
 						foreach(var fuzzLocationInfo in fuzzDescInfo.FuzzLocations)
 							fuzzLocationInfo.SetLogger(LoggerDestinationEnum.DataGenLogger, datagenLogger);
+						
+						foreach(var preCondition in _preConditions)
+							preCondition.SetLogger(LoggerDestinationEnum.DataGenLogger, datagenLogger);
 					}
 					_loggers.Add(datagenLogger);
 					break;
