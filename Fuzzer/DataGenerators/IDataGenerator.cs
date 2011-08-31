@@ -68,6 +68,9 @@ namespace Fuzzer.DataGenerators
 	{
 		public static IDataGeneratorLenType Create (int minlen, int maxlen, string lentypeSpecifier)
 		{
+			if (lentypeSpecifier == null)
+				lentypeSpecifier = "random";
+			
 			string[] lentypeParts = lentypeSpecifier.Split (new char[] { '|' }, 2);
 			
 			int arg1 = 0;
