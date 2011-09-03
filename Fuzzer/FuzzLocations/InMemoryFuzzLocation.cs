@@ -71,9 +71,8 @@ namespace Fuzzer.FuzzLocations
 		{
 			base.Init (fuzzLocationRoot, connector, predefinedFuzzers);
 		
-			IDictionary<string, string> config = DictionaryHelper.ReadDictionaryXml (fuzzLocationRoot, "FuzzerArg");
-			SetDataRegion (DictionaryHelper.GetString ("data_region", config, null), connector);
-			SetDataType (DictionaryHelper.GetString ("data_type", config, null));
+			SetDataRegion (XmlHelper.ReadString (fuzzLocationRoot, "DataRegion"), connector);
+			SetDataType (XmlHelper.ReadString (fuzzLocationRoot, "DataType"));
 		}
 		
 		private void SetDataRegion (string regionSpecifier, ITargetConnector connector)

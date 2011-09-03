@@ -26,7 +26,6 @@ using log4net;
 using Iaik.Utils;
 using System.Collections.Generic;
 using Mono.Unix;
-using System.IO;
 
 namespace Iaik.Utils.Net
 {
@@ -129,24 +128,17 @@ namespace Iaik.Utils.Net
 			//No flushing required
 		}
 
-		public override void Connect ()
+		public override void Connect()
 		{
-			if (_createdFromSocket)
-				throw new ConnectionException ("Cannot reconnect preconnected socket");
-			
-			if (_socket == null || _socket.Connected == false)
+			if(_createdFromSocket)
+				throw new ConnectionException("Cannot reconnect preconnected socket");
+				
+			if(_socket == null || _socket.Connected == false)
 			{
-				_logger.Info (string.Format ("Connecting to '{0}'", _socketFile));
+				_logger.Info(string.Format("Connecting to '{0}'", _socketFile));
 				try
 				{
-					_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
-					
-					string sockFile = "/tmp/tmp.sock";
-					if(File.Exists(sockFile))
-						File.Delete(sockFile);
-					
-					_socket.Bind(new UnixEndPoint(sockFile));
-					new UnixFileInfo(sockFile).Protection = Mono.Unix.Native.FilePermissions.S_IRWXU;
+					_socket = new Socket(AddressFamily.Unix, SocketType.Stream, (ProtocolType)0);
 					_socket.Connect(_endpoint);
 				}
 				catch(Exception ex)

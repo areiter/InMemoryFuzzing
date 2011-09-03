@@ -54,7 +54,7 @@ namespace Fuzzer.FuzzLocations
 		{
 			base.Init (fuzzLocationRoot, connector, predefinedFuzzers);
 			
-			_socket = new UnixSocketConnection (DictionaryHelper.ReadDictionaryXml(fuzzLocationRoot, "FuzzerArg"));
+			_socket = new UnixSocketConnection (XmlHelper.ReadString (fuzzLocationRoot, "SocketPath"));
 			
 		}
 		
