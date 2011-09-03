@@ -34,11 +34,14 @@
   <DefineFuzzer>
     <Id>proftpd_socket</Id>
     <FuzzerType>fuzzer/unix_socket</FuzzerType>
-    <SocketPath>/opt/proftpd-1.3.0a-vulnerable/var/proftpd/proftpd.sock</SocketPath>
+    <FuzzerArg name="socket_file">/opt/proftpd-1.3.0a-vulnerable/var/proftpd/proftpd.sock</FuzzerArg>
+    <FuzzerArg name="enable_scripting">1</FuzzerArg>
+    <FuzzerArg name="script_file">/path/to/scriptfile</FuzzerArg>
   </DefineFuzzer>
 
   <!-- Tries to send some data to the victim regardless of the position, to reach the
-       start of the area of interest.
+       start of the area of interest and the end. It can be seen as a test run.
+      
        It has quite the same structure than a Fuzz Location, but the pre condition is only invoked once.
 
        Multiple PreCondition can be specified, they are invoked in the same order as they appear in the 
@@ -46,26 +49,35 @@
     -->
   <PreCondition>
     <FuzzerType>fuzz_helper/delay</FuzzerType>
-    <Delay>10000</Delay>
+    <Delay>2000</Delay>
   </PreCondition>
   <PreCondition>
     <FuzzerType>fuzzer/predefined</FuzzerType>
-    <Id>proftpd_socket</Id>
+    <FuzzerArg name="id">proftpd_socket</FuzzerArg>
 
     <DataGenerator>datagen/fixed_bytes</DataGenerator>
-    <DataGenArg name="data">000100BC0200</DataGenArg>
+    <DataGenArg name="data">000000000100000064000000</DataGenArg>
+  </PreCondition>
+  <PreCondition>
+    <FuzzerType>fuzzer/predefined</FuzzerType>
+    <FuzzerArg name="id">proftpd_socket</FuzzerArg>
+
+    <DataGenerator>datagen/random_bytes</DataGenerator>
+    <DataGenArg name="minlen">100</DataGenArg>
+    <DataGenArg name="maxlen">100</DataGenArg>
+    <DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
   </PreCondition>
 
 
   <FuzzDescription>
     <RegionStart>source|ctrls.c,507</RegionStart>
-    <RegionEnd>source|ctrls.c,606</RegionEnd>
+    <RegionEnd>source|ctrls.c,542</RegionEnd>
 
     <FuzzLocation>
       <Trigger>start</Trigger>
       <StopCondition>none</StopCondition>
       <FuzzerType>fuzzer/predefined</FuzzerType>
-      <Id>proftpd_socket</Id>
+      <FuzzerArg name="id">proftpd_socket</FuzzerArg>
 
       <DataGenerator>datagen/random_bytes</DataGenerator>
       <DataGenArg name="minlen">2000</DataGenArg>

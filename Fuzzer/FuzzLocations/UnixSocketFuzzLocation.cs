@@ -28,8 +28,15 @@ namespace Fuzzer.FuzzLocations
 	[ClassIdentifier("fuzzer/unix_socket")]
 	public class UnixSocketFuzzLocation : BaseFuzzLocation
 	{
+				
+		
 		private UnixSocketConnection _socket;
 			
+		public UnixSocketConnection Connection
+		{
+			get { return _socket;}
+		}
+		
 		#region implemented abstract members of Fuzzer.FuzzLocations.BaseFuzzLocation
 		protected override bool SupportsStopCondition 
 		{

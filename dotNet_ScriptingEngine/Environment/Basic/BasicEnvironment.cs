@@ -67,6 +67,11 @@ namespace DevEck.ScriptingEngine.Environment.Basic
         /// </summary>
         protected CompilerResults _compilerResults = null;
 
+		public CompilerResults CompilerResults 
+		{
+			get { return _compilerResults; }
+		}
+		
         protected CodeDomProvider Compiler
         {
             get

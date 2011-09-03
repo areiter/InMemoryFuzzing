@@ -173,6 +173,8 @@
     <Compile Include="FuzzLocations\PredefinedFuzzLocation.cs" />
     <Compile Include="FuzzLocations\FuzzHelpers\DelayFuzzHelper.cs" />
     <Compile Include="DataGenerators\FixedByteGenerator.cs" />
+    <Compile Include="Scripting\Environments\UnixSocketEnvironment.cs" />
+    <Compile Include="Scripting\ScriptEvaluator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -202,6 +204,10 @@
     <ProjectReference Include="..\libbfd.net\libbfd.net.csproj">
       <Project>{8612D69A-C75F-4CEC-955D-1E2A0ECC1BCB}</Project>
       <Name>libbfd.net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dotNet_ScriptingEngine\DevEck.ScriptingEngine.csproj">
+      <Project>{6F8FB95D-C7E1-416D-8557-7E8B98D4DB14}</Project>
+      <Name>DevEck.ScriptingEngine</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

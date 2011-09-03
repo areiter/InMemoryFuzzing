@@ -48,7 +48,11 @@ namespace Iaik.Utils.Net
 	[FrontEndConnection("net/unix_socket")]
 	public sealed class UnixSocketConnection : FrontEndConnection
 	{
-
+		public event Action<UnixSocketConnection> Hook_BeforeSocketCreation;
+		public event Action<UnixSocketConnection> Hook_AfterSocketCreation;
+		public event Action<UnixSocketConnection> Hook_AfterSocketConnect;
+		public event Action<UnixSocketConnection> Hook_BeforeSocketClose;
+		public event Action<UnixSocketConnection> Hook_AfterSocketClose;
 		
 		/// <summary>
 		/// Specifies the unix socket file to use
@@ -139,7 +143,13 @@ namespace Iaik.Utils.Net
 				_logger.Info (string.Format ("Connecting to '{0}'", _socketFile));
 				try
 				{
+					if (Hook_BeforeSocketCreation != null)
+						Hook_BeforeSocketCreation (this);
+					
 					_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+					
+					if (Hook_AfterSocketCreation != null)
+						Hook_AfterSocketCreation (this);
 					
 					string sockFile = "/tmp/tmp.sock";
 					if(File.Exists(sockFile))
@@ -148,6 +158,9 @@ namespace Iaik.Utils.Net
 					_socket.Bind(new UnixEndPoint(sockFile));
 					new UnixFileInfo(sockFile).Protection = Mono.Unix.Native.FilePermissions.S_IRWXU;
 					_socket.Connect(_endpoint);
+					
+					if(Hook_AfterSocketConnect != null)
+						Hook_AfterSocketConnect(this);
 				}
 				catch(Exception ex)
 				{
@@ -158,8 +171,14 @@ namespace Iaik.Utils.Net
 		
 		public override void Close ()
 		{
-			_logger.Info(string.Format("Closing '{0}'", _socketFile));
-			_socket.Close();
+			if (Hook_BeforeSocketClose != null)
+				Hook_BeforeSocketClose (this);
+			
+			_logger.Info (string.Format ("Closing '{0}'", _socketFile));
+			_socket.Close ();
+			
+			if (Hook_AfterSocketClose != null)
+				Hook_AfterSocketClose (this);
 		}
 
 	
