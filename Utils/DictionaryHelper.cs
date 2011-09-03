@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace Iaik.Utils
 {
@@ -83,16 +84,43 @@ namespace Iaik.Utils
 			return paramDict[name];
 		}
 		
-		public static T GetEnum<T>(string name, IDictionary<string, string> paramDict, T defaultVal)
+		public static T GetEnum<T> (string name, IDictionary<string, string> paramDict, T defaultVal)
 		{
 			try
 			{
-				return (T)Enum.Parse(typeof(T), GetString(name, paramDict, defaultVal.ToString()));
+				return (T)Enum.Parse (typeof(T), GetString (name, paramDict, defaultVal.ToString ()));
 			}
-			catch(Exception)
+			catch (Exception)
 			{
 				return defaultVal;
 			}
+		}
+		
+		/// <summary>
+		/// Builds a dictionary from an xml structure of the form:
+		/// [root]
+		///  [-nodeName- name="-name-"]-value-[/-nodeName]
+		///  [-nodeName- name="-name2-"]-value2-[/-nodeName]
+		///  ...
+		/// [/root]
+		/// </summary>
+		/// <param name="root">
+		/// A <see cref="XmlElement"/>
+		/// </param>
+		/// <param name="nodeName">
+		/// A <see cref="System.String"/>
+		/// </param>
+		/// <returns>
+		/// A <see cref="IDictionary<System.String, System.String>"/>
+		/// </returns>
+		public static IDictionary<string, string> ReadDictionaryXml (XmlElement root, string nodeName)
+		{
+			Dictionary<string, string> dict = new Dictionary<string, string> ();
+			
+			foreach (XmlElement element in root.SelectNodes (nodeName))
+				dict.Add (XmlHelper.ReadString (root, "name"), element.InnerText);
+			
+			return dict;
 		}
 	}
 }
