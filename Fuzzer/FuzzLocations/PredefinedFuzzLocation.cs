@@ -59,7 +59,9 @@ namespace Fuzzer.FuzzLocations
 
 		public void Init (XmlElement fuzzLocationRoot, ITargetConnector connector, Dictionary<string, IFuzzLocation> predefinedFuzzers)
 		{
-			string id = XmlHelper.ReadString (fuzzLocationRoot, "Id");
+			IDictionary<string, string> config = DictionaryHelper.ReadDictionaryXml (fuzzLocationRoot, "FuzzerArg");
+			
+			string id = DictionaryHelper.GetString ("id", config, null);
 			if (!predefinedFuzzers.ContainsKey (id))
 				throw new ArgumentException (string.Format ("Could not find fuzzer with id '{0}'", id));
 			

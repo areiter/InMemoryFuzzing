@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "..\Utils\Utils.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libbfd.net", "..\libbfd.net\libbfd.net.csproj", "{8612D69A-C75F-4CEC-955D-1E2A0ECC1BCB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevEck.ScriptingEngine", "..\dotNet_ScriptingEngine\DevEck.ScriptingEngine.csproj", "{6F8FB95D-C7E1-416D-8557-7E8B98D4DB14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -17,6 +19,10 @@ Global
 		{3877532F-35F6-47B2-85DF-E20A2EE696A9}.Debug|x86.Build.0 = Debug|x86
 		{3877532F-35F6-47B2-85DF-E20A2EE696A9}.Release|x86.ActiveCfg = Release|x86
 		{3877532F-35F6-47B2-85DF-E20A2EE696A9}.Release|x86.Build.0 = Release|x86
+		{6F8FB95D-C7E1-416D-8557-7E8B98D4DB14}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6F8FB95D-C7E1-416D-8557-7E8B98D4DB14}.Debug|x86.Build.0 = Debug|Any CPU
+		{6F8FB95D-C7E1-416D-8557-7E8B98D4DB14}.Release|x86.ActiveCfg = Release|Any CPU
+		{6F8FB95D-C7E1-416D-8557-7E8B98D4DB14}.Release|x86.Build.0 = Release|Any CPU
 		{8612D69A-C75F-4CEC-955D-1E2A0ECC1BCB}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{8612D69A-C75F-4CEC-955D-1E2A0ECC1BCB}.Debug|x86.Build.0 = Debug|Any CPU
 		{8612D69A-C75F-4CEC-955D-1E2A0ECC1BCB}.Release|x86.ActiveCfg = Release|Any CPU
