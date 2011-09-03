@@ -30,7 +30,8 @@ namespace Fuzzer.Scripting.Environments
 		public UnixSocketEnvironment (ScriptingLanguage language, UnixSocketFuzzLocation fuzzLocation)
             : base(language)
 		{
-			_writer = strWriter;
+			
+			_fuzzLocation = fuzzLocation;
 			
 			ParameterInfo fuzzLocationParameterInfo = new ParameterInfo ("fuzzLocation", typeof(UnixSocketFuzzLocation));
 			base.GlobalParameters.Add (fuzzLocationParameterInfo);
