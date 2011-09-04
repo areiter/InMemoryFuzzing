@@ -147,16 +147,10 @@ namespace Iaik.Utils.Net
 						Hook_BeforeSocketCreation (this);
 					
 					_socket = new Socket (AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
-					
+
 					if (Hook_AfterSocketCreation != null)
 						Hook_AfterSocketCreation (this);
 					
-					string sockFile = "/tmp/tmp.sock";
-					if(File.Exists(sockFile))
-						File.Delete(sockFile);
-					
-					_socket.Bind(new UnixEndPoint(sockFile));
-					new UnixFileInfo(sockFile).Protection = Mono.Unix.Native.FilePermissions.S_IRWXU;
 					_socket.Connect(_endpoint);
 					
 					if(Hook_AfterSocketConnect != null)

@@ -35,15 +35,20 @@ namespace Iaik.Utils
         /// <param name="paramDict"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-		public static bool GetBool(string name, IDictionary<string, string> paramDict, bool defaultValue)
+		public static bool GetBool (string name, IDictionary<string, string> paramDict, bool defaultValue)
 		{
-			if(paramDict.ContainsKey(name) == false)
+			if (paramDict.ContainsKey (name) == false)
 				return defaultValue;
 			
 			bool val;
 			
-			if(bool.TryParse(paramDict[name], out val))
+			if (bool.TryParse (paramDict[name], out val))
 				return val;
+			
+			if (paramDict[name] == "1")
+				return true;
+			else if (paramDict[name] == "0")
+				return false;
 			
 			return defaultValue;
 		}
@@ -118,7 +123,7 @@ namespace Iaik.Utils
 			Dictionary<string, string> dict = new Dictionary<string, string> ();
 			
 			foreach (XmlElement element in root.SelectNodes (nodeName))
-				dict.Add (XmlHelper.ReadString (root, "name"), element.InnerText);
+				dict.Add (element.GetAttribute("name"), element.InnerText);
 			
 			return dict;
 		}

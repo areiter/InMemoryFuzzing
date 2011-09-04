@@ -23,45 +23,66 @@ using System.Collections.Generic;
 using Iaik.Utils;
 using Iaik.Utils.CommonFactories;
 using System.IO;
+using System.Text;
+using System.CodeDom.Compiler;
 
 namespace Fuzzer.Scripting
 {
-	public class ScriptEvaluator<T> where T: IScriptEnvironment
+	public class ScriptEvaluator<T> where T: class, IScriptEnvironment
 	{
 		private T _environment;
-		private IDictionary<string, string> _config;
+		
+		public T Environment
+		{
+			get { return _environment;}
+		}
 		
 		public ScriptEvaluator (IDictionary<string, string> config, params object[] ctorParams)
 		{
-			_config = config;
 			
-			if(DictionaryHelper.GetBool("enable_scripting", config, false) == false)
+			if (DictionaryHelper.GetBool ("enable_scripting", config, false) == false)
 			{
 				_environment = null;
 				return;
 			}
 			
-			if(config.ContainsKey("script_lang") == false)
-				throw new ArgumentException("'script_lang' not defined");
+			if (config.ContainsKey ("script_lang") == false)
+				throw new ArgumentException ("'script_lang' not defined");
 			ScriptingLanguage scriptLang =
-				DictionaryHelper.GetEnum<ScriptingLanguage>("script_lang", config, ScriptingLanguage.CSharp);
+				DictionaryHelper.GetEnum<ScriptingLanguage> ("script_lang", config, ScriptingLanguage.CSharp);
 			
-			_environment = GenericClassIdentifierFactory.CreateInstance(typeof(T), scriptLang, ctorParams);
+			List<object> args = new List<object> ();
+			args.Add (scriptLang);
+			args.AddRange (ctorParams);
 			
-			if(_environment == null)
-				throw new ArgumentException("Could not create scripting environment");
+			_environment = (T)GenericClassIdentifierFactory.CreateInstance (typeof(T), args.ToArray ());
+			
+			if (_environment == null)
+				throw new ArgumentException ("Could not create scripting environment");
 			
 			
-			if(config.ContainsKey("script_file"))
-			{
-				_environment2File.ReadAllText(DictionaryHelper.GetString("script_file", config, null));
-				
-			}
-			else if(config.Contains("script_code"))
-			{
-			}
+			if (config.ContainsKey ("script_file"))
+				_environment.MainCode = File.ReadAllText (DictionaryHelper.GetString ("script_file", config, null));
+			else if (config.ContainsKey ("script_code"))
+				_environment.MainCode = DictionaryHelper.GetString ("script_code", config, null);
 			else
-				throw new ArgumentException("No script_file or script_code argument found");
+				throw new ArgumentException ("No script_file or script_code argument found");
+		}
+		
+		public void Run ()
+		{
+			if (_environment == null)
+				return;
+			
+			_environment.Execute ();
+			if (_environment.CompilerResults.Errors.HasErrors)
+			{
+				StringBuilder errorBuilder = new StringBuilder ();
+				foreach (CompilerError error in _environment.CompilerResults.Errors)
+					errorBuilder.Append ("\n" + error.ToString ());
+			
+				throw new ScriptingException (errorBuilder.ToString ());
+			}
 		}
 	}
 }

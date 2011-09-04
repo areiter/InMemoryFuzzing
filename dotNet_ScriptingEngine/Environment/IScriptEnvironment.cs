@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.CodeDom.Compiler;
 
 namespace DevEck.ScriptingEngine.Environment
 {
@@ -32,6 +33,11 @@ namespace DevEck.ScriptingEngine.Environment
     /// </remarks>
     public interface IScriptEnvironment
     {
+		/// <summary>
+		/// Compiler Results
+		/// </summary>
+		CompilerResults CompilerResults{ get; }
+		
         /// <summary>
         /// Returns all globally defined parameters.
         /// </summary>

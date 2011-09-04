@@ -173,36 +173,79 @@ namespace DevEck.ScriptingEngine.Environment.Basic
         /// Generates the code
         /// </summary>
         /// <returns></returns>
-        protected virtual CompilerResults GenerateCode()
+        protected virtual CompilerResults GenerateCode ()
         {
-            if (_recompile == false)
-                return _compilerResults;
-            else
+        	if (_recompile == false)
+        		return _compilerResults;
+        	else
             {
-                List<Assembly> referencedAssemblies = new List<Assembly>();
-                foreach (AssemblyName asmName in this.GetType().Assembly.GetReferencedAssemblies())
+        		List<Assembly> referencedAssemblies = new List<Assembly> ();
+        		foreach (AssemblyName asmName in this.GetType ().Assembly.GetReferencedAssemblies ())
                 {
-                    Assembly asm = Assembly.Load(asmName);
-                    referencedAssemblies.Add(asm);
-                }
+        			Assembly asm = Assembly.Load (asmName);
+        			referencedAssemblies.Add (asm);
+        		}
 
 
-                CodeCompileUnit compileUnit = new CodeCompileUnit();
+                CodeCompileUnit compileUnit = new CodeCompileUnit ();
 
                 //Create our namespace statement
-                CodeNamespace executionNamespace = new CodeNamespace(_codeGenerationOptions.Namespace);
-                compileUnit.Namespaces.Add(executionNamespace);
+        		CodeNamespace executionNamespace = new CodeNamespace (_codeGenerationOptions.Namespace);
+        		compileUnit.Namespaces.Add (executionNamespace);
 
                 //Add some imports
-                executionNamespace.Imports.Add(new CodeNamespaceImport("System"));
-                executionNamespace.Imports.Add(new CodeNamespaceImport(typeof(IRuntimeDataProvider).Namespace));
+        		executionNamespace.Imports.Add (new CodeNamespaceImport ("System"));
+        		executionNamespace.Imports.Add (new CodeNamespaceImport (typeof(IRuntimeDataProvider).Namespace));
 
                 foreach (string nspace in _extraImports)
-                    executionNamespace.Imports.Add(new CodeNamespaceImport(nspace));
+        			executionNamespace.Imports.Add (new CodeNamespaceImport (nspace));
 
-                referencedAssemblies.Add(typeof(IRuntimeDataProvider).Assembly);
+                referencedAssemblies.Add (typeof(IRuntimeDataProvider).Assembly);
 
-
+				//Main code can include some special commands
+        		//#ref <assembly name>
+        		//  References the specified assembly in the script
+        		//
+        		//#import <namespace>
+        		//  Imports/uses the specified namespace
+        		//
+        		//#endheader
+        		//  Ends the header section. For the Scriptcode, everything before
+        		//  this directive gets cut off.
+        		//  if any #ref or #import statement is present the #endheader statement
+        		//  is mandatory.
+        		StringReader rdr = new StringReader (_mainCode);
+        		string realMainCode = null;
+        		bool headerStatementsPresent = false;
+        		bool foundEndHeader = false;
+				
+				string line = null;
+        		while ((line = rdr.ReadLine ()) != null)
+				{
+        			if (line.Trim ().StartsWith ("#ref "))
+					{
+        				headerStatementsPresent = true;
+        				referencedAssemblies.Add (Assembly.Load (line.Trim ().Substring (5)));
+        			}
+					else if (line.Trim ().StartsWith ("#import "))
+					{
+        				headerStatementsPresent = true;
+        				executionNamespace.Imports.Add (new CodeNamespaceImport (line.Trim ().Substring (8)));
+        			}
+					else if (line.Trim ().Equals("#endheader"))
+					{
+        				headerStatementsPresent = true;
+        				foundEndHeader = true;
+        				realMainCode = rdr.ReadToEnd ();
+        				break;
+        			}
+        		}
+    
+				if (!headerStatementsPresent)
+        			realMainCode = _mainCode;
+				else if (foundEndHeader == false)
+        			throw new ArgumentException ("Missing '#endheader' statement");
+				
                 //Define the execution environment class, and add to the namespace
                 CodeTypeDeclaration execEnv = new CodeTypeDeclaration("ExecutionEnvironment");
                 executionNamespace.Types.Add(execEnv);
@@ -238,7 +281,7 @@ namespace DevEck.ScriptingEngine.Environment.Basic
                 CodeMemberMethod memberExecute = CodeHelpers.DefineMemberMethod(
                     execEnv, "Execute", CodeHelpers.ModifierEnum.Public, null);
 
-                memberExecute.Statements.Add(new CodeSnippetExpression(_mainCode));
+                memberExecute.Statements.Add(new CodeSnippetExpression(realMainCode));
                 execEnv.Members.Add(new CodeSnippetTypeMember(_extraCode));
 
                 StringBuilder bld = new StringBuilder();

@@ -23,9 +23,28 @@ using System.IO;
 using Fuzzer.FuzzLocations;
 namespace Fuzzer.Scripting.Environments
 {
+	public enum UnixSocketHookType
+	{
+		BeforeSocketCreation,
+		AfterSocketCreation,
+		AfterSocketConnect,
+		BeforeSocketClose,
+		AfterSocketClose
+	}
+	
 	public class UnixSocketEnvironment : BasicEnvironment
 	{
+		public delegate UnixSocketHookType GetHookTypeDelegate();
+		
 		private UnixSocketFuzzLocation _fuzzLocation;
+		private UnixSocketHookType _hookType;
+		
+		public UnixSocketHookType HookType
+		{
+			get { return _hookType; }
+			set { _hookType = value;}
+		}
+		
 		
 		public UnixSocketEnvironment (ScriptingLanguage language, UnixSocketFuzzLocation fuzzLocation)
             : base(language)
@@ -33,9 +52,21 @@ namespace Fuzzer.Scripting.Environments
 			
 			_fuzzLocation = fuzzLocation;
 			
+			_extraImports.Add ("Fuzzer.Scripting.Environments");
+			
 			ParameterInfo fuzzLocationParameterInfo = new ParameterInfo ("fuzzLocation", typeof(UnixSocketFuzzLocation));
 			base.GlobalParameters.Add (fuzzLocationParameterInfo);
 			base.SetParameter (fuzzLocationParameterInfo, fuzzLocation);
+			
+			MethodInfo hookTypeGetterInfo = new MethodInfo ("HookType", typeof(UnixSocketHookType));
+			base.GlobalMethods.Add (hookTypeGetterInfo);
+			base.SetMethod (hookTypeGetterInfo, new GetHookTypeDelegate (GetHookType));
+		
+		}
+		
+		private UnixSocketHookType GetHookType ()
+		{
+			return _hookType;
 		}
 	}
 }

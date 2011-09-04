@@ -175,6 +175,9 @@
     <Compile Include="DataGenerators\FixedByteGenerator.cs" />
     <Compile Include="Scripting\Environments\UnixSocketEnvironment.cs" />
     <Compile Include="Scripting\ScriptEvaluator.cs" />
+    <Compile Include="Scripting\ScriptingException.cs" />
+    <Compile Include="DataGenerators\ScriptedDataGenerator.cs" />
+    <Compile Include="Scripting\Environments\ScriptedDataGeneratorEnvironment.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
