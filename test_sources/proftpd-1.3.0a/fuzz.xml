@@ -88,9 +88,10 @@
     <FuzzerArg name="id">proftpd_socket</FuzzerArg>
 
     <DataGenerator>datagen/scripted</DataGenerator>
-    <DataGenArg name="minlen">100</DataGenArg>
-    <DataGenArg name="maxlen">100</DataGenArg>
-    <DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
+    <DataGenArg name="enable_scripting">1</DataGenArg>
+    <DataGenArg name="script_lang">CSharp</DataGenArg>
+    <DataGenArg name="script_file">script_datagen_mod_ctrls.cs</DataGenArg>
+    <DataGenArg name="scriptval_generate_valid_data">1</DataGenArg>
   </PreCondition>
 
 

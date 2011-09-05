@@ -24,20 +24,73 @@ namespace Fuzzer.Scripting.Environments
 {
 	public class ScriptedDataGeneratorEnvironment : BasicEnvironment
 	{
+		
+		public delegate bool ValueIsSetDelegate(string name);
+		public delegate object GetValueDelegate(string name);
+		public delegate void SetValueDelegate(string name, object value);
+		
 		private Action<byte[]> _setDataCallback;
 		
+		/// <summary>
+		/// Contains persistive script values
+		/// </summary>
 		private Dictionary<string, object> _scriptValues = new Dictionary<string, object>();
 		
-		public ScriptedDataGeneratorEnvironment (ScriptingLanguage language, Action<byte[]> setDataCallback)
+		public ScriptedDataGeneratorEnvironment (
+			ScriptingLanguage language, 
+			Action<byte[]> setDataCallback,
+			IDictionary<string, string> config)
             : base(language)
 		{
 			_setDataCallback = setDataCallback;
 			
-			MethodInfo setDataMethodInfo = new MethodInfo ("SetData", null, 
-				new ParameterInfo (DataLoggers, typeof(byte[])));
-			GlobalMethods.Add(setDataMethodInfo);
-			SetMethod(setDataMethodInfo, _setDataCallback);
+			foreach (KeyValuePair<string, string> kvPair in config)
+			{
+				if (kvPair.Key.StartsWith ("scriptval_"))
+					_scriptValues.Add (kvPair.Key, kvPair.Value);
+			}
 			
+			MethodInfo setDataMethodInfo = new MethodInfo ("SetData", null, 
+				new ParameterInfo ("data", typeof(byte[])));
+			GlobalMethods.Add (setDataMethodInfo);
+			SetMethod (setDataMethodInfo, _setDataCallback);
+			
+			MethodInfo valueIsSetMethodInfo = new MethodInfo ("ValueIsSet", typeof(bool), 
+				new ParameterInfo ("name", typeof(string)));
+			GlobalMethods.Add (valueIsSetMethodInfo);
+			SetMethod (valueIsSetMethodInfo, new ValueIsSetDelegate (ValueIsSet));
+		
+			MethodInfo getValueMethodInfo = new MethodInfo ("GetValue", typeof(object), 
+				new ParameterInfo ("name", typeof(string)));
+			GlobalMethods.Add (getValueMethodInfo);
+			SetMethod (getValueMethodInfo, new GetValueDelegate (GetValue));
+			
+			MethodInfo setValueMethodInfo = new MethodInfo ("SetValue", null,
+				new ParameterInfo ("name", typeof(string)),
+				new ParameterInfo ("value", typeof(object)));			
+			GlobalMethods.Add (setValueMethodInfo);
+			SetMethod (setValueMethodInfo, new SetValueDelegate (SetValue));
+		}
+		
+		private bool ValueIsSet (string name)
+		{
+			return _scriptValues.ContainsKey (name);
+		}
+		
+		private object GetValue (string name)
+		{
+			if (ValueIsSet (name) == false)
+				return null;
+			else
+				return _scriptValues[name];
+		}
+		
+		public void SetValue (string name, object value)
+		{
+			if (ValueIsSet (name))
+				_scriptValues[name] = value;
+			else
+				_scriptValues.Add (name, value);
 		}
 	}
 }

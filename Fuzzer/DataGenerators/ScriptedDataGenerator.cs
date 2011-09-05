@@ -21,12 +21,17 @@ using Iaik.Utils.CommonAttributes;
 using System.Collections.Generic;
 using Fuzzer.DataLoggers;
 using Iaik.Utils;
+using Fuzzer.Scripting.Environments;
+using Fuzzer.Scripting;
 namespace Fuzzer.DataGenerators
 {
 	[ClassIdentifier("datagen/scripted")]
 	public class ScriptedDataGenerator : IDataGenerator
 	{
 		private DataGeneratorLogger _logger;
+		private ScriptEvaluator<ScriptedDataGeneratorEnvironment> _scriptEvaluator = null;
+		private byte[] _data = null;
+		
 		
 		public ScriptedDataGenerator ()
 		{
@@ -36,7 +41,13 @@ namespace Fuzzer.DataGenerators
 		#region IDataGenerator implementation
 		public void Setup (IDictionary<string, string> config)
 		{
-			
+			_scriptEvaluator = new ScriptEvaluator<ScriptedDataGeneratorEnvironment> (
+				config, new Action<byte[]> (SetDataCallback), config);
+		}
+				
+		private void SetDataCallback (byte[] data)
+		{
+			_data = data;
 		}
 
 		public void SetLogger (DataGeneratorLogger logger)
@@ -46,8 +57,8 @@ namespace Fuzzer.DataGenerators
 
 		public byte[] GenerateData ()
 		{
-			throw new NotImplementedException ();
-			
+			_scriptEvaluator.Run ();
+			return _data;
 		}
 		#endregion
 	}
