@@ -130,13 +130,14 @@ namespace Fuzzer.XmlFactory
 			
 		public XmlFuzzFactory (string path)
 		{
-			FileInfo configFile = new FileInfo(path);
+			FileInfo configFile = new FileInfo (path);
 			
 			if (!configFile.Exists)
 				throw new FileNotFoundException (string.Format ("The specified xml description file '{0}' does not exist", path));
 		
 			
 			_configDir = configFile.DirectoryName;
+			MainClass.ConfigPath = _configDir;
 			
 			_doc = new XmlDocument ();
 			_doc.Load (configFile.FullName);	

@@ -42,6 +42,8 @@ namespace Fuzzer.Scripting.Environments
 			IDictionary<string, string> config)
             : base(language)
 		{
+			_extraImports.Add ("Iaik.Utils");
+			
 			_setDataCallback = setDataCallback;
 			
 			foreach (KeyValuePair<string, string> kvPair in config)
@@ -55,7 +57,7 @@ namespace Fuzzer.Scripting.Environments
 			GlobalMethods.Add (setDataMethodInfo);
 			SetMethod (setDataMethodInfo, _setDataCallback);
 			
-			MethodInfo valueIsSetMethodInfo = new MethodInfo ("ValueIsSet", typeof(bool), 
+			MethodInfo valueIsSetMethodInfo = new MethodInfo ("IsValueSet", typeof(bool), 
 				new ParameterInfo ("name", typeof(string)));
 			GlobalMethods.Add (valueIsSetMethodInfo);
 			SetMethod (valueIsSetMethodInfo, new ValueIsSetDelegate (ValueIsSet));

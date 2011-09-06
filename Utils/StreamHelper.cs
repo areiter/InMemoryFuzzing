@@ -32,9 +32,9 @@ namespace Iaik.Utils
 	/// </summary>
 	public static class StreamHelper
 	{
-		public static void WriteUInt16(ushort value, Stream sink)
+		public static void WriteUInt16 (ushort value, Stream sink)
 		{
-			WriteBytes(BitConverter.GetBytes(value), sink);
+			WriteBytes (BitConverter.GetBytes (value), sink);
 		}
 		
 		public static ushort ReadUInt16(Stream src)

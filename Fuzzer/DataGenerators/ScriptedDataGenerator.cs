@@ -58,6 +58,9 @@ namespace Fuzzer.DataGenerators
 		public byte[] GenerateData ()
 		{
 			_scriptEvaluator.Run ();
+			_logger.LogData (_data);
+			
+			Console.WriteLine ("ScriptedDataGenerator: {0}", ByteHelper.ByteArrayToHexString (_data));
 			return _data;
 		}
 		#endregion

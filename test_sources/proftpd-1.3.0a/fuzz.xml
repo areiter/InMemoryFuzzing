@@ -80,13 +80,6 @@
     <FuzzerType>fuzzer/predefined</FuzzerType>
     <FuzzerArg name="id">proftpd_socket</FuzzerArg>
 
-    <DataGenerator>datagen/fixed_bytes</DataGenerator>
-    <DataGenArg name="data">000000000100000064000000</DataGenArg>
-  </PreCondition>
-  <PreCondition>
-    <FuzzerType>fuzzer/predefined</FuzzerType>
-    <FuzzerArg name="id">proftpd_socket</FuzzerArg>
-
     <DataGenerator>datagen/scripted</DataGenerator>
     <DataGenArg name="enable_scripting">1</DataGenArg>
     <DataGenArg name="script_lang">CSharp</DataGenArg>
@@ -96,22 +89,51 @@
 
 
   <FuzzDescription>
-    <RegionStart>source|ctrls.c,507</RegionStart>
+    <RegionStart>source|ctrls.c,532</RegionStart>
     <RegionEnd>source|ctrls.c,542</RegionEnd>
 
+    <FuzzLocation>
+      <Trigger>start</Trigger>
+      <StopCondition>none</StopCondition>
+      <FuzzerType>fuzzer/in_memory</FuzzerType>
+      <FuzzerArg name="data_region">variable|reqarglen</FuzzerArg>
+      <FuzzerArg name="data_type">fuzzdescription/single_value</FuzzerArg>
+
+      <DataGenerator>datagen/scripted</DataGenerator>
+      <DataGenArg name="enable_scripting">1</DataGenArg>
+      <DataGenArg name="script_lang">CSharp</DataGenArg>
+      <!--<FuzzerArg name="script_file">/path/to/scriptfile</FuzzerArg>-->
+      <DataGenArg name="script_code">
+        #import System.IO
+        #endheader
+        int val = 100;
+        if(IsValueSet("last_val"))
+          val = (int)GetValue("last_val") + 1;
+        SetValue("last_val", val);
+        
+
+        using(MemoryStream sink = new MemoryStream())
+        {
+          StreamHelper.WriteInt32(val, sink);    //status
+          SetData(sink.ToArray());
+        }
+      </DataGenArg>    
+    </FuzzLocation>
     <FuzzLocation>
       <Trigger>start</Trigger>
       <StopCondition>none</StopCondition>
       <FuzzerType>fuzzer/predefined</FuzzerType>
       <FuzzerArg name="id">proftpd_socket</FuzzerArg>
 
-      <DataGenerator>datagen/random_bytes</DataGenerator>
-      <DataGenArg name="minlen">2000</DataGenArg>
-      <DataGenArg name="maxlen">30000</DataGenArg>
-      <DataGenArg name="lentype">increase|1000</DataGenArg>
-      <DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
-      
+      <DataGenerator>datagen/scripted</DataGenerator>
+      <DataGenArg name="enable_scripting">1</DataGenArg>
+      <DataGenArg name="script_lang">CSharp</DataGenArg>
+      <!--<FuzzerArg name="script_file">/path/to/scriptfile</FuzzerArg>-->
+      <DataGenArg name="script_code">
+        SetData(new byte[1]);
+      </DataGenArg>    
     </FuzzLocation>
+
   </FuzzDescription>
 
   <Logger>

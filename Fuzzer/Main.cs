@@ -38,6 +38,7 @@ namespace Fuzzer
 		private static FuzzController[] _fuzzControllers = null;
 		private static AnalyzeController _analyzeController = null;
 		
+		public static string ConfigPath = "";
 		public static void Main (string[] args)
 		{
 			SetupLogging ();

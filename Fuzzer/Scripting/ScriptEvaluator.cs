@@ -62,7 +62,7 @@ namespace Fuzzer.Scripting
 			
 			
 			if (config.ContainsKey ("script_file"))
-				_environment.MainCode = File.ReadAllText (DictionaryHelper.GetString ("script_file", config, null));
+				_environment.MainCode = File.ReadAllText (Path.Combine (MainClass.ConfigPath, DictionaryHelper.GetString ("script_file", config, null)));
 			else if (config.ContainsKey ("script_code"))
 				_environment.MainCode = DictionaryHelper.GetString ("script_code", config, null);
 			else
