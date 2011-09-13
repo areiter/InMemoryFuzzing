@@ -90,7 +90,7 @@
 
   <FuzzDescription>
     <RegionStart>source|ctrls.c,532</RegionStart>
-    <RegionEnd>source|ctrls.c,542</RegionEnd>
+    <RegionEnd>source|ctrls.c,545</RegionEnd>
 
     <FuzzLocation>
       <Trigger>start</Trigger>
@@ -108,7 +108,7 @@
         #endheader
         int val = 100;
         if(IsValueSet("last_val"))
-          val = (int)GetValue("last_val") + 1;
+          val = (int)GetValue("last_val") + 10;
         SetValue("last_val", val);
         
 
@@ -130,7 +130,7 @@
       <DataGenArg name="script_lang">CSharp</DataGenArg>
       <!--<FuzzerArg name="script_file">/path/to/scriptfile</FuzzerArg>-->
       <DataGenArg name="script_code">
-        SetData(new byte[1]);
+        SetData(new byte[10]);
       </DataGenArg>    
     </FuzzLocation>
 

@@ -15,3 +15,6 @@ remote_control/remote_control
 log_memory_allocations/liblog_memory_allocations.so
 log_memory_allocations/log_memory_allocations_client
 test_sources/log_*
+
+qemu_data/arm/arm-test/arm_root.img
+qemu_data/arm/arm-test/zImage.integrator

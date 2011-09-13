@@ -1,0 +1,2 @@
+qemu-system-arm -kernel zImage.integrator -initrd arm_root.img -nographic
+-append "console=ttyAMA0" -net user,smb=./data
