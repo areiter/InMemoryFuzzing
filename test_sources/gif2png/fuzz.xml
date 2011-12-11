@@ -13,7 +13,6 @@
       <Arg>--</Arg>
       <Arg>:1234</Arg>
       <Arg>{[test_source_root]}gif2png</Arg>
-      <Arg>DUMMYARGUMENT</Arg>
     </Exec>
   </RemoteControl>
 
@@ -28,15 +27,15 @@
 
   <FuzzDescription>
     <RegionStart>source|gif2png.c,877</RegionStart>
-    <RegionEnd>source|gif2png.c,878</RegionEnd>
+    <RegionEnd>source|heap_overflow_test.c,878</RegionEnd>
 
     <FuzzLocation>
       <DataRegion>variable|argv[1]</DataRegion>
       <DataType>fuzzdescription/pointer_value</DataType>
       <DataGenerator>datagen/random_bytes</DataGenerator>
       <DataGenArg name="minlen">2</DataGenArg>
-      <DataGenArg name="maxlen">30000</DataGenArg>
-      <DataGenArg name="lentype">increase|1000</DataGenArg>
+      <DataGenArg name="maxlen">3000</DataGenArg>
+      <DataGenArg name="lentype">increase|100</DataGenArg>
       <DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
       <StopCondition>count|30</StopCondition>
     </FuzzLocation>

@@ -1,0 +1,60 @@
+%define	name	gif2png
+%define	version	2.5.2
+%define	release	1
+%define	serial	1
+
+Summary:	GIF to PNG graphics file conversion.
+Name:		%{name}
+Version:	%{version}
+Release:	%{release}
+Serial:		%{serial}
+Prefix:		%{prefix}
+License:	MIT-like
+Group:		Applications/Publishing
+URL:		http://www.catb.org/~esr/gif2png/
+Vendor:		Eric S. Raymond <esr@thyrsus.com>
+Source:		%{name}-%{version}.tar.gz
+Requires:	python >= 1.5.2
+BuildRoot: %{_tmppath}/%{name}-root
+
+%description 
+The gif2png program converts files from the patent-encumbered Graphic
+Interchange Format to Portable Network Graphics.
+
+This distribution also supplies web2png, a Python front end for
+gif2png which automagically converts entire web hierarchies (the
+graphics files themselves and references to them in web pages).
+
+%prep
+%setup -q
+
+%build
+%configure --prefix=/usr
+make gif2png gif2png.1 web2png.1
+
+%install
+[ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
+mkdir -p "$RPM_BUILD_ROOT"/usr/bin
+mkdir -p "$RPM_BUILD_ROOT"/usr/share/man/man1/
+cp gif2png web2png "$RPM_BUILD_ROOT"/usr/bin
+cp gif2png.1 web2png.1 "$RPM_BUILD_ROOT"/usr/share/man/man1/
+
+%clean
+[ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
+
+%files
+%defattr(-,root,root,-)
+%doc AUTHORS COPYING ChangeLog INSTALL NEWS README
+%{_bindir}/gif2png
+%{_bindir}/web2png
+%{_mandir}/man1/gif2png.1*
+%{_mandir}/man1/web2png.1*
+
+%changelog
+* Sun Dec 29 2003 Eric S. Raymond <esr@snark.thyrsus.com> 2.5.1
+- Make RPMs buildable by non-root user.
+
+* Wed Dec 24 2003 Eric S. Raymond <esr@snark.thyrsus.com> 2.5.0
+- Updated RPM generation and packaging for Freshmeat release.
+
+Older changelog entries are in the NEWS file.

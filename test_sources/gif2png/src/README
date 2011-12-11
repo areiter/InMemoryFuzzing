@@ -1,0 +1,31 @@
+		gif2png -- GIF to PNG graphics file conversion
+
+The gif2png program converts files from the Graphic Interchange Format
+to Portable Network Graphics.  It can be built under any Unix, or
+under MS-DOS or Windows using djgpp, or using Borland C. I don't know
+when the djgpp or Borland builds were last tested.  You will need
+libpng at version 1.0.5 or later to build this program.
+
+Some pre-1.0.0 versions of gif2png had a bug that messed up color
+conversions that followed grayscale conversions.  There has also been
+at least one relevant bug-fix in zlib, so if you are using gif2png (or
+any other png writing program using zlib) with a version below 0.95,
+you should update.
+
+Note: Some ImageMagick 4.2.x versions (including the 4.2.2 shipped
+with Red Hat 6.1) have a bug displaying grayscale PNGs that makes it
+look like gif2png is broken.  It's not.  This bug is fixed in the
+ImageMagick 5.2.2 shipped with Red Hat 7.0.
+
+This distribution also supplies web2png, a Python front end for
+gif2png which automagically converts entire web hierarchies (the
+graphics files themselves and references to them in web pages).
+Note: this script requires Python 1.5.2.
+
+These programs has a home site at <http://www.catb.org/~esr/gif2png/>.
+Look there for updates and related resources. 
+See NEWS for the project history.
+
+					Eric S. Raymond
+					esr@thyrsus.com
+					http://www.catb.org/~esr
