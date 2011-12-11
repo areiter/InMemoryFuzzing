@@ -72,6 +72,26 @@ namespace Iaik.Utils
 			
 			return defaultValue;
 		}
+		
+		/// <summary>
+        /// Gets an integer
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="paramDict"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+		public static int? GetInt(string name, IDictionary<string, string> paramDict)
+		{
+			if(paramDict.ContainsKey(name) == false)
+				return null;
+			
+			int val;
+			
+			if(int.TryParse(paramDict[name], out val))
+				return val;
+			
+			return null;
+		}
 
         /// <summary>
         /// Gets a string
