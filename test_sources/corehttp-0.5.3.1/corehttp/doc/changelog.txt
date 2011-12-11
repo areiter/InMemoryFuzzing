@@ -1,0 +1,136 @@
+CoreHTTP - Embeddable Single-process TCP/IP HTTP Server
+Copyright (C) 2005-2007  Frank Yaul
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File: changelog.txt
+===========================================   
+
+Changelog
+---------
+
+TODO FOR NEXT VERSION
+*	Better HTTP Protocol implementation (keep-alive)
+
+*	Better logging (do not log all pointless things, add log rotation, 
+	and non blocking logging?)
+
+*	Make cgi handling better so corehttp doesnt have to fork and kill for
+	every cgi request. Also make HTTP GET/POST vars work
+
+*	Make everything buffer overflow proof. Use snprintf, sscanf with max
+	field sizes, strncpy, strncat, everything. Check all functions for error
+	handling.
+	
+*	General code cleaning
+
+
+0.5.3.1 - 3 Aug 2007
+One year later. Fixed two flaws in HttpSprockMake. One was sscanf without limiters for string size which could result in a buffer overflow. The other involved shell command injection into the urlencoded variables. For example visiting index.pl?&&ls -l would make corehttp execute `perl index.pl &&ls-l`. Now the popen is escaped for " ' and \, and " is put around the arg in the sh command. Used realpath to further prevent symlink directory traversal.
+
+Changed license from AFL to GPL. Recommended _against_ usage of CGI until I get that more reliable. Added break;'s after sprocket->state changes in corehttp.c for good measure. Fixed a bug involving removesprocking a non-linked sprocket causing firstsprock to be null. Did general spring cleaning. Fixed parsing bug for urlencoded vars, and fixed bug in HttpSprockMake causing FIRSTSPROCK to be set to NULL. Added support for editing content-types in config file.
+
+0.5.3 - 5 Aug 2006
+Corehttp now redirects the client from /adirectory to /adirectory/ so clients handle them correctly. Reworked the HTTP code so it supports HEAD, POST, and GET. Renamed config file to chttp.conf rather than .cfg. Modified the socket timeout setting so we store the time of the last i/o  operation and use that to check for idle. Plus now we can send files that take longer than 20 seconds to transfer. Made socket linked list in ascending order so RemoveWatch can find the new high fd much faster. Moved corehttp.1 to corehttp.7 which is where it should be.
+
+0.5.2 - 25 Jul 2006
+When terminating, corehttp now cleanly closes existing sockets. Added "directory listing" feature, you may need to update your config file. Made CGI request process more robust - the child process will now exit if the request was cancelled and the pipe to the parent was closed from the parent side.
+
+0.5.1 - 7 Jul 2006
+A quick update. Fixed the bug that caused CLNT and HTTP sockets to linger after the client disconnected, which caused corehttp to eat up cpu power in an idle loop. Also added CGI settings to the config file allowing for customizing the commands to run dynamic web content.
+
+0.5.0 - 6 Jul 2006
+What a long lapse, but a lot was done. First, the annoying command line options were removed and now corehttp reads settings from a file. Usage.txt was updated again. Also, multiplexing is now possible - it always was but there was no way to configure it. Some internal changes to clean out the main loop and got rid of IDLEPROC. Now, either we block at select for no time at all if there are still client sprockets existing, or we block forever if there are none.
+
+0.3.9.2 - 23 Dec 2005
+Got rid of the horrible settings interface requiring recompile. Usage.txt updated with new command line options. Changed how we handle global variables.
+
+0.3.9.1 - 20 Dec 2005
+Got rid of pointless success/failure returns in sprock.c and watch.c. Reformatted all files to my new indentation style.
+
+0.3.9 - 16 Dec 2005
+Messed around with the global defines and structure. Changed corehttp into a daemon process. Made a default port. Made a logging file. Description of new usage in usage.txt.
+
+0.3.8 - 9 Dec 2005
+This version cleans up quite a bit. Also, fixed the endless looping while the buffer was full and the read watch still said it was okay to read. Also when the buffer was empty (like when waiting for OS to fork for a dynamic script) yet the write buffer was ready. Last, the child process handling was fixed.
+
+0.3.7 - 4 Dec 2005
+Can now handle dynamic content and more accurate content-types. Dynamic content is somewhat patched on right now, but it works fine. I will work on it to make it better later. It forks and makes pipes and is non blocking. sprock_t was also cleaned up and the Http processing was cleaned. Changed sprocket and watch functions to check for NULL.
+
+0.3.6.1 - 3 Nov 2005
+Seperated CoreHTTP into multiple files for more clean code, and cleaned up some stuff.
+
+0.3.6 - 28 Aug 2005
+Merged HTTP and FGET so now FGET is HTTP. CLNT still reads HTTP the same way it read FGET, though now FGET spits out a header. This way the HTTP header and body are more connected since they aren't seperated and it's just a cleaner way to do things. HTTP is cleaned up quite a bit too now.
+
+0.3.5 - 22 Aug 2005
+Supports HTTP GET requests fully now, though it ignores most headers. It always does 200 OK despite giving a 404 page. Also waits for client to say \r\n\r\n before sending anything. The <directory> arguement now is removed, but the server will now serve pages relative to its directory.
+
+Content-Type will be supported as soon as I get a list parser for file extension->mime type. Currently it just sends the file ext.
+        
+HttpHandleSprock(sprock_t *sprocket) so http is seperated from recieving and sending. The only part of http present in the recv/send would be stop recieving once you get a double newline. It would take a sprocket->buffer with a request header, and change that into a response header, and tied to an fgets. This function calls other http functions and gives them a struct httpdat_t * as an arguement.
+
+As a general note to my arguement structures and pointer style, all structures are initialized to zero, so any NULL pointers mean that an optional structure module isn't used - as in the httpdata_t, which the SERV doesn't use, but the CLNT does.
+
+Next version will SERIOUSLY rearrange the code to organize it more semantically, in terms of what is taken care of in main, and what is taken care of in functions, and how and where sprocket, watches, and http interact.
+
+0.3.4 - 18 Aug 2005
+Added error checking for everything. The server now *badly* supports the HTTP GET request. The <dir> command line option still is not implemented.
+        
+The server now works with Firefox, *badly*. Run the server as something like ./corehttp asdfafgakdfgja 5555 and then in Firefox, try to visit http://localhost:5555/home/my_directory/my_web_page/index.html or some other text file and it will work.
+
+0.3.3 - 12 Aug 2005
+Added sprocket function "FGET" which is a non-blocking file-reader using open() which pipes file content from a file to a client sprocket. Added pointer from client sprocket to its corresponding file-reader called *child.
+
+Also handled the evil signal SIGPIPE which slipped my mind for about three hours. Now, we ignore it and check if clntsprocksend or clntsprockread is negative.
+
+The new variables fpos and bpos handle communication between FGET and CLNT. fpos is how many bytes total read from the file. bpos is how many bytes are in the buffer. (fpos-bpos) is the position in the file of the data in the buffer. The FGET keeps reading until bpos = BUFSIZE and then waits for the CLNT to read from the buffer. After CLNT is done, it sets FGET's bpos to zero, telling it that it's okay to read more and to overwrite the buffer. If CLNT reads the buffer before it is full, the same thing happens, but CLNT only reads bpos bytes from the buffer. After CLNT has the buffer and bpos, it sends the buffer, and keeps track of how much is sent with upos, "Used position." We are done sending the current chunk when upos == bpos. Then, we get a new chunk. If there aren't any more chunks, FGET terminates and CLNT knows the file is finished.
+
+Since now FGET is a sub process of CLNT, sprockets are now linked heirarchically too, having parent a child pointers. A CLNT is also a child of the SERV that accepted it.
+        
+CoreHTTP is now basically a file server that supports the GET request and reponds without any headers. There are no security features yet. The <Directory> arguement does not work yet. However, try:
+        
+% ./corehttp asdjfak 5555
+        
+Then, open up a new terminal and try:
+        
+% telnet localhost 5555
+% /usr/include/stdlib.h
+        
+The server should send you a copy of that file. Note that you must press enter and send the \n newline character. The file also must be valid, or will result in a segmentation fault.
+
+0.3.2 - 8 Aug 2005
+Next version will implement HTTP/1.0.
+        
+Added function SetNonBlock, which sets a file descriptor in non-blocking mode. Even though we poll, a descriptor might not be ready when we handle it, so it is important to use this mode.
+
+Select now blocks for 5 seconds waiting for input, so we only cycle through all sprockets once every five seconds when there is no input to process, giving a chance for sprockets in a non-I/O state to process, but not taking up lots of processing power in idle time. Also split up AddWatch into AddReadWatch and AddWriteWatch, so processing power won't shoot up to 100% when you only need to read data, but select() keeps returning true because you are also able to write data and the server does needless iterations. RemoveWatch is still the same; it will remove watches from both. These changes allow the server to go to sleep when there isn't I/O available. I can't believe I didnt do this in the first release; they are small changes but affect ALOT.
+        
+Ideas:
+Make some client protocol so that a client can say "Please listen on port X" and the client handler creates a new server sprocket with the port in its buffer so when the server sprocket INITs, it listens to that port. 
+     
+case CLIENT: case MAKESERVER: newsprocket = MakeServerSprocket(port);   
+
+0.3.1 - 5 Aug 2005
+First alpha release. The server uses only one thread of execution and blocking sockets. However, before any I/O function is called the socket is polled with select() to make sure no real "blocking" occurs, so it is really non-blocking. 
+        
+This is a PRE-ALPHA release! The server *IS NOT* an HTTP server yet. Currently, it's only an echo server. However, I decided to release it because its a fully working prototype for the server's client-concurrency model. In other words, the server resource management part is being worked on now - the HTTP protocol will be added later - and perhaps other protocols as well. 
+        
+As it is only an echo server, the command line <Directory> option does nothing. Just put in a dummy value like "asdfadfjklj" and give a port as the second arguement to test it.
+
+0.2.x - 8 July 2005
+Used POSIX threads and an internal pending queue
+
+0.1.x - 1 July 2005
+Used POSIX threads and fork()

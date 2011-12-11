@@ -1,0 +1,83 @@
+1323640686 corehttp-0.5.3.1 started.
+ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGI Extensions: 
+1323640749 127.0.0.1 requests '/'
+1323640749 127.0.0.1 requests '/favicon.ico'
+1323640749 127.0.0.1 requests '/favicon.ico'
+1323640870 terminating... dumping existing sprockets ...
+4       SERV
+5       SERV
+6       SERV
+
+1323640879 corehttp-0.5.3.1 started.
+ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGI Extensions: 
+1323640884 127.0.0.1 requests '/'
+1323640884 127.0.0.1 requests '/favicon.ico'
+1323640884 127.0.0.1 requests '/favicon.ico'
+1323640888 127.0.0.1 requests '/test.php'
+1323640890 127.0.0.1 requests '/benchmark.jpg'
+1323640893 127.0.0.1 requests '/favicon.ico'
+1323642941 127.0.0.1 requests 'A/index.html'
+1323642941 PROBLEM: failed to socksend when watches allowed
+1323643189 terminating... dumping existing sprockets ...
+4       SERV
+5       SERV
+6       SERV
+
+1323643190 corehttp-0.5.3.1 started.
+ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGI Extensions: 
+1323643213 127.0.0.1 requests '/'
+1323643213 127.0.0.1 requests '/favicon.ico'
+1323643213 127.0.0.1 requests '/favicon.ico'
+1323643729 terminating... dumping existing sprockets ...
+4       SERV
+5       SERV
+6       SERV
+
+1323643747 corehttp-0.5.3.1 started.
+ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGI Extensions: 
+1323643822 terminating... dumping existing sprockets ...
+4       SERV
+5       SERV
+6       SERV
+7       CLNT 127.0.0.1 requesting 
+
+1323643823 corehttp-0.5.3.1 started.
+ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGI Extensions: 
+1323644363 terminating... dumping existing sprockets ...
+4       SERV
+5       SERV
+6       SERV
+7       CLNT 127.0.0.1 requesting 
+
+1323644365 corehttp-0.5.3 started. TIMEOUT=20 BACKLOG=15 ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/ PAGE404=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/404.html LOGFILE=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/chttp.log DIRLIST=//home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/403.html
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGIEXTs/CGIBINs: 
+1323644373 terminating... dumping existing sprockets ...
+4       SERV
+5       SERV
+6       SERV
+
+1323644425 corehttp-0.5.3 started. TIMEOUT=20 BACKLOG=15 ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/ PAGE404=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/404.html LOGFILE=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/chttp.log DIRLIST=//home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/403.html
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGIEXTs/CGIBINs: 
+1323644443 corehttp-0.5.3 started. TIMEOUT=20 BACKLOG=15 ROOTDIR=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/ PAGE404=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/404.html LOGFILE=/home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/chttp.log DIRLIST=//home/andi/Documents/Uni/master-thesis/src/test_sources/corehttp-0.5.3.1/corehttp/www/403.html
+PORTs: 5555 5556 5557 
+DEFPAGEs: index.html index.htm index 
+CGIEXTs/CGIBINs: 

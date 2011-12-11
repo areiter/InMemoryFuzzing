@@ -1,0 +1,174 @@
+.TH corehttp 7 "5 Aug 2005"
+.SH NAME
+corehttp - single-process non-forking-blocking-threading http server
+.SH SYNOPSIS
+.B corehttp
+.I configfile 
+.SH DESCRIPTION
+.PP
+.I corehttp
+is a web server which provides basic HTTP/1.0 support and does all it's work
+from within one process. It never forks (except to serve dynamic content) and
+it does not use pthreads. corehttp does all of this by using a
+.I select()
+server model where all sockets are set to non-blocking so we can cycle through
+every socket fast, filling each socket's I/O demands evenly. Features include
+.TP
+*
+Efficient processing model and good concurrency performance.
+.TP
+*
+Passable HTTP/1.0 support.
+.TP
+*
+Basic CGI support, though passing URL-encoded variables is sketchy.
+.TP
+*
+Easily extensible but hard to understand at first.
+.TP
+*
+Directory listings, root web directory, logging, configuration file.
+.SH USAGE
+To install corehttp, simply run make in the src/ directory
+.PP
+.nf
+	make all		# Makes everything
+	make install		# Installs files to path
+	make clean		# Removes local objects and executables
+	make uninstall		# Removes installed files
+.fi
+.PP
+If you wish to have dynamic content support you will also need to have the
+.B PHP - command line interpretor
+and
+.B Perl
+interpretor installed on your system, or any other binary defined in the config
+file. Currently, CGI isn't recommended because CoreHTTP must fork each time a
+CGI page is requested. This should be fixed in the future with CoreHTTP 
+pre-forking a few processes to handle dynamic content.
+.PP
+Using corehttp is simple once the config file is set up. Simply supply the
+relative path to the config file as the only argument to corehttp.
+.PP
+.nf
+	Example:
+	corehttp chttp.conf
+.fi
+.PP
+The included config file in the distribution is named
+.B chttp.conf
+and is located in the top level of the corehttp folder.
+.SH CONFIGURATION
+The
+.B configuration file
+will now be described. The format is simple and the included file has all the
+possible settings corehttp has to offer. Here are some bullet points:
+.TP
+.BI # "    comment"
+The hash mark denotes a comment. Anything on the current line beyond this is
+ignored.
+.TP
+.BI TIMEOUT "    seconds"
+How long until we drop an idle client.
+.TP
+.BI BACKLOG "    numPending"
+This is the listening socket backlog. See
+.B man 2 listen
+for more information.
+.TP
+.BI DEFPAGE "    filename"
+You may have more than one of these. The first DEFPAGE we see in the config
+file is the "first" default filename we check for in a directory. The second
+is the second, and so on. A common setup would be:
+.PP
+.nf
+	DEFPAGE index.php
+	DEFPAGE index.pl
+	DEFPAGE index.html
+	DEFPAGE index.htm
+.fi
+.TP
+.BI PORT "    portno"
+Just like DEFPAGE you may have more than one of these. This is the port that
+the server listens on. The web port is 80.
+.TP
+.BI ROOTDIR "    absoluteWebPath"
+This should be entered as an absolute path and should be the root web
+directory. In other words, when someone types in www.yourdomain.com they should
+view the index page within this directory.
+.TP
+.BI LOGFILE "    absoluteLogFilePath"
+This should contain the absolute path to the file corehttp will write its log
+to. Make sure whatever user you run corehttp with has write access to this
+file.
+.TP
+.BI PAGE404 "    absolute404errorFilePath"
+This should contain the absolute path to the page the server serves up when
+it can't find a file.
+.TP
+.BI CGIEXT/CGIBIN
+These two are meant to be used together, with CGIEXT being the file extension
+and CGIBIN being the binary called. Multiple instances of this may be used. Just
+keep the EXT/BINs in order. You can alternate them or do all BIN's and then all
+EXTs if you want. For example, if /usr/bin/perl is the binary and *.pl is the
+extension:
+.PP
+.nf
+	CGIBIN	"/usr/bin/perl"
+	CGIEXT	"pl"
+.fi
+.TP
+.BI CONTENTEXT/CONTENTTYPE
+Similarly used like CGIEXT and CGIBIN, except these denote what is sent in the
+Content-type field in the HTTP header.
+.TP
+.BI UNKNOWNTYPE
+The Content-type to return for a file with an unknown extension or none at all.
+.TP
+.BI DIRLIST "	dirlistScriptPath"
+The location of the script that is suppost to take an absolute directory as an argument and print out an html directory list.
+.PP
+All you do is stick one of these bullet things on a separate line starting at
+the beginning of a line in some file. Simple. There are also a few more compile
+options present in 
+.B common.c
+and
+.B common.h
+and these files must be modified before compiling. These options are just
+buffer sizes. The reason they are not changeable is that they are hard coded
+free memory spaces within the program itself.
+.TP
+.B BUFSIZE
+The largest buffer - this is used for sending and receiving chunks of data and
+storing HTTP headers.
+.TP
+.B PATHSIZE
+This is the utility size - used for things like storing URLs and filenames.
+.TP
+.B SETSIZE
+The smallest buffer - this is how many multiplexed ports may be present and how
+many default page names there are.
+.SH TROUBLESHOOTING
+There are some common problems associated with running a server. A look at the
+log file is the first step to take. Here are some possible problems:
+.TP
+.B Segmentation fault!
+Uh oh, this server is still nascent and if this happens send me a line and
+the config file or the log if it was running.
+.TP
+.B Bad config file
+Maybe the config file parsing is buggy, maybe not. It should output what it
+read before it exits, so see if you can use that to help.
+.TP
+.B Couldn't bind with server socket!
+If you terminate an application that was bound to a port and attempt to start
+another application that uses the same port in a small margin of time, the OS
+won't let you because of a TCP feature. Just wait a minute or two and try
+again. If this doesn't work, make sure you have admin privaliges if you are
+trying a port less than 1024.
+.TP
+.B My log file has "PROBLEMS" everywhere!
+That's okay. They're more like things that just happen, like when a client
+bails out of a large file transfer.
+.SH AUTHOR
+Copyright © 2005-2007 by Frank Yaul <frank723@gmail.com>. All rights reserved.
