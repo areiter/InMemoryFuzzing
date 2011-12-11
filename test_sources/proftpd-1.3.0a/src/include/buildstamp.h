@@ -1,0 +1,1 @@
+#define BUILD_STAMP "Thu Dec 8 22:32:56 CET 2011"
