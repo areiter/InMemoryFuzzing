@@ -1,0 +1,3 @@
+vxdserv.o: vxdserv.cc vxd.h
+
+vxd.h:

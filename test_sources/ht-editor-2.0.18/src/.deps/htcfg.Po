@@ -1,0 +1,261 @@
+htcfg.o: htcfg.cc /usr/include/errno.h /usr/include/features.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
+ /usr/include/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/asm/errno.h /usr/include/asm-generic/errno.h \
+ /usr/include/asm-generic/errno-base.h /usr/include/stdlib.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stddef.h \
+ /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/xlocale.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/string.h /usr/include/stdio.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/memory \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_algobase.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/c++config.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/os_defines.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/functexcept.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/exception_defines.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/cpp_type_traits.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/ext/type_traits.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/ext/numeric_traits.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_pair.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/move.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/concept_check.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_iterator_base_types.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_iterator_base_funcs.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_iterator.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/debug/debug.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/allocator.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/c++allocator.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/ext/new_allocator.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/new \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/exception \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_construct.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_uninitialized.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_tempbuf.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_raw_storage_iter.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/backward/auto_ptr.h \
+ cstream.h io/types.h config.h io/posix/types.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdint.h \
+ /usr/include/stdint.h /usr/include/bits/wchar.h stream.h data.h config.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstdlib \
+ str.h io/file.h io/types.h io/fileofs.h io/types.h /usr/include/dirent.h \
+ /usr/include/bits/dirent.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/timex.h htcfg.h htctrl.h htobj.h io/display.h \
+ io/bounds.h data.h htdebug.h endianess.h htreg.h strtools.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstring \
+ store.h except.h io/sys.h tools.h
+
+/usr/include/errno.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/include/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/stdlib.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stddef.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/time.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/alloca.h:
+
+/usr/include/string.h:
+
+/usr/include/stdio.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/memory:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_algobase.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/c++config.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/os_defines.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/functexcept.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/exception_defines.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/cpp_type_traits.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/ext/type_traits.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/ext/numeric_traits.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_pair.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/move.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/concept_check.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_iterator_base_types.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_iterator_base_funcs.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_iterator.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/debug/debug.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/allocator.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/c++allocator.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/ext/new_allocator.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/new:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/exception:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_construct.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_uninitialized.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_tempbuf.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/bits/stl_raw_storage_iter.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/backward/auto_ptr.h:
+
+cstream.h:
+
+io/types.h:
+
+config.h:
+
+io/posix/types.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/bits/wchar.h:
+
+stream.h:
+
+data.h:
+
+config.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstdlib:
+
+str.h:
+
+io/file.h:
+
+io/types.h:
+
+io/fileofs.h:
+
+io/types.h:
+
+/usr/include/dirent.h:
+
+/usr/include/bits/dirent.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/timex.h:
+
+htcfg.h:
+
+htctrl.h:
+
+htobj.h:
+
+io/display.h:
+
+io/bounds.h:
+
+data.h:
+
+htdebug.h:
+
+endianess.h:
+
+htreg.h:
+
+strtools.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstring:
+
+store.h:
+
+except.h:
+
+io/sys.h:
+
+tools.h:

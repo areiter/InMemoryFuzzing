@@ -1,0 +1,231 @@
+htxbehead.o: htxbehead.cc formats.h stream.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdarg.h \
+ /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stddef.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h data.h \
+ config.h io/types.h config.h io/posix/types.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdint.h \
+ /usr/include/stdint.h /usr/include/bits/wchar.h /usr/include/sys/types.h \
+ /usr/include/time.h /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/bits/sigset.h \
+ /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+ /usr/include/bits/pthreadtypes.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstdlib \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/c++config.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/os_defines.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/xlocale.h \
+ /usr/include/alloca.h str.h io/file.h io/types.h io/fileofs.h io/types.h \
+ /usr/include/dirent.h /usr/include/bits/dirent.h \
+ /usr/include/bits/posix1_lim.h /usr/include/bits/local_lim.h \
+ /usr/include/linux/limits.h /usr/include/bits/timex.h htformat.h \
+ eval/evalx.h eval/evaltype.h eval/eval.h /usr/include/math.h \
+ /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
+ /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
+ /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
+ /usr/include/bits/mathcalls.h /usr/include/string.h eval/lex.h \
+ eval/evalx.h htobj.h io/display.h io/bounds.h data.h strtools.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstring \
+ htapp.h htctrl.h htdialog.h htdebug.h io/keyb.h atom.h htcoff.h coff_s.h \
+ tools.h htcoffhd.h httag.h endianess.h hthex.h htiobox.h htnewexe.h \
+ htxbe.h xbestruct.h htxbeimp.h htxbehead.h snprintf.h
+
+formats.h:
+
+stream.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdarg.h:
+
+/usr/include/stdio.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stddef.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+data.h:
+
+config.h:
+
+io/types.h:
+
+config.h:
+
+io/posix/types.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/time.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstdlib:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/c++config.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/os_defines.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/alloca.h:
+
+str.h:
+
+io/file.h:
+
+io/types.h:
+
+io/fileofs.h:
+
+io/types.h:
+
+/usr/include/dirent.h:
+
+/usr/include/bits/dirent.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/timex.h:
+
+htformat.h:
+
+eval/evalx.h:
+
+eval/evaltype.h:
+
+eval/eval.h:
+
+/usr/include/math.h:
+
+/usr/include/bits/huge_val.h:
+
+/usr/include/bits/huge_valf.h:
+
+/usr/include/bits/huge_vall.h:
+
+/usr/include/bits/inf.h:
+
+/usr/include/bits/nan.h:
+
+/usr/include/bits/mathdef.h:
+
+/usr/include/bits/mathcalls.h:
+
+/usr/include/string.h:
+
+eval/lex.h:
+
+eval/evalx.h:
+
+htobj.h:
+
+io/display.h:
+
+io/bounds.h:
+
+data.h:
+
+strtools.h:
+
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.6.2/../../../../include/c++/4.6.2/cstring:
+
+htapp.h:
+
+htctrl.h:
+
+htdialog.h:
+
+htdebug.h:
+
+io/keyb.h:
+
+atom.h:
+
+htcoff.h:
+
+coff_s.h:
+
+tools.h:
+
+htcoffhd.h:
+
+httag.h:
+
+endianess.h:
+
+hthex.h:
+
+htiobox.h:
+
+htnewexe.h:
+
+htxbe.h:
+
+xbestruct.h:
+
+htxbeimp.h:
+
+htxbehead.h:
+
+snprintf.h:

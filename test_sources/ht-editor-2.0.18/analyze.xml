@@ -1,0 +1,17 @@
+<Analyze>
+	<Include>config_paths.xml</Include>
+
+	<RegisterTypeResolver name="registertypes/x86_64" />
+	<RegisterFile>{[register_root]}x86-64.registers</RegisterFile>
+	<FuzzLogPath>{[log_root]}</FuzzLogPath>
+	<ErrorLog>{[log_root]}errorlog.xml</ErrorLog>
+	
+	<AddAnalyzer name="analyzers/program_error" />
+	<AddAnalyzer name="analyzers/saved_registers" />
+	<!--<AddAnalyzer name="analyzers/simple_heap_overflow" />
+
+  <AddAnalyzer name="analyzers/memory_zones">
+    <WhiteZone>0x602010:0x60201F</WhiteZone>
+    <RedZone>0x600000:0x700000</RedZone>
+  </AddAnalyzer>-->
+</Analyze>

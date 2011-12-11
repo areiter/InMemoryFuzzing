@@ -1,0 +1,83 @@
+<Fuzz>
+  <Include>config_paths.xml</Include>
+ <!-- <RemoteControl>
+    <Host>localhost</Host>
+    <Port>8899</Port>
+    
+    <Exec trigger="immediate">
+      <Cmd>{[gdbserver_exec]}</Cmd>		
+      <Arg>- -wrapper</Arg>
+      <Arg>env</Arg>
+      <Arg>LD_PRELOAD={[lib_logmem]}</Arg>
+      <Arg>LOG_MEM_PIPE=logmem_pipe</Arg>
+      <Arg> - -</Arg>
+      <Arg>:1234</Arg>
+      <Arg>{[test_source_root]}gif2png</Arg>
+      <Arg>DUMMYARGUMENT</Arg>
+    </Exec>
+  </RemoteControl>-->
+
+  <TargetConnection>
+    <Connector>general/gdb</Connector>
+    <Config key="gdb_exec">{[gdb_exec]}</Config>
+    <Config key="gdb_log">stream:stderr</Config>
+    <Config key="gdb_max_instructions">4000000</Config>
+    <Config key="target">run_local</Config>
+
+    <Config key="file">{[test_source_root]}ht</Config>
+    <Config key="run_args">dummyarg</Config>
+  </TargetConnection>
+
+
+  <FuzzDescription>
+    <RegionStart>source|main.cc,262</RegionStart>
+    <RegionEnd>source|main.cc,380</RegionEnd>
+
+    <FuzzLocation>
+      <Trigger>start</Trigger>
+      <StopCondition>count|1000</StopCondition>
+      <FuzzerType>fuzzer/in_memory</FuzzerType>
+      <FuzzerArg name="data_region">variable|argv[1]</FuzzerArg>
+      <FuzzerArg name="data_type">fuzzdescription/pointer_value</FuzzerArg>
+
+      <DataGenerator>datagen/random_bytes</DataGenerator>
+      <DataGenArg name="minlen">3000</DataGenArg>
+      <DataGenArg name="maxlen">1000000</DataGenArg>
+      <DataGenArg name="lentype">increase|1000</DataGenArg>
+      <DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
+<!--      <DataGenerator>datagen/scripted</DataGenerator>
+      <DataGenArg name="enable_scripting">1</DataGenArg>
+      <DataGenArg name="script_lang">CSharp</DataGenArg>
+      <DataGenArg name="script_code">
+        #import System.IO
+        #endheader
+        int size = 1;
+        if(IsValueSet("last_size"))
+          size = (int)GetValue("last_size") + 10;
+        SetValue("last_size", size);
+        
+	byte[] data = new byte[size];
+	RandomByteGenerator r = new RandomByteGenerator(size, size, RandomByteGenerator.ByteType.PrintableASCIINullTerminated, 
+	Random r = new Random();
+	r.NextBytes(data);
+
+        using(MemoryStream sink = new MemoryStream())
+        {
+	  sink.Write(data, 0, size);
+          SetData(sink.ToArray());
+        }
+      </DataGenArg>    
+-->
+    </FuzzLocation>
+  </FuzzDescription>
+
+  <Logger>
+    <Destination>{[log_root]}</Destination>
+    <UseLogger name="datagenlogger" />
+    <UseLogger name="connectorlogger" />
+    <UseLogger name="stackframelogger" />
+    <UseLogger name="remotepipelogger">
+      <PipeName>logmem_pipe</PipeName>
+    </UseLogger>
+  </Logger>
+</Fuzz>

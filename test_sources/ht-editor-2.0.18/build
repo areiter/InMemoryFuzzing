@@ -1,0 +1,4 @@
+cd src
+CPPFLAGS="-g -O0" CXXFLAGS="-g -O0" ./configure --prefix=/opt/hteditor-vulnerable
+make
+cd ..

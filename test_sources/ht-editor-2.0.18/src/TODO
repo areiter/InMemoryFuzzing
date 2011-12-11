@@ -1,0 +1,165 @@
+ HT TODO
+=========
++sepps
+- implement ht_static_treeview::goto_node() at all
+- exports/dimports in PE32+ broken
+- ht_listbox should have column align (left, right, center)
+- strz escape problems e.g. ffffffff -> "    "
+- segments
+	- multiple disassemblers
+- address: different display types (ie rva)
+- next unexplored
+- out_addr *analyser_output::get_addr(ADDR Addr) no cur_out_addr==NULL test
+- htanaly.cc: menu ifs not used properly (for keys...)
+- analy_x86: AnalyX86Disassembler::createAddress() fix it.
+- analy.cc: pushAddress(x,y) leaks x if !isValidCodeAddr(x)
+- analy.cc: analyser file storage: thresholds are stored after data structures
+  which they are used for.
+> 80c20   dd   0x4c000024  ;;          00080c20   rfid
+> 823e4   dd   0x7d708120  ;;          000823e4   mtcrf   0x08,r11
+
++dunno
+- update help
+- listbox-search
+- qword *, /, %: better impl...
+- FILEOFS 64+ bits
+- (HT_1_0) freeze/stabilize config file formats / APIs
+- int ht_ne_entrypoint_viewer::ref_sel(LINE_ID *id)
+- 1”1 will eval to 1
+- [x86 asm] 'jmp 1+2' doenst work but 'mov [1+2], ax' ??
+- store.cc:60: getObject quits with invalid config file
+- disasm (esp. x86) switch 16/32 correctly
+- classread/view.cc
+    - rename to match PE/ELF/LE,etc.'s structure
+    - shared data not freed
+- segmented addresses + eval()
+- [start, end) or [start, end] in
+	- Areas
+	- ht_analy::lowest/highest address
+- document commandline options in help
+
++steves
+- get rid of bnstr()!!!
+- ./configure should not fail if it can't find lex/flex (and probably other including
+	but not limited to yacc)
+- eval: no signed division (there should be an operator s/ with "-7 s/ 7 == -1")
+- x86asm: "test eax, [2342343]" should yield "test [2342343], eax" 
+          ("test" ist symmetric)
+	  same with "xchg"
+- eval: "-2+1.0" vs. "2+1.0" (difficult)
+- option to open a file without attempting to parse
+  'special information' - i.e. to edit it as pure hex.
+- mov eax, [eax+ebp] vs. mov eax, [ebp+eax]
+- blockop should support multiple endianesses (currently only big-endian)
+- eval: int(-1.0) results in 0xffffffff instead of 0xffffffffffffffff
+- eval: int("-1") does not work
+- eval should warn if number too big/cannot parse
+- eval whatis(whatis("whatis")), what is?
+- create ht.cfg in "home dir", implementation+interface sys_get_home_dir()
+- disabling "-pipe" on generic-POSIX systems doesn't seem to work
+- input_date_time()
+- open... new option: preserve mtime
+- htsys.h move to .., implement sys_pstat_fd(pstat_t *s, int fd)
+- eval text_viewer
+- LE binary search does not work
+- Resources in VxDs (like in PE)
+- IPC-djgpp: recognize gui progs and close window !?
+- httext line wrapping, ctrl+page_down ?!
+- new instead of malloc
+- terminal.cc: terminal line buffering ?!
+- textviewer: vi-mania: '/' searches, 'n' continues
+- vfsview: xtime tag modified to display seconds. keep this ?
+- LE: fix file offset chaos (but howto ?)
+- "class Process" in process.cc: replacing/improving *_process
+  see messy code htsearch: replace_bin_process (c->'s)
+
+- (HT_0_9) features configurable
+- (HT_0_9) directory structure
+	- move source files (especially object system) into separate directories,
+	  solve name problems
+- (HT_0_9) data2/string2/stream2/store2/debug2
+	- homogenous/heterogenous lists
+	- save on readonly/locked file
+	- stream::set_layered suspicious
+	- use exceptions
+- (HT_0_9) the next big changes (htvision rewrites)
+	- rewrite menus, disable menu-entries (and multiple context menus ?)
+	- handlemsg should not have to handle keypressed. new concepts needed
+	- texteditor as dialog-widget should have attachable scrollbar
+	- menus should save last cursor position
+	- use exceptions and get rid of globalerror (cause its ugly)
+	- cleanup msg interface
+	- auto-documentation (e.g. keys)
+
+- syntax.cc:bool match_sorted_stringtable(char *s, UINT slen, char **strings, UINT strings_count):
+  better use bsearch() (ANSI, POSIX)
+
+- texteditor as dialog-widget should have attachable scrollbar
+- open file: wildcards
+- search
+	- search should prefill start/end ofs from selection (if applicable)
+	- search with invalid start/end offset
+- menus should save last cursor position
+- int ht_disasm_sub::prev_line_id(LINE_ID *line_id, int n), bah
+- getbounds rel coords
+- disable buttons (disable menu-entries, disable messages)
+- file manager
+	- file browser
+	- vfs based on ht_listbox
+	- copy, etc. ?!
+	- vfs ..._viewer to get config_changed
+- elf/pe/etc.-section ref tree optimizationdfgjl
+- KEY_RESIZE
+- textedit/file
+	- +get_size,extend,truncate +overwrite -use_getline
+	- highlighter speed !!
+	- bug with getline's pofs ?!
+	- long lines
+	- unindent()
+	- match pair highlight
+	- undo::gettext() should (be able to) use text_editor::snprint_ppos(...)
+	- input separators configurable (right now only creates UNIX-style files)
+- search backwards
+- more history entries: replace e.g.
+- improve edit_time/dialog ?!
+- auto-documentation (e.g. keys)
+- portability
+	- compile on sun solaris (curses problems (only?) on cf.sf.net)
+	- compile on MacOS X (curses.h, but no ACS_*)
+- detect format length (ne,le,elf)
+- LE: use byte/word order (no examples)
+- pe/elf relocations ?
+- make ht_group_sub work correctly
+- color invert & underlined attribute and transparent chars, codepages ? &&
+	abstract (e.g. transparent) chars (io/*)
+- x86 (dis)assembler
+	- options (ambigous & + floats) + beautify (enums)
+	- "short"/"large" branches
+- OBJECT_ID vs HT_ATOM ?
+- object notification (e.g. insertion into groups (c overview),
+  dialog-elements content modified )
+- file structure overview
+- uformat+k_shift_*: use select_mode_*
+- *::duplicate(); --> *::clone();
+- use better c/c++ (s/most dwords/UINT/, s/int/bool/where needed,
+  more enums, templates, exceptions)
+- better coff-detection
+- multiple bit tag (extend bit tag ?)
+- execute_dialog_modal + window move/resize
+- taginfo-window
+- clipboard: limit size somehow
+- smart window positioning (don't hide cursor)
+- split up htobj.cc and htdialog.cc into smaller files
+- extended search (continue as idle w/result window)
+- CHAR-TAGs must also be editable as hex
+- full support of: pe, le, lx, mz, ne, elf, a archives, pure/dj coff,
+  m$ object files, etc..
+- exe-packer support (at least notification)
+- fix FIXMEs
+- remove memory leaks
+
++discussion
+- queuemsg in ht_view ?!
+- searchmode bin/regex: rewrite regex ?
+- "Ctrl-X" vs. "Ctrl+X"
+- only frames have desc, rest view_debug_name
