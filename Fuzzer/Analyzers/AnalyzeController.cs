@@ -124,7 +124,7 @@ namespace Fuzzer.Analyzers
 					dataAnalyzer.Analyze (this);
 				});
 			
-				if (prefix % 10 == 0)
+				//if (prefix % 10 == 0)
 					_doc.Save (_errorlog);
 			}
 			

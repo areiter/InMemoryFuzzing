@@ -126,7 +126,9 @@ namespace Fuzzer.DataGenerators
 		#region IDataGeneratorLenType implementation
 		public int NextLength ()
 		{
-			_current = (_current + _step) % (_maxlen - _minlen) + _minlen;
+			_current = (_current + _step) % (_maxlen);
+			if(_current < _minlen)
+				_current = _minlen;
 			return _current;
 		}
 		#endregion

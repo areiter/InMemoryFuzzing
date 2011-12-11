@@ -1,4 +1,4 @@
-// ContinueRH.cs
+// FileCmd.cs
 //  
 //  Author:
 //       Andreas Reiter <andreas.reiter@student.tugraz.at>
@@ -20,41 +20,29 @@ using System;
 namespace Fuzzer.TargetConnectors.GDB
 {
 	/// <summary>
-	/// Sends a continue command
+	/// Loads a file (with debug information) to gdb
 	/// </summary>
-	public class ContinueCmd:GDBCommand
+	public class SetMaxInstructionsCmd : GDBCommand
 	{
-		private ContinueRH _continueRH;
-		private bool _reverse = false;
+		private int _maxInstructions;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBCommand
 		public override GDBResponseHandler ResponseHandler 
 		{
-			get { return _continueRH; }
-		}		
+			get { return null; }
+		}
 		
 		public override string Command 
 		{
-			get 
-			{
-				if(_reverse)
-					return "reverse-continue";
-				else
-					return "continue"; }
-		}
-		
-		
-		protected override string LogIdentifier 
-		{
-			get { return "CMD_continue" + (_reverse ? "_r": ""); }
+			get { return string.Format("set record insn-number-max {0}", _maxInstructions); }
 		}
 		
 		#endregion
-		public ContinueCmd (bool reverse, string runArgs, Action<bool> continueResult, GDBSubProcess gdbProc)
+		
+		public SetMaxInstructionsCmd (int maxInstructions, GDBSubProcess gdbProc)
 			:base(gdbProc)
 		{
-			_reverse = reverse;
-			_continueRH = new ContinueRH(runArgs, continueResult, _gdbProc);
+			_maxInstructions = maxInstructions;
 		}
 	}
 }

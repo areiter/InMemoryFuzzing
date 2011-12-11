@@ -201,7 +201,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		protected void GdbLog(char c)
 		{
 			if(_gdbLog != null)
+			{
 				_gdbLog.Write(c.ToString());
+				//_gdbLog.Write("[{0:X2}]", (int)c);
+			}
 		}
 		
 		protected void GdbLog(string data)
@@ -220,6 +223,7 @@ namespace Fuzzer.TargetConnectors.GDB
 		private void ReadThread (object data)
 		{
 			StringBuilder currentLine = new StringBuilder ();
+			StringBuilder lastLine = new StringBuilder();
 			List<string> currentLines = new List<string> ();
 			try
 			{
@@ -228,30 +232,55 @@ namespace Fuzzer.TargetConnectors.GDB
 					char read = ReadChar ();
 					GdbLog (read);
 				
-				if (read == '\n' || read == '\r')
-				{
+					if (read == '\n' || read == '\r')
+					{
 						if (currentLine.ToString ().Trim ().Equals (string.Empty))
 							continue;
 					
-					currentLines.Add (currentLine.ToString ());
+						lastLine = new StringBuilder(currentLine.ToString());
+						
+						//Console.WriteLine("TRIGGERCHAR=={0:X2}", (int)read);
+						//Console.WriteLine("ADDING LINE: \"{0}\"", currentLine.ToString().Trim());
+						
+						//currentLines.Add (currentLine.ToString ());
 						currentLine.Remove (0, currentLine.Length);
-					
-					ReceivedNewLine (currentLines);
+						
+						
+						//ReceivedNewLine (currentLines);
 					}
-				else
-						currentLine.Append (read);
-				
-				lock (_commands)
-				{
-						if (currentLine.ToString ().Trim ().Equals ("(gdb)"))
+					else if(currentLine.Length == 0 && read == ' ')
 					{
+						currentLine.Append(lastLine.ToString());
+						lastLine.Remove(0, lastLine.Length);
+					}
+					else if(currentLine.Length == 0 && read != ' ' && lastLine.Length != 0)
+					{
+						currentLines.Add(lastLine.ToString());
+						lastLine.Remove(0, lastLine.Length);
+						
+						ReceivedNewLine(currentLines);
+						
+						currentLine.Append (read);
+					}
+					else
+						currentLine.Append (read);
+					
+					lock (_commands)
+					{
+						if (currentLine.ToString ().Trim ().Equals ("(gdb)"))
+						{
 							currentLine.Remove (0, currentLine.Length);
 							_gdbReadyForInput = true;
 						
-						//Call ReceivedNewLine for response handlers that wait for the (gdb) prompt
+							if(lastLine.Length != 0)
+							{
+								currentLines.Add(lastLine.ToString());
+								lastLine.Remove(0, lastLine.Length);
+							}
+							//Call ReceivedNewLine for response handlers that wait for the (gdb) prompt
 							ReceivedNewLine (currentLines);
 						
-						ProcessQueue ();
+							ProcessQueue ();
 						}
 					}
 				}

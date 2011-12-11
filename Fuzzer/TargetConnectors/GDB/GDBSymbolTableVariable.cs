@@ -63,9 +63,15 @@ namespace Fuzzer.TargetConnectors.GDB
 				ManualResetEvent evt = new ManualResetEvent (false);
 				
 				//HACK
-				if(this.Symbol.Contains("["))
+				if(this.Symbol.Contains("[") && this.Symbol.Contains("]"))
 				{
-					_connector.QueueCommand(new ExamineCmd(_connector, this,
+					int start = Symbol.IndexOf("[");
+					int end = Symbol.IndexOf("]");
+					ISymbol realSymbol = _connector.CreateVariable(
+						String.Format("({0}+{1})", this.Symbol.Substring(0, start),
+					              Symbol.Substring((int)(start+1), (int)(end-start - 1))), _size);
+					                                                  
+					_connector.QueueCommand(new ExamineCmd(_connector, realSymbol,
 					      delegate(ISymbol symbol, IAddressSpecifier address)
 						{
 							myAddress = address;

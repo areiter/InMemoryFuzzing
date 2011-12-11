@@ -146,7 +146,7 @@ namespace Fuzzer
 				else if (_snapshot != null && _connector.LastDebuggerStop.StopReason != StopReasonEnum.Breakpoint)
 				{
 					//_log.InfoFormat ("Restore snapshot for prefix #{0}, error ", loggerPrefix);
-					//_errorLog.LogDebuggerStop (_connector.LastDebuggerStop);
+					_errorLog.LogDebuggerStop (_connector.LastDebuggerStop);
 
 					//RestoreAndFuzz (ref loggerPrefix, morePrefix);
 					InvokeFuzzLocations(TriggerEnum.Location, _connector.LastDebuggerStop.Address);

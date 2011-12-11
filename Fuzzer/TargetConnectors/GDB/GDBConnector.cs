@@ -56,6 +56,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		protected string _file = null;
 		 
 		/// <summary>
+		/// In case the program is not started yet and the gdb connector executes a "run" command the _runArgs are appended and passed to the program
+		/// </summary>
+		protected string _runArgs = null;
+		
+		/// <summary>
 		/// The cached methods
 		/// </summary>
 		private ISymbolTableMethod[] _cachedMethods = null;		
@@ -66,6 +71,8 @@ namespace Fuzzer.TargetConnectors.GDB
 		private string _target = null;
 		
 		private string _targetOptions = null;
+		
+		private int? _maxInstructions = null;
 		
 		/// <summary>
 		/// Contains all current breakpoints
@@ -120,6 +127,8 @@ namespace Fuzzer.TargetConnectors.GDB
 			_target = DictionaryHelper.GetString ("target", config, "extended-remote :1234");
 			_targetOptions = DictionaryHelper.GetString ("target-options", config, "");
 			_file = DictionaryHelper.GetString("file", config, null);
+			_runArgs = DictionaryHelper.GetString("run_args", config, null);
+			_maxInstructions = DictionaryHelper.GetInt("gdb_max_instructions", config);
 		}
 
 		public void Connect ()
@@ -139,6 +148,9 @@ namespace Fuzzer.TargetConnectors.GDB
 				evt.WaitOne ();
 				if (!success)
 					throw new ArgumentException ("Could not load file");
+				
+				if(_maxInstructions != null)
+					QueueCommand(new SetMaxInstructionsCmd(_maxInstructions.Value, this));
 			}
 			
 			if (_target == "run_local")
@@ -239,8 +251,12 @@ namespace Fuzzer.TargetConnectors.GDB
 				evt.Set ();
 			};
 			
-			QueueCommand (cmd);
+			QueueCommand (new ExamineCmd (this, CreateVariable(new StaticAddress(address), 8), delegate(ISymbol symbol, IAddressSpecifier resolvedAddr) { }));
+			QueueCommand (new PrintCmd (PrintCmd.Format.None, "argv[1]", delegate(object value) { }, this));
+			QueueCommand(cmd);
 			evt.WaitOne ();
+			QueueCommand (new ExamineCmd (this, CreateVariable(new StaticAddress(address), 8), delegate(ISymbol symbol, IAddressSpecifier resolvedAddr) { }));
+			QueueCommand (new PrintCmd (PrintCmd.Format.None, "argv[1]", delegate(object value) { }, this));
 			return size;
 		}
 
@@ -311,7 +327,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			bool success = false;
 			ManualResetEvent evt = new ManualResetEvent (false);
 			_gdbStopEventHandler.Reset ();
-			QueueCommand (new ContinueCmd (reverse,
+			QueueCommand (new ContinueCmd (reverse, _runArgs,
 			    (Action<bool>)delegate(bool bSuc)
                 {
 				success = bSuc;

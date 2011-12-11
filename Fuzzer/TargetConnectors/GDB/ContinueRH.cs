@@ -26,7 +26,7 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// </summary>
 	public class ContinueRH : GDBResponseHandler
 	{
-		
+		private string _runArgs;
 		private Action<bool> _cb;
 		
 		#region implemented abstract members of Fuzzer.TargetConnectors.GDB.GDBResponseHandler
@@ -50,7 +50,7 @@ namespace Fuzzer.TargetConnectors.GDB
 				}
 				else if(failure.Match(line).Success)
 				{
-					connector.QueueCommand(new RunCmd(_cb, _gdbProc));
+					connector.QueueCommand(new RunCmd(_runArgs, _cb, _gdbProc));
 					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}				
 			}
@@ -61,9 +61,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		#endregion
 		
 		
-		public ContinueRH (Action<bool> cb,GDBSubProcess gdbProc)
+		public ContinueRH (string runArgs, Action<bool> cb,GDBSubProcess gdbProc)
 			:base(gdbProc)
 		{
+			_runArgs = runArgs;
 			_cb = cb;
 		}
 	}

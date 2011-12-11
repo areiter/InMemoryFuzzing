@@ -24,6 +24,7 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// </summary>
 	public class RunCmd:GDBCommand
 	{
+		private string _runArgs;
 		private RunRH _runRH;
 		
 		
@@ -35,7 +36,15 @@ namespace Fuzzer.TargetConnectors.GDB
 		
 		public override string Command 
 		{
-			get { return "run"; }
+			get 
+			{ 
+				if(_runArgs == null)
+					return "run";
+				else
+				{
+					return "run " + _runArgs;
+				}
+			}
 		}
 		
 		
@@ -45,9 +54,10 @@ namespace Fuzzer.TargetConnectors.GDB
 		}
 		
 		#endregion
-		public RunCmd (Action<bool> runResult, GDBSubProcess gdbProc)
+		public RunCmd (string runArgs, Action<bool> runResult, GDBSubProcess gdbProc)
 			:base(gdbProc)
 		{
+			_runArgs = runArgs;
 			_runRH = new RunRH(runResult, _gdbProc);
 		}
 	}

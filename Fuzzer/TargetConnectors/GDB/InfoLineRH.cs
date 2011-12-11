@@ -15,7 +15,7 @@
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //    See the License for the specific language governing permissions and
-//    limitations under the License.
+//    limitations under the License{{.
 using System;
 using System.Text.RegularExpressions;
 using System.Globalization;
@@ -39,15 +39,18 @@ namespace Fuzzer.TargetConnectors.GDB
 		public override GDBResponseHandler.HandleResponseEnum HandleResponse (GDBSubProcess subProcess, string[] responseLines, bool allowRequestLine)
 		{
 			Regex rOutOfRange = new Regex (@"\s*Line number \S* is out of range[\s*\S*]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-			Regex rAddress = new Regex (@"\s*Line \S* of [\s*\S*]* \S* at address 0x(?<address>\S*) [\s*\S*]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			//Regex rAddress = new Regex (@"\s*Line \S* of [\s*\S*]* \S* at address 0x(?<address>\S*) [\s*\S*]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			Regex rAddress = new Regex (@"[\s*\S*]*at address 0x(?<address>\S*) [\s*\S*]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
 			
 			foreach (string line in responseLines)
 			{
+				Console.WriteLine("Handling ResponseLine: {0}", line);
 				if (rOutOfRange.Match (line).Success)
 				{
 					_addressResolved (_lineArg, null);
-					continue;
+					return GDBResponseHandler.HandleResponseEnum.Handled;
+					//continue;
 				}
 				
 				Match m = rAddress.Match (line);
@@ -59,11 +62,13 @@ namespace Fuzzer.TargetConnectors.GDB
 						_addressResolved (_lineArg, new StaticAddress (address));
 					else
 						_addressResolved (_lineArg, null);
+					
+					return GDBResponseHandler.HandleResponseEnum.Handled;
 				}
 			
 			}
 			
-			return GDBResponseHandler.HandleResponseEnum.Handled;
+			return GDBResponseHandler.HandleResponseEnum.RequestLine;
 		}
 
 
