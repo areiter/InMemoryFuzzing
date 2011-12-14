@@ -8,7 +8,7 @@
 BINDIR =	/usr/local/bin
 MANDIR = 	/usr/local/man/man7
 CC =		gcc
-CFLAGS = 	-pedantic -Wall
+CFLAGS = 	-g -O0 -pedantic -Wall
 
 all: corehttp
 
