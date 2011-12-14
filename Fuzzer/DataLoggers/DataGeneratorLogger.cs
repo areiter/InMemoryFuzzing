@@ -66,7 +66,8 @@ namespace Fuzzer.DataLoggers
 		public void LogData (byte[] data)
 		{
 			if (_logStream != null)
-				StreamHelper.WriteBytesSafe (data, _logStream);
+				_logStream.Write(data, 0, data.Length);
+//				StreamHelper.WriteBytesSafe (data, _logStream);
 		}
 		
 		private void CloseLogStream ()

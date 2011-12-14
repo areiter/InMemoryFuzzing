@@ -58,7 +58,7 @@ namespace Fuzzer.Analyzers
 					XmlHelper.WriteString (node, "Prefix", _prefix);
 					XmlHelper.WriteString (node, "StopReason", stopReason.ToString ());
 					XmlHelper.WriteInt64 (node, "Status", status);
-					XmlHelper.WriteUInt64 (node, "Address", address);
+					XmlHelper.WriteString (node, "Address", string.Format ("0x{0:X}",address));
 				}
 			}
 		}

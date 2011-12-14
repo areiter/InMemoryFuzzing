@@ -35,9 +35,10 @@ namespace Fuzzer.TargetConnectors.GDB
 			if (allowRequestLine)
 				return GDBResponseHandler.HandleResponseEnum.RequestLine;
 			
-			Regex rSavedRegisterStart = new Regex ("Saved registers:", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			Regex rSavedRegisterStart = new Regex (@"[\s*\S*]*Saved registers:(?<reg_definitions>[\s*\S*]*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		
-			//Current parsing status 
+			//Current parsing status,
+			//The response may also come in a single line (new behaviour)
 			// 0 ... Waiting for next "key-line"
 			// 1 ... Reading Saved register addressed (appear after "Saved registers:" line)
 			int status = 0;
@@ -45,8 +46,23 @@ namespace Fuzzer.TargetConnectors.GDB
 			
 			foreach (string line in responseLines)
 			{
-				if (status == 0 && rSavedRegisterStart.Match (line).Success)
-					status = 1;
+
+				if (status == 0)
+				{
+					Match savedRegMatch = rSavedRegisterStart.Match (line);
+					
+					if(savedRegMatch.Success)
+					{
+						status = 1;
+						string regDefinitions = savedRegMatch.Result("${reg_definitions}");
+						
+						if(regDefinitions != null && !regDefinitions.Equals(String.Empty))
+						{
+							ParseSavedRegisterLine(regDefinitions, savedRegisters);
+						}
+					}
+					
+				}
 				else if (status == 1)
 					ParseSavedRegisterLine (line, savedRegisters);
 			}
@@ -56,6 +72,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			return GDBResponseHandler.HandleResponseEnum.Handled;
 		
 		}
+		
 		
 		private void ParseSavedRegisterLine (string line, IDictionary<string, IAddressSpecifier> parsedRegisters)
 		{

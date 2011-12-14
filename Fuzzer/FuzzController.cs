@@ -134,7 +134,7 @@ namespace Fuzzer
 					_fuzzDescription.SnapshotBreakpoint.Address == _connector.LastDebuggerStop.Address && 
 					_connector.LastDebuggerStop.StopReason == StopReasonEnum.Breakpoint)
 				{
-					_dataLogger.StartingFuzzRun ();
+					LoggerStartFuzzRun();
 					_snapshot = _connector.CreateSnapshot ();
 				}
 				
@@ -163,11 +163,12 @@ namespace Fuzzer
 		private void RestoreAndFuzz (ref int loggerPrefix, string morePrefix)
 		{
 			InvokeFuzzLocations (TriggerEnum.End, null);
-			_dataLogger.FinishedFuzzRun ();
+			LoggerFinishFuzzRun();
 			_snapshot.Restore ();
 
 			IncrementLoggerPrefix (ref loggerPrefix, morePrefix);
-			_dataLogger.StartingFuzzRun ();
+			
+			LoggerStartFuzzRun();
 			
 			_fuzzDescription.NextFuzzRun ();
 			
@@ -192,6 +193,25 @@ namespace Fuzzer
 		{
 			loggerPrefix++;
 			_dataLogger.Prefix = string.Format ("{0}", loggerPrefix, morePrefix);
+			
+			if(_errorLog != null)
+				_errorLog.Prefix = _dataLogger.Prefix;
+		}
+		
+		private void LoggerFinishFuzzRun()
+		{
+			_dataLogger.FinishedFuzzRun();
+			
+			if(_errorLog != null)
+				_errorLog.FinishedFuzzRun();
+		}
+		
+		private void LoggerStartFuzzRun()
+		{
+			_dataLogger.StartingFuzzRun ();
+			
+			if(_errorLog != null)
+				_errorLog.StartingFuzzRun();
 		}
 	}
 }
