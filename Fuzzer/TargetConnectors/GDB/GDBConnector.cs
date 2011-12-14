@@ -251,12 +251,8 @@ namespace Fuzzer.TargetConnectors.GDB
 				evt.Set ();
 			};
 			
-			QueueCommand (new ExamineCmd (this, CreateVariable(new StaticAddress(address), 8), delegate(ISymbol symbol, IAddressSpecifier resolvedAddr) { }));
-			QueueCommand (new PrintCmd (PrintCmd.Format.None, "argv[1]", delegate(object value) { }, this));
 			QueueCommand(cmd);
 			evt.WaitOne ();
-			QueueCommand (new ExamineCmd (this, CreateVariable(new StaticAddress(address), 8), delegate(ISymbol symbol, IAddressSpecifier resolvedAddr) { }));
-			QueueCommand (new PrintCmd (PrintCmd.Format.None, "argv[1]", delegate(object value) { }, this));
 			return size;
 		}
 
@@ -500,6 +496,11 @@ namespace Fuzzer.TargetConnectors.GDB
 		public ISymbolTableVariable CreateCalculatedVariable (string expression, int size)
 		{
 			return new GDBCalculatedSymbolTableVariable (this, expression, size);
+		}
+		
+		public ISymbolTableVariable CreateCStyleReferenceOperatorVariable (string expression, int size)
+		{
+			return new GDBCStyleReferenceSymbolTableVariable (this, expression, size);
 		}
 		
 		public IAddressSpecifier ResolveSymbol(ISymbol symbol)

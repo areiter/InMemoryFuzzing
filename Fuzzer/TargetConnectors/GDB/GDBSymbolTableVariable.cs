@@ -26,9 +26,9 @@ namespace Fuzzer.TargetConnectors.GDB
 	/// </summary>
 	public class GDBSymbolTableVariable : ISymbolTableVariable
 	{
-		private GDBConnector _connector;
-		private string _name;
-		private int _size;
+		protected GDBConnector _connector;
+		protected string _name;
+		protected int _size;
 		
 		public GDBSymbolTableVariable (GDBConnector connector, string name, int size)
 		{
@@ -54,7 +54,7 @@ namespace Fuzzer.TargetConnectors.GDB
 			get { return Name; }
 		}
 		
-		public UInt64? Address 
+		public virtual UInt64? Address 
 		{
 			get 
 			{

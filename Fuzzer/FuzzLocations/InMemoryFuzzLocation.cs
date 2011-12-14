@@ -101,6 +101,9 @@ namespace Fuzzer.FuzzLocations
 				_fuzzTarget = connector.SymbolTable.CreateCalculatedVariable (regionSpecifierPair.Value.Value, 8);
 				break;
 				
+			case "cstyle_reference_operator":
+				_fuzzTarget = connector.SymbolTable.CreateCStyleReferenceOperatorVariable(regionSpecifierPair.Value.Value, 8);
+				break;
 			default:
 				throw new FuzzParseException ("Invalid data region specifier '{0}'", regionSpecifierPair.Value.Key);
 			}

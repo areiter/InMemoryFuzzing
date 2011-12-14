@@ -71,6 +71,9 @@ namespace Fuzzer
 			_snapshot = null;
 			_dataLogger = logger;
 			_logDestination = logDestination;
+			
+			_errorLog = new ErrorLog (_logDestination);
+			
 			_fuzzDescription = fuzzDescription;
 			_fuzzDescription.Init ();
 			
@@ -142,14 +145,14 @@ namespace Fuzzer
 					RestoreAndFuzz (ref loggerPrefix, morePrefix);
 				}
 				
-				//Another breakpoint is reached, maybe a trigger breakpoint?
+				//Another breakpoint is reached, program exited or terminated, not for trigger breakpoints
 				else if (_snapshot != null && _connector.LastDebuggerStop.StopReason != StopReasonEnum.Breakpoint)
 				{
 					//_log.InfoFormat ("Restore snapshot for prefix #{0}, error ", loggerPrefix);
 					_errorLog.LogDebuggerStop (_connector.LastDebuggerStop);
 
-					//RestoreAndFuzz (ref loggerPrefix, morePrefix);
-					InvokeFuzzLocations(TriggerEnum.Location, _connector.LastDebuggerStop.Address);
+					RestoreAndFuzz (ref loggerPrefix, morePrefix);
+					//InvokeFuzzLocations(TriggerEnum.Location, _connector.LastDebuggerStop.Address);
 				}
 				
 				_log.InfoFormat ("Starting fuzz with prefix #{0}", loggerPrefix);

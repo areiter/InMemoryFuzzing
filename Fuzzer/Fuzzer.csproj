@@ -19,7 +19,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters>--fuzz --xmlinput=../../../test_sources/ht-editor-2.0.18/fuzz.xml</Commandlineparameters>
+    <Commandlineparameters>--fuzz --xmlinput=../../../test_sources/corehttp-0.5.3.1/fuzz.xml</Commandlineparameters>
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
@@ -176,6 +176,8 @@
     <Compile Include="DataGenerators\ScriptedDataGenerator.cs" />
     <Compile Include="Scripting\Environments\ScriptedDataGeneratorEnvironment.cs" />
     <Compile Include="TargetConnectors\GDB\SetMaxInstructionsCmd.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBCStyleReferenceAddressSpecifier.cs" />
+    <Compile Include="TargetConnectors\GDB\GDBCStyleReferenceSymbolTableVariable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

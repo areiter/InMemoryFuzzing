@@ -122,6 +122,13 @@ namespace Fuzzer.TargetConnectors
 		/// <returns></returns>
 		ISymbolTableVariable CreateCalculatedVariable (string expression, int size);
 		
+		/// <summary>
+		/// Creates a variable that can be resolved like &({var})
+		/// </summary>
+		/// <param name="expression"></param>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		ISymbolTableVariable CreateCStyleReferenceOperatorVariable (string expression, int size);
 	}
 	
 	/// <summary>

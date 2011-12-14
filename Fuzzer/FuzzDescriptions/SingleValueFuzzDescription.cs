@@ -24,7 +24,7 @@ using Fuzzer.FuzzLocations;
 namespace Fuzzer.FuzzDescriptions
 {
 	/// <summary>
-	/// Fuzzes a single variable with a simple type (no pointer). e.g. int, int64, ...
+	/// Fuzzes a single variable with a simple type (no pointer). e.g. int, int64, char array ...
 	/// </summary>
 	[ClassIdentifier("fuzzdescription/single_value")]
 	public class SingleValueFuzzDescription : IFuzzTech
