@@ -1,0 +1,60 @@
+<Fuzz>
+  <Include>config_paths.xml</Include>
+ <!-- <RemoteControl>
+    <Host>localhost</Host>
+    <Port>8899</Port>
+    
+    <Exec trigger="immediate">
+      <Cmd>{[gdbserver_exec]}</Cmd>		
+      <Arg>- -wrapper</Arg>
+      <Arg>env</Arg>
+      <Arg>LD_PRELOAD={[lib_logmem]}</Arg>
+      <Arg>LOG_MEM_PIPE=logmem_pipe</Arg>
+      <Arg> - -</Arg>
+      <Arg>:1234</Arg>
+      <Arg>{[test_source_root]}gif2png</Arg>
+      <Arg>DUMMYARGUMENT</Arg>
+    </Exec>
+  </RemoteControl>-->
+
+  <TargetConnection>
+    <Connector>general/gdb</Connector>
+    <Config key="gdb_exec">{[gdb_exec]}</Config>
+    <Config key="gdb_log">stream:stderr</Config>
+    <Config key="gdb_max_instructions">4000000</Config>
+    <Config key="target">run_local</Config>
+
+    <Config key="file">{[test_source_root]}3proxy</Config>
+    <Config key="run_args">{[test_source_root]}/../cfg/3proxy.cfg.sample</Config>
+  </TargetConnection>
+
+
+  <FuzzDescription>
+    <RegionStart>source|proxy.c,873</RegionStart>
+    <RegionEnd>source|proxy.c,878</RegionEnd>
+
+    <FuzzLocation>
+      <Trigger>start</Trigger>
+      <StopCondition>count|100</StopCondition>
+      <FuzzerType>fuzzer/in_memory</FuzzerType>
+      <FuzzerArg name="data_region">variable|req</FuzzerArg>
+      <FuzzerArg name="data_type">fuzzdescription/pointer_value</FuzzerArg>
+
+      <DataGenerator>datagen/random_bytes</DataGenerator>
+      <DataGenArg name="minlen">1</DataGenArg>
+      <DataGenArg name="maxlen">20000</DataGenArg>
+      <DataGenArg name="lentype">increase|100</DataGenArg>
+      <DataGenArg name="type">PrintableASCIINullTerminated</DataGenArg>
+    </FuzzLocation>
+  </FuzzDescription>
+
+  <Logger>
+    <Destination>{[loge_root]}</Destination>
+    <UseLogger name="datagenlogger" />
+    <UseLogger name="connectorlogger" />
+    <UseLogger name="stackframelogger" />
+    <UseLogger name="remotepipelogger">
+      <PipeName>logmem_pipe</PipeName>
+    </UseLogger>
+  </Logger>
+</Fuzz>

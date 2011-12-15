@@ -1,0 +1,24 @@
+#$Id: Makefile.Solaris,v 1.2 2005/11/17 07:48:56 vlad Exp $
+#
+# 3 proxy Makefile for Solaris/SunCC
+#
+# You can try to add -DWITH_STD_MALLOC to CFLAGS to use standard malloc
+# libraries
+
+CC = cc
+CFLAGS = -xO3 -c -lsocket -lnsl -lpthread -lresolv -D_THREAD_SAFE -D_REENTRANT -DNOODBC -DWITH_STD_MALLOC -DFD_SETSIZE=4096 -DWITH_POLL
+COUT = -o
+LN = cc
+LDFLAGS = -xO3 -lpthread -lsocket -lnsl -lresolv
+LIBS =
+LNOUT = -o
+EXESUFFICS =
+OBJSUFFICS = .o
+DEFINEOPTION = -D
+COMPFILES = *~
+REMOVECOMMAND = rm -f
+TYPECOMMAND = cat
+COMPATLIBS =
+MAKEFILE = Makefile.Solaris
+
+include Makefile.inc

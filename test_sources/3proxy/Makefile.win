@@ -1,0 +1,25 @@
+#$Id: Makefile.win,v 1.1.1.1 2004/06/25 17:32:54 vlad Exp $
+#
+# 3 proxy Makefile for GCC/windows
+#
+# You can try to add -DWITH_STD_MALLOC to CFLAGS to use standard malloc
+# libraries
+
+
+CC = gcc
+CFLAGS = -Wall -O2 -s -c -mno-cygwin -mthreads -DWITH_STD_MALLOC
+COUT = -o 
+LN = gcc
+LDFLAGS = -Wall -O2 -s -mno-cygwin -mthreads
+LIBS = -lws2_32 -lodbc32
+LNOUT = -o 
+EXESUFFICS = .exe
+OBJSUFFICS = .o
+DEFINEOPTION = -D
+COMPFILES = *.tmp
+REMOVECOMMAND = rm -f
+TYPECOMMAND = cat
+COMPATLIBS =
+MAKEFILE = Makefile.win
+
+include Makefile.inc

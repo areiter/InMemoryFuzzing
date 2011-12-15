@@ -1,0 +1,24 @@
+#$Id: Makefile.ccc,v 1.2 2005/04/30 18:29:00 vlad Exp $
+#
+# 3 proxy Makefile for Compaq C Compiler
+#
+# You can try to add -DWITH_STD_MALLOC to CFLAGS to use standard malloc
+# libraries
+
+CC = ccc
+CFLAGS = -Wall -O2 -c -pthread -D_THREAD_SAFE -DNOODBC -DWITH_STD_MALLOC -DFD_SETSIZE=4096 -WITH_POLL
+COUT = -o 
+LN = ccc
+LDFLAGS = -Wall -O2 -pthread
+LIBS =
+LNOUT = -o 
+EXESUFFICS =
+OBJSUFFICS = .o
+DEFINEOPTION = -D
+COMPFILES = *~
+REMOVECOMMAND = rm -f
+TYPECOMMAND = cat
+COMPATLIBS =
+MAKEFILE = Makefile.ccc
+
+include Makefile.inc
