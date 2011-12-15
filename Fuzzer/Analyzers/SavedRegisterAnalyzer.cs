@@ -63,7 +63,7 @@ namespace Fuzzer.Analyzers
 				stackFrameInfo = StreamHelper.ReadTypedStreamSerializable<IStackFrameInfo> (src);
 
 			foreach(String reg in stackFrameInfo.SavedRegisters)
-				_log.DebugFormat("Saved Register '{0} at 0x{1:X})'", reg, stackFrameInfo.GetSavedRegisterAddress(reg).ResolveAddress());
+				//_log.DebugFormat("Saved Register '{0} at 0x{1:X})'", reg, stackFrameInfo.GetSavedRegisterAddress(reg).ResolveAddress());
 			
 			foreach (InstructionDescription insn in ctrl.ExecutedInstructions)
 			{
@@ -79,7 +79,7 @@ namespace Fuzzer.Analyzers
 		
 		private void SavedRegistersInRange (IStackFrameInfo stackFrameInfo, UInt64 address, int size, InstructionDescription insn, AnalyzeController ctrl)
 		{
-			_log.DebugFormat ("address=0x{0:X} size={1}", address, size);
+			//_log.DebugFormat ("address=0x{0:X} size={1}", address, size);
 			foreach (string savedRegisterName in stackFrameInfo.SavedRegisters)
 			{
 				IAddressSpecifier savedRegisterAddressSpecifier = stackFrameInfo.GetSavedRegisterAddress (savedRegisterName);
